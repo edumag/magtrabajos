@@ -1,0 +1,54 @@
+#!/bin/bash 
+
+## @file actualizarManualPhp
+##
+## @brief Actualizar manual de PHP
+##
+## El manual de php es utilizado por vim para mostrarnos la documentación de las
+## funciones. Es importante que coincida el directorio donde se actualiza el manual
+## con el que tiene vim configurado.
+##
+## Para que funcione en vim añadimos las siguientes lineas en el ~/.vimrc :
+## @code
+## <pre>
+## " Asigna phpman para manejar las 'man pages'
+## setlocal keywordprg=phpman
+## " Asigna Ctrl-K para ver un hint sobre la sintaxis de la función.
+## nnoremap <C-K> :call PhpMan()<CR>
+## inoremap <C-K> <Esc>:call PhpMan()<CR>a
+## nnoremap <S-K> :call PhpManHint()<CR>
+## " Función para emular man con el manual de PHP
+## function PhpMan()
+##    let func = substitute(expand('<cword>'), '_', '-', 'g')
+##    "let file = '/usr/share/Documentos/doc/phpdoc/html/function.' . func . '.html'
+##    let file = '/home/eduardo/Documentos/doc/programacion/programacionWeb/php/html/function.' . func . '.html'
+##    exe '!/usr/bin/firefox ' . file . ' &' 
+## endfunction
+## " Función para dar un hint sobre la sintaxis de una función de PHP.
+## function PhpManHint()
+##     let func = substitute(expand('<cword>'), '_', '-', 'g')
+##     let file = '/home/eduardo/Documents/doc/programacion/programacionWeb/php/html/function.' . func . '.html'
+##     let hint = system('links -dump ' . file . ' 2>&1 |egrep -A2 -m1 "Descri" |tail -n1 |cut -b 4-')
+##     let hint = strpart(hint, 0, stridx(hint, "\n"))
+##     if hint != ''
+##    echo hint
+##     else
+##    echohl WarningMsg
+##    echomsg 'No se encuentra la función "' . func . '"!'
+##    echohl None
+##     endif
+## endfunction
+## </pre>
+## @endcode
+
+## Directorio destino
+DIR_MANUAL=/home/eduardo/Documentos/doc/programacion/programacionWeb/php/
+
+dir_actual="`pwd`"
+[[ -d "$DIR_MANUAL" ]] || mkdir -p "$DIR_MANUAL"
+cd /tmp
+wget -c http://es.php.net/distributions/manual/php_manual_es.tar.gz
+cd $DIR_MANUAL
+tar -zxf /tmp/php_manual_es.tar.gz
+cd "$dir_actual"
+zenity --info --text "`basename $0`  Terminado"

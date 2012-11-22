@@ -1,0 +1,321 @@
+#!/bin/bash
+
+## @file magexportar 
+## @brief Exportar archivos rst a diferentes formatos
+## 
+## Exportación de archivos rst a diferentes formatos
+## 
+## Dependencias: python-docutils
+##
+## Uso: magexportar [opciones] [archivo rst]
+## 
+## @todo Terminar script
+## @todo Exportar: html,pdf,s5, excel
+## 
+## @author   Eduardo Magrané
+## @internal
+##       web  http://www.mamedu.com
+##
+##      mail  eduardo.mamedu.com
+##
+##   Created  13/03/11
+##
+##  Revision  SVN $Id: $
+##
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+## Recoger configuración de magtrabajos
+source "`dirname "$BASH_SOURCE"`/../../config"
+
+## Menú para las acciones de exportación
+##
+## @todo Configurar carpeta destino para los archivos exportados
+## @todo Buscar archivos con extensión .rst en la carpeta de proyecto y
+##       permitir seleccionar entre ellos, ahora e encuentran programadores.rst
+##       y pendiente.rst
+##
+## @param $1 Archivo rst a exportar
+
+function menuExportar() {
+
+   log $FUNCNAME "$*"
+
+   if [ "$1" == "" ] ; then
+      archivo_rst="$DIR_TMP/trabajos.rst"
+   else
+      archivo_rst="$1"
+   fi
+
+   clear
+   caja "$archivo_rst" 'Exportar informe'
+   abre_caja
+   linea_caja "[G]uardar archivo como" "E[d]itar archivo"
+   linea_caja '[I]mprimir' 'C[a]mbiar archivo a exportar'
+   linea_caja
+   linea_caja 'Enviar [e]mail con informe'
+   linea_caja 'Enviar email en h[t]ml'
+   linea_caja
+   linea_caja '[H]tml' '[P]df'
+   linea_caja '[l]ess'  '[c]sv'
+   linea_caja '[m]ost'  '[c]sv'
+   cierra_caja
+
+   # Si tenim missatge el presentem
+   mensajes -get
+
+   read -n 1 -s OPCION
+   echo
+
+   [[ "$OPCION" = "" ]] && exit 0 
+
+   exportar $OPCION "$archivo_rst"
+
+   menuExportar "$1"
+
+   }
+
+## Exportar
+##
+## @param $1 acción a realizar
+## @param $2 Archivo a exportar
+
+function exportar() {
+
+   local origen="$2"
+
+   case $1 in
+
+      guardar|g) read -p 'Destino para informe: ' destino
+         if [ "$destino" != "" ] ; then
+            cp "$origen" "$destino"
+            origen="$destino"
+         fi
+         ;;
+
+      editar|d) 
+         # $mt_editor "$origen"
+         [[ -e "${DIR_TMP}rst2html.err" ]] && errores=s || errores=''
+         continuar='s'
+         while [ "$continuar" == "s" ] ; do
+            if [ "$errores" != "" ] ; then
+               $mt_editor -c "cfile ${DIR_TMP}rst2html.err" -c "copen" "$origen"
+            else
+               $mt_editor "$origen"
+            fi
+            [[ -e ${DIR_TMP}rst2html.err ]] && rm ${DIR_TMP}rst2html.err
+            $mt_rst2html $origen "${DIR_TMP}trabajos.html" 2> ${DIR_TMP}rst2html.err 
+            errores=`cat ${DIR_TMP}rst2html.err`
+            if [ "$errores" != "" ] ; then
+               echo
+               echo Errores al procesar archivo:
+               echo
+               echo -e "$errores"
+               echo
+               read -p 'Corregir errores (s/n): ' opcion
+               [[ "$opcion" == 'n' ]] && continuar='n' || continuar='s'
+            else
+               continuar='n'
+            fi
+         done
+         ;;
+
+      cambiar|a) read -p 'Archivo a exportar: ' origen
+           menuExportar '' "$origen"
+           ;;
+      csv|c) ACCION=csv ; comenzar ;;
+      html|h) # exportar a html
+           if [ "$consulta" == 1 ] ; then
+              cmd="cat "$origen" | grep -v 'trabajos -t' | $mt_rst2html --stylesheet-path='' | sed -e 's/\&quot\;/_/g'  > ${DIR_TMP}trabajos.html"
+           else
+              cmd="cat "$origen" | grep -v 'trabajos -t' | $mt_rst2html | sed -e 's/\&quot\;/_/g'  > ${DIR_TMP}trabajos.html"
+           fi
+           #eval $cmd 2> ${DIR_TMP}rst2html.err
+           ejecutarComando "$cmd" 2> ${DIR_TMP}rst2html.err
+
+           if [ "`cat ${DIR_TMP}rst2html.err`" != "" ] ; then
+              mensajes "Error al exportar a html"
+              clear
+              echo "Error al exportar"
+              echo "-----------------"
+              echo
+              cat ${DIR_TMP}rst2html.err
+              echo
+              tecla
+           else
+              [[ $consulta == 0 ]] && ejecutarComando "$mt_navegador ${DIR_TMP}trabajos.html &"
+           fi
+         ;;
+
+      email|e) rst2email txt "$origen" ;;
+
+      enviarhtml|t) rst2email html "$origen" ;;
+
+      pdf|p) # exportar a pdf
+         cd ${DIR_TMP}
+         log $mt_rst2pdf $origen -o trabajos.pdf
+         $mt_rst2pdf "$origen" -o trabajos.pdf
+         xdg-open trabajos.pdf
+         cd $DIR_PROYECTOS
+         ;;
+
+      raw-pdf) 
+         # Genera el pdf y nos devuelve la ubicación del archivo de salida
+         cd ${DIR_TMP}
+         log $mt_rst2pdf $origen -o trabajos.pdf
+         $mt_rst2pdf "$origen" -o trabajos.pdf
+         echo "`pwd`/trabajos.pdf" ; exit 0
+         cd $DIR_PROYECTOS
+         ;;
+
+      less|l) # less
+         less "$origen"
+         ;;
+
+      most|m) # most
+         most "$origen"
+         ;;
+
+      imprimir|I) # imprimir
+         origen_LATIN1="${DIR_TMP}$proyecto"
+         cp "$origen" "$origen_LATIN1"
+         vi -c "wq! ++enc=latin1" $origen_LATIN1
+         /home/eduardo/bin/impy $origen_LATIN1
+         ;;
+
+      menu) menuExportar;;
+   
+      *) echo Opción [$1] no encontrada ; shift ; exit 1 ;;
+
+      esac
+
+   }
+
+function rst2email() {
+
+   # Definir concepto de email
+   if [ "$movimientoId" != "" ] ; then
+      concepto_mail="$tarea / $movimiento"
+   elif [ "$tareaId" != "" ] ; then 
+      concepto_mail=$tarea
+   elif [ "$proyectoId" != "" ] ; then
+      concepto_mail=$proyecto
+   else
+      concepto_mail='SIN CONCEPTO'
+   fi
+
+   para_mail="`echo ${proyecto_correos[*]} | tr ' ' ,`"
+
+   echo Concepto: $concepto_mail
+   echo "Emails: $para_mail"
+
+   if [ "$1" != "html" ] ; then
+
+      case "$mge_prog_correo" in
+         
+         evolution)
+
+            evolution "mailto:$para_mail?subject=$concepto_mail&body=$(cat "$2" | sed s/\&/\$/g )" &
+            ;;
+
+         claws-mail)
+            claws-mail --compose "mailto:$para_mail?subject=$concepto_mail&insert=$2" &
+            ;;
+
+         thunderbird)
+            mozilla-thunderbird "mailto:$para_mail?subject=$concepto_mail&body=`cat $origen`" &
+            ;;
+
+         sendmail)
+            ;;
+
+         *)
+            [[ "$mge_prog_correo" == "" ]] && sin_programa=1 || programa_sin=1
+            ;;
+
+      esac
+
+
+   else
+
+      case "$mge_prog_correo" in
+         
+         evolution)
+
+            cmd="cat "$2" | grep -v 'trabajos -t' | $mt_rst2html > $mt_archivo_html"
+            echo $cmd && eval $cmd
+            body=$(cat "$mt_archivo_html" | sed 's/&/\\@/g' | sed 's/"/\\"/g' )
+            html1="
+            MIME-Version: 1.0
+            Content-Type: multipart/alternative; boundary='b1_81e56f5bd9aeea2c7184723f0e76b08a'
+
+            --b1_81e56f5bd9aeea2c7184723f0e76b08a
+            Content-Type: text/html; charset='UTF-8'
+            Content-Transfer-Encoding: quoted-printable
+
+            "
+            html2="
+
+            --b1_81e56f5bd9aeea2c7184723f0e76b08a--
+            "
+            #cmd="mozilla-thunderbird \"mailto:jaume07@totbisbal.com?subject=$tarea&body=$(protegerTexto "`cat $mt_archivo_html`")\""
+            cmd="evolution \"mailto:$para_mail?subject=$concepto_mail&body=${html1}${body}$html2\"" 
+            echo $cmd && eval "$cmd"
+            ;;
+
+         claws-mail)
+            cmd="cat "$2" | grep -v 'trabajos -t' | $mt_rst2html > $mt_archivo_html"
+            echo $cmd && eval $cmd
+            claws-mail --attach "$mt_archivo_html" --compose "mailto:$para_mail?subject=$concepto_mail" &
+            ;;
+
+         thunderbird)
+            mozilla-thunderbird "mailto:$para_mail?subject=$concepto_mail&body=`cat $origen`" &
+            ;;
+
+         sendmail)
+            ;;
+
+         *)
+            [[ "$mge_prog_correo" == "" ]] && sin_programa=1 || programa_sin=1
+            ;;
+
+      esac
+
+
+   fi
+
+   if [ "$programa_sin" == 1 ] ; then
+
+      echo
+      echo "Falta implementar el envío de correo con $mge_prog_correo"
+      echo
+      exit 1
+   fi
+
+   if [ "$sin_programa" == 1 ] ; then
+
+      echo
+      echo "Programa de correo sin definir, falta configurar el programa de correo a utilizar"
+      echo
+      exit 1
+   fi
+
+
+   }
+
+if [ "`basename $BASH_SOURCE`" = "`basename $0`" ] ; then
+
+   # Si tenemos más de un argumento viene la acción
+   # definida sino vamos a menú
+
+   if [ "$2" == "" ] ; then
+     menuExportar "$1"
+   else
+      exportar "$1" "$2"
+   fi
+
+fi
+

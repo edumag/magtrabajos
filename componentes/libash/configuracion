@@ -1,0 +1,274 @@
+#!/bin/bash
+
+## @file configuracion
+##
+## @brief Librería para gestionar la configuración de los scripts de bash
+##
+## Para trabajar con esta librería es necesario que tengamos un archivo de configuración definido,
+## y sus variables deben tener un prefijo que las identifique.
+##
+## También es necesario una descripción de cada variable que se define con formato de doxygen, puede
+## estar en el mismo archivo del script, y pasarselo como archivo que contiene las descripciones. En
+## caso de no tenerla pondremos el nombre de la variable
+##
+## ejemplo:
+## @code
+## ## @var miprograma_titulo
+## ## Define el titulo que deseas
+## miprograma_titulo='HOLA'
+## @endcode
+##
+## @ingroup libash
+##
+## @author   Eduardo Magrané
+##
+## @internal
+##
+##       web  http://www.mamedu.com
+##
+##      mail  eduardo.mamedu.com
+##
+##   Created  13/03/11
+##
+##  Revision  SVN $Id: $
+##
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+## Editamos las variables que coincidan con el prefijo
+##
+## $1 Prefijo
+## $2 Archivo donde guardar el resultado
+
+function configuracion_editar() {
+
+   # comprobamos que tengamos los parámetros necesarios
+   if [ "$1" = "" ] ; then
+      echo 'Se necesita un prefijo'
+      return
+   fi
+   local configuracion_prefijo=$1
+
+   if [ "$2" = "" ] ; then
+      echo 'Se necesita el archivo que contiene las descripciones'
+      return
+   fi
+   local archivo_descripciones="$2"
+
+   echo "Editar"
+
+   # Presentamos lista variables y valores para seleccionar
+
+   local c='${!'$configuracion_prefijo'*}'
+   [[ -e ${DIR_TMP}listado ]] && rm ${DIR_TMP}listado
+   for variable in `eval echo "$c"` ; do
+      #if [ "$variable" != "" ] ; then
+         local a=${!variable}  # valor anterior
+         echo -e "$variable\t${a:-NULL}" >> ${DIR_TMP}listado
+      #fi
+   done
+   generar_listado_fichero --ocultar-ayuda
+   [[ "$resultado_listado" == "" ]] && return
+   local a=${!resultado_listado}  # valor anterior
+   local d="`configuracion_descripcion "$archivo_descripciones" $resultado_listado`"
+   echo
+   echo "$d"
+   echo
+   read -p "Valor [ENTER]=$a: " $resultado_listado
+   if [ "${!resultado_listado}" = '' ] ; then                    # Si no entran nada ponemos el valor anterior
+      eval "${resultado_listado}=\"$a\""
+   fi
+   configuracion_editar "$1" "$2"
+   }
+
+## Leemos archivo con las variables
+## Esto se debe hacer desde el propio programa sino no lee las variables desde él
+
+function configuracion_leer() {
+
+   if [ "$1" = "" ] ; then
+      echo 'Necesito el archivo de donde leer las variables'
+      return
+   fi
+
+   source "$1"
+   log "Leemos archivo $1"
+
+   }
+
+## Guardamos las variables que coincidan con el prefijo en al archivo que se nos indica
+##
+## $1 Prefijo de las variables a guardar
+## $2 Archivo donde guardar las variables
+
+function configuracion_guardar() {
+
+   if [ "$1" = "" ] ; then
+      echo 'Se necesita un prefijo'
+      return
+   fi
+   local configuracion_prefijo=$1
+
+   if [ "$2" = "" ] ; then
+      echo 'Necesito el archivo donde escribir las variables'
+      return
+   fi
+   local configuracion_archivo="$2"
+
+   # si no existe la carpeta contenedora la creamos
+
+   [ -e "`dirname "$configuracion_archivo"`" ] || mkdir -p "`dirname "$configuracion_archivo"`"
+
+   local c='${!'$configuracion_prefijo'*}'
+   for variable in `eval echo "$c"` ; do
+      echo -e "\n$variable='${!variable}'"
+   done > "$configuracion_archivo"
+
+   if [ $? = 0 ] ; then
+      echo "Archivo $configuracion_archivo guardado"
+   else
+      echo "Archivo $configuracion_archivo No se pudo guardar"
+   fi
+
+   }
+
+## Listar variables y valores
+##
+## $1 Prefijo de las variables a guardar
+## $2 Archivo donde estàn las descripciones 
+
+function configuracion_lista() {
+
+   if [ "$1" = "" ] ; then
+      echo 'Se necesita un prefijo'
+      return
+   fi
+   local configuracion_prefijo=$1
+
+   if [ "$2" = "" ] ; then
+      echo 'Se necesita el archivo que contiene las descripciones'
+      return
+   fi
+   local archivo_descripciones="$2"
+
+   local c='${!'$configuracion_prefijo'*}'
+   for variable in `eval echo "$c"` ; do
+      printf "\n- %s : %s" "${variable}" "${!variable}"
+   done
+
+
+   }
+
+## Presentar la configuración actual
+##
+## $1 Prefijo de las variables a guardar
+## $2 Archivo donde estàn las descripciones 
+
+function configuracion_ver() {
+
+   if [ "$1" = "" ] ; then
+      echo 'Se necesita un prefijo'
+      return
+   fi
+   local configuracion_prefijo=$1
+
+   if [ "$2" = "" ] ; then
+      echo 'Se necesita el archivo que contiene las descripciones'
+      return
+   fi
+   local archivo_descripciones="$2"
+
+   local c='${!'$configuracion_prefijo'*}'
+   for variable in `eval echo "$c"` ; do
+      d="`configuracion_descripcion "$archivo_descripciones" $variable`"
+      if [ $? != 0 ] ; then
+         # Si no tenemos descripción colocamos nombre de la variable
+         printf "\n[%s]\n\nValor: %s\n" "${variable}" "${!variable}"
+      else
+         printf "\n[%s]\n\n%s\n\nValor: %s\n" "${variable}" "$d" "${!variable}"
+      fi
+   done
+
+
+   }
+
+## Descripción de variable
+
+function configuracion_descripcion() {
+
+   if [ "$1" = "" ] ; then
+      # echo 'Se necesita el archivo que contiene las descripciones'
+      return
+   fi
+   local archivo_descripciones=$1
+
+   if [ "$2" = "" ] ; then
+      # echo 'Se necesita el nombre de la variable a buscar'
+      return
+   fi
+   local variable=$2
+
+   while read linea ; do
+      echo -e "$linea" | sed 's/## //' | sed 's/@code//' | sed 's/@endcode//'
+      if [ "$linea" == "" ] ; then return ; fi
+   done <<< "`grep -A 8 "@var $variable" "$archivo_descripciones" | grep -v "@var"`"
+
+   }
+
+## Menú
+##
+## $1 Prefijo de las variables a guardar
+## $2 Archivo donde guardar las variables
+## $3 Archivo donde buscar las descripciones
+
+function configuracion_menu() {
+
+   if [ "$1" = "" ] ; then
+      echo 'Se necesita un prefijo'
+      return
+   fi
+   configuracion_prefijo=$1
+
+   if [ "$2" = "" ] ; then
+      echo 'Necesito el archivo donde guardar las variables'
+      return
+   fi
+   configuracion_archivo="$2"
+
+   if [ "$3" = "" ] ; then
+      echo 'Necesito el archivo de donde leer las descripciones de las variables'
+      return
+   fi
+   archivo_descripciones="$3"
+
+   clear
+   echo
+   echo '+---------------+'
+   echo '| Configuración |'
+   echo '+---------------+'
+   echo
+   echo "Archivo de configuración:..$configuracion_archivo"
+   echo "Archivo descripciones:.....$archivo_descripciones"
+   echo "Prefijo de variables:......$configuracion_prefijo"
+   echo
+   echo '[V]er, [E]ditar' 
+   echo
+   read -n 1 -s -p "Opcion: " OPCION
+
+   echo
+   echo
+
+   case "$OPCION" in
+
+      v) configuracion_ver "$configuracion_prefijo" "$archivo_descripciones" | less ;;
+      e) configuracion_editar "$configuracion_prefijo" "$archivo_descripciones" 
+         configuracion_guardar "$configuracion_prefijo" "$configuracion_archivo" 
+         ;;
+      *) return ;;
+   esac
+
+   configuracion_menu "$configuracion_prefijo" "$configuracion_archivo" "$archivo_descripciones" 
+
+   }

@@ -1,0 +1,7 @@
+lanzadores Comandos externos 
+
+Los comandos nos permiten de una forma sencilla, ampliar la aplicación.
+
+Hay comandos externos para todos los proyectos en la carpeta lanzadores de 
+la aplicación, y tenemos otra o sino se puede crear para cada proyecto en su carpeta
+correspondiente $HOME/.magtrabajos/[proyecto]/lanzadores.

@@ -1,0 +1,59 @@
+#!/bin/bash 
+
+## @file ultimos_archivos_modificados 
+## 
+## @brief listamos los últimos archivos que han sido modificados
+##
+## Por defecto se muestran los archivos modificados en las últimas 24 horas
+## del directorio actual.
+##
+## Opciones:
+## <pre>
+## --help | -h              Pantalla de ayuda
+## </pre>
+##
+## @author   Eduardo Magrané
+##
+## @internal
+##
+##       web  http://www.mamedu.com
+##
+##      mail  eduardo.mamedu.com
+##
+##  Revision  SVN $Id: $
+##
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+## Mostrar ayuda
+
+function help() {
+
+   local -i count=0
+   while read linea ; do 
+      let count++
+      if [ $count -gt 2 ] ; then
+         [ "$linea" = "" ] && return
+         echo "$linea" | sed 's/^##//' | sed 's/@brief //' | sed 's/@file //' 
+      fi
+   done < "$0"
+   echo
+
+   }
+
+while [ -n "$1" ] ; do
+
+   case "$1" in
+      
+      -h|-help|--help) help_magtestunit ; exit ;;
+      -info) info_magtestunit ; exit ;;
+      --dependencias|-d) comprobar_dependencias ; exit ;;
+      *) break ;;
+
+   esac
+
+done
+
+find ./ -type f -mtime 0 | grep -v '.swp' | grep -v 'log/' | grep -v '.svn' | sed 's/\.\///' | sed 's/^\.//' 

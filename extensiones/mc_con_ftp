@@ -1,0 +1,14 @@
+#!/bin/sh 
+
+## @file mc_con_ftp
+## @brief Lanzar mc con dirección ftp del proyecto
+
+if [ "$proyecto_ftp" == "" ] ; then
+   echo
+   echo No tenemos configurado ningún ftp en este proyecto
+   echo
+   read -p 'Dominio ftp a conectar: ' proyecto_ftp
+   [ "$proyecto_ftp" == "" ] && exit
+fi
+
+xterm -geometry 150x50 -bg black -fg white -e "read -p '`pwd` $proyecto_ftp' && mc ./ /#ftp:$proyecto_ftp" &

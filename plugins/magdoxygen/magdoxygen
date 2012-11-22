@@ -1,0 +1,507 @@
+#!/bin/bash 
+
+## @file magdoxygen
+## @brief Interface para doxygen
+##
+## Magdoxygen nos permite documentar un proyecto al vuelo, creando la documentación generada en
+## la carpeta temporal.
+##
+## Documentar de forma temporal carpetas o archivos seleccionados, evitando la espera de una 
+## documentación completa del proyecto para ver un resultado concreto.
+##
+## También nos permite enviar la salida generada al servidor de vim como lista de errores.
+##
+## --filtra bash Si se pide filtro lo aplicamos y salimos, el único filtro que tenemos actualmente
+##          es para los archivos bash
+## 
+## Ejemplo de documentación con bash:
+##
+## - bloque
+## <pre>
+## #\# @brief Descripción corta
+## #\# 
+## #\# Descripción larga que
+## #\# llega hasta aquí
+## </pre>
+## - Tras la variable
+## <pre>
+## variable=hola; #\#< Variable
+## </pre>
+##
+## Uso: magdoxygen [opción] [archivos seleccionados]
+##
+## A falta de una lista de archivos a documentar se recoge el directorio actual, 
+## si es que no se pasa un archivo de configuración para doxygen
+##
+## Opciones:
+## <pre>
+## ejecutar                 Ejecutar doxygen sobre directorio actual
+## ver                      Ver documentación generada por doxygen
+## verErrores               Ver fichero de errores
+## configurar               Configurar
+## ejecutar_archivos [pdf]  Ejecutar doxygen unicamente sobre archivos recibidos, 
+##                          Opcionalmente podemos pedir el resultado en pdf.
+## ver_temporal             Ver resultado temporal
+## errores2vim              Enviar lista de errores a vim
+## filtrar                  Generamos filtro que nos permite documentar los script de bash
+## conf [fich]              Fichero de configuración
+## menu                     Menú
+## </pre>
+##
+## @todo Configuración a sistema de magtrabajos
+##
+## @author   Eduardo Magrané
+## @internal
+##       web  http://www.mamedu.com
+##
+##      mail  eduardo.mamedu.com
+##
+##   Created  13/03/11
+##
+##  Revision  SVN $Id: $
+##
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+# configuración
+DIR_TMP="/tmp/"
+
+## Recoger configuración de magtrabajos
+source "`dirname "$BASH_SOURCE"`/../../config"
+
+if [ "$1" == "--filtra" ] ; then
+
+   case "$2" in
+
+      *)
+         shift 2
+         # Por defecto tipo bash
+         # Los archivos readme les añadimos:
+         # - /** @file [nombre de archivo] Al inicio
+         # - */ Al final
+         # - Y la primera linea del archivo con @page [linea]
+         if [ "`basename "$1" | grep 'readme'`" != "" ] ; then
+            echo "/**"
+            echo -n "@" ; echo -n "page "
+            cat "$1"
+            echo "*/"
+            exit
+         fi
+         # comandos sed:
+         # ##< por ///<
+         # Modificamos ## por ///
+         # Sin ///,no es linea en blanco ni tiene ';' , le añadimos ';' 
+         # Modificamos '/*' por -mod- Para no confundir
+         cat "$1" | \
+            sed 's/##</;\/\/\/</g' | \
+            sed 's/##/\/\/\//g' | \
+            sed '/\/\/\/\|^$\|;$/!s/$/;/' | \
+            sed 's/\/\*/\-mod-/g'             
+         ;;
+
+   esac
+
+   exit
+fi
+
+md_navegador="${md_navegador:-firefox}"            ##< Navegador web a  utilizar
+md_terminal=${md_terminal:-$TERM}}                 ##< Terminal para lanzar comandos, por defecto $TERM
+
+desc_md_navegador='Navegador web a utilizar'
+desc_md_terminal='Terminal para lanzar comandos'
+
+fich_doxygen_temporal="$(dirname $0)/doxygen.conf"    ##< Fichero para proyectos sin archivo propio.
+fich_doxygen=$fich_doxygen_temporal                   ##< Fichero de configuración de doxygen del proyecto
+registro=${DIR_TMP}/errores_doxygen.vim               ##< Registro de la aplicación con formato para vim
+archivos_afectados=''                                 ##< Archivos afectados, para poder actuar sobre archivos seleccionados
+debug=false                                           ##< Si hacemos debug o no
+con_proyecto=false                                    ##< Si tenemos proyecto propio o no. 
+dir_tmp_servidor=/home/eduardo/SERVIDOR/tmp/          ##< Directorio tmp dentro del servidor
+url_web_tmp=http://localhost/tmp/                     ##< url para carpeta tmp del servidor
+
+## Filtrado de archivos,nos permite modificar el archivo antes de ser procesado por doxygen
+## en el caso de archivos bash es necesario.
+##
+## La única opcion de filtrado actual es bash
+
+filtrar=''
+
+# Estas variables serán llenadas desde construir_variables()
+
+fichero_log=""                                        ##< Fichero de registro
+dir_final=""                                          ##< Directorio final
+dir_tmp="${dir_tmp_servidor}magdoxygen/"                       ##< Si ejecutamos sobre archivos generamos en tmp
+
+[[ -e "$dir_tmp" ]] || mkdir "$dir_tmp"
+
+# incluir librerías
+lib=$(dirname "$BASH_SOURCE")/../../componentes/libash/doxygen2help
+[[ -e "$lib" ]] && source "$lib" || (echo -e "\nError: no se pudo encontrar $lib" ; exit ) 
+[[ -z "$libash_general_incluida" ]] && source "$(dirname "$BASH_SOURCE")/../../componentes/libash/general" 
+
+## Construir variables desde archivo de configuración de doxygen
+
+function construir_variables() {
+
+   dir_final="$(grep ^OUTPUT_DIRECTORY $fich_doxygen | cut -d= -f 2 | sed 's/^ //')"
+   html_output="$(grep ^HTML_OUTPUT $fich_doxygen | cut -d= -f 2 | sed 's/^ //')"
+   html_ext="$(grep ^HTML_FILE_EXTENSION $fich_doxygen | cut -d= -f 2 | sed 's/^ //')"
+   fichero_log="$(grep ^WARN_LOGFILE $fich_doxygen | cut -d= -f 2 | sed 's/^ //')"
+   nombre_proyecto="$(grep ^PROJECT_NAME $fich_doxygen | cut -d= -f 2 | sed 's/^ //')"
+   formato_registro="$(grep ^WARN_FORMAT $fich_doxygen | cut -d= -f 2 | sed 's/^ //')"
+   filtrar_archivos="$(grep ^FILTER_SOURCE_FILES $fich_doxygen | cut -d= -f 2 | sed 's/^ //')"
+   comando_filtrado="$(grep ^INPUT_FILTER $fich_doxygen | cut -d= -f 2 | sed 's/^ //')"
+   #[[ "$filtrar_archivos" != "" ]] && filtrar=$comando_filtrado
+   [[ "$fich_doxygen" != "$fich_doxygen_temporal" ]] && con_proyecto=true
+   if [ "$con_proyecto" != "true" ] ; then
+      [[ "$archivos_afectados" = "" ]] && archivos_afectados=`pwd`
+   fi
+   [[ "$fichero_log" != "" ]] && registro=$fichero_log
+
+   }
+
+## Manejar parámetros que nos pasan
+
+function _doxygen() {
+
+   while [ -n "$1" ] ; do
+
+      case "$1" in
+         
+         -h|-help|--help|help) doxygen2help "$0" ; exit ;;
+
+         conf) fich_doxygen="$2" ; shift 2 ;;
+
+         debug) shift 1 ; debug=true ;;
+
+         filtrar) 
+            if [ "$filtrar" = "" ] ; then
+               echo 'Filtramos archivos'
+               filtrar='bash'
+            else
+               echo 'Quitamos filtro'
+               filtrar=''
+            fi
+            shift 1
+            ;;
+
+         conf) fich_doxygen="$2" ; shift 2 ;;
+
+         ejecutar)
+            shift 1
+            construir_variables 
+            if [ ! -e "$dir_final" ] ; then
+               echo "No existe el directorio destino"
+               echo
+               echo "Crear directorio: $dir_final: (s/n): "
+               read -s -n 1 OPCION
+               echo
+               if [ "$OPCION" != "s" ] ; then
+                  echo "Cancelado"
+                  exit
+               fi
+               mkdir -p "$dir_final"
+            else
+               if [ -e "$dir_final/$html_output" ] ; then
+                  echo 'El directorio destino existe'
+                  echo
+                  echo $dir_final/$html_output
+                  echo
+                  read -p "Borrar (s/n): " OPCION
+                  if [ "$OPCION" == "s" ] ; then
+                     rm -fr "$dir_final/$html_output"
+                  fi
+               fi
+            fi
+
+            # $TERM -T Doxygen -e "doxygen $fich_doxygen 2> $registro " &
+            doxygen $fich_doxygen 2> $registro
+            ;;
+
+         ver)
+            shift 1
+            construir_variables 
+            servidor=`echo $dir_final | replace "$parte_dir" localhost/`
+
+            echo "$md_navegador $servidor/$html_output/"
+            $md_navegador "$servidor/$html_output/" &
+            ;;
+
+         ver_temporal)
+            shift 1
+            construir_variables 
+            $md_navegador $url_web_tmp/ &
+            ;;
+
+         verErrores) 
+            shift 1
+            echo Fichero de registro: $registro
+            less $registro 
+            ;;
+
+         configurar) shift 1 ; doxywizard "$fich_doxygen" & ;;
+
+         configurar_con_gvim) shift 1 ; gvim "$fich_doxygen" & ;;
+
+         exportar_pdf) 
+            shift 1
+            construir_variables 
+
+            dir_final=$dir_tmp
+
+            filtro=""
+            filtro="$filtro\n##############################################################"
+            filtro="$filtro\n# Modificaciones para que se genere documentación únicamente #"
+            filtro="$filtro\n# en los archivos afectados.                                 #"
+            filtro="$filtro\n##############################################################"
+            filtro="$filtro\nOUTPUT_DIRECTORY       =$dir_final                            "
+            filtro="$filtro\nWARN_FORMAT            = \"\$file:\$line:0: \$text  \"        "
+            #filtro="$filtro\nHTML_HEADER            = `dirname "$BASH_SOURCE"`/doxygen_cabecera.html" 
+            #filtro="$filtro\nHTML_FOOTER            = `dirname "$BASH_SOURCE"`/doxygen_pie.html" 
+            #filtro="$filtro\nHTML_STYLESHEET        = `dirname "$BASH_SOURCE"`/doxygen.css" 
+            #filtro="$filtro\nWARN_LOGFILE           =$fichero_log"
+            filtro="$filtro\nUSE_PDFLATEX           = YES"
+            filtro="$filtro\nGENERATE_HTML          = NO"
+            filtro="$filtro\nGENERATE_LATEX         = YES"
+            filtro="$filtro\nCOMPACT_LATEX          = YES"
+            filtro="$filtro\nPDF_HYPERLINKS         = YES"
+            filtro="$filtro\n"
+
+
+
+            if [ "$filtrar" != "" ] ; then
+               filtro="$filtro\nFILTER_SOURCE_FILES    = YES"
+               filtro="$filtro\nINPUT_FILTER           = \"$0 --filtra bash\""
+            fi
+
+            cat "$fich_doxygen" > ${DIR_TMP}dox_tmp.conf
+            echo -e "$filtro" >> ${DIR_TMP}dox_tmp.conf
+            cat ${DIR_TMP}dox_tmp.conf
+            cat ${DIR_TMP}dox_tmp.conf | doxygen - 2> $registro
+
+            if [ $? != 0 ] ; then
+               echo
+               echo Error al ejecutar comando
+               echo
+               exit
+            fi
+
+            echo
+            echo Filtro: 
+            echo -e "$filtro"
+            echo
+            echo Fichero de avisos: $registro
+            echo Documentación generada en: $dir_final
+            echo Selección: $archivos_afectados
+            echo
+
+
+            dir_latex="$(grep ^LATEX_OUTPUT $fich_doxygen | cut -d= -f 2 | sed 's/^ //')"
+            pwd=`pwd`
+            cd "$dir_final/$dir_latex"
+            make
+            xdg-open refman.pdf &
+            cd "$pwd"
+            ;;
+
+         ejecutar_archivos) 
+            
+            local pdf=0
+
+            shift 1
+
+            if [ "$1" == "pdf" ] ; then pdf=1 ; shift 1 ; fi
+
+            construir_variables 
+
+            dir_final=$dir_tmp
+
+            filtro=""
+            filtro="$filtro\n##############################################################"
+            filtro="$filtro\n# Modificaciones para que se genere documentación únicamente #"
+            filtro="$filtro\n# en los archivos afectados.                                 #"
+            filtro="$filtro\n##############################################################"
+            filtro="$filtro\nINPUT                  = $archivos_afectados                  "
+            filtro="$filtro\nOUTPUT_DIRECTORY       =$dir_final                            "
+            filtro="$filtro\nWARN_FORMAT            = \"\$file:\$line:0: \$text  \"        "
+            #filtro="$filtro\nHTML_HEADER            = `dirname "$BASH_SOURCE"`/doxygen_cabecera.html" 
+            filtro="$filtro\nHTML_FOOTER            = `dirname "$BASH_SOURCE"`/doxygen_pie.html" 
+            filtro="$filtro\nHTML_STYLESHEET        = `dirname "$BASH_SOURCE"`/doxygen.css" 
+            #filtro="$filtro\nWARN_LOGFILE           =$fichero_log"
+
+            if [ $pdf = 1 ] ; then
+               filtro="$filtro\nGENERATE_HTML          = NO"
+               filtro="$filtro\nUSE_PDFLATEX           = YES"
+               filtro="$filtro\nGENERATE_LATEX         = YES"
+               filtro="$filtro\nCOMPACT_LATEX          = YES"
+               filtro="$filtro\nPDF_HYPERLINKS         = YES"
+            fi
+
+            if [ "$filtrar" != "" ] ; then
+               filtro="$filtro\nFILTER_SOURCE_FILES    = YES"
+               filtro="$filtro\nINPUT_FILTER           = \"$0 --filtra bash\""
+            fi
+
+            cat "$fich_doxygen" > ${DIR_TMP}dox_tmp.conf
+            echo -e "$filtro" >> ${DIR_TMP}dox_tmp.conf
+            cat ${DIR_TMP}dox_tmp.conf
+            cat ${DIR_TMP}dox_tmp.conf | doxygen - 2> $registro
+
+            if [ $? != 0 ] ; then
+               echo
+               echo Error al ejecutar comando
+               echo
+               exit
+            fi
+
+            echo
+            echo Filtro: 
+            echo -e "$filtro"
+            echo
+            echo Fichero de avisos: $registro
+            echo Documentación generada en: $dir_final
+            echo Selección: $archivos_afectados
+            echo
+
+            if [ $pdf = 1 ] ; then
+               dir_latex="$(grep ^LATEX_OUTPUT $fich_doxygen | cut -d= -f 2 | sed 's/^ //')"
+               pwd=`pwd`
+               cd "$dir_final/$dir_latex"
+               make
+               xdg-open refman.pdf &
+               cd "$pwd"
+            fi
+            ;;
+
+         errores2vim)
+
+            shift 1
+            if [ "`vim --serverlist | grep -i $nombre_proyecto`" != "" ] ; then
+               cmd="gvim --servername $nombre_proyecto --remote-send '<C-\><C-N>:cfile $registro<CR>:copen<CR>'"
+            else
+               local -a servidores_vim=(`vim --serverlist`)
+               echo ${servidores_vim[0]}
+               if [ ${#servidores_vim[*]} -gt 1 ] ; then
+                  echo
+                  echo 'Hay más de un servidor de vim disponible, selecciona uno'
+                  echo
+                  for x in `seq 0 $((${#servidores_vim[*]}-1))` ; do
+                     echo "$x) ${servidores_vim[$x]}"
+                  done
+                  echo
+                  read OPCION
+                  [[ "$OPCION" = "" ]] && return
+                  servername=${servidores_vim[$OPCION]}
+               else
+                  servername=${servidores_vim[*]}
+               fi
+               cmd="gvim --servername $servername --remote-send '<C-\><C-N>:cfile $registro<CR>:copen<CR>'"
+            fi
+            echo comando: $cmd
+            eval $cmd
+            ;;
+
+         menu) shift 1
+
+            construir_variables 
+
+            [[ "$*" != "" ]] && archivos_afectados=$(echo "$*")
+
+            echo
+            clear
+            caja $nombre_proyecto MagDoxygen $colAfirmativo
+
+            local f=($archivos_afectados)
+
+            if [ "$archivos_afectados" != "" ] ; then
+               abre_caja
+               if [ ${#f[*]} -gt 5 ] ; then
+                  linea_caja "" "${#f[*]} archivos seleccionados" $colDestacado
+               else
+                  for a in $archivos_afectados ; do
+                     linea_caja "- $a"
+                  done
+               fi
+               cierra_caja
+            fi
+
+            if [ "$con_proyecto" = "false" ] ; then
+               echo
+               echo " [F]iltro para scripts bash: ${filtrar:-NO}"
+               echo
+               echo ' El filtro nos permite modificar los scripts para ser interpretados por doxygen'
+               echo ' modificando los ## por /// y los ##< por ///<' 
+               echo
+            fi
+
+            if [ "$con_proyecto" == "true" ] ; then
+               abre_caja 'Sobre proyecto'
+               linea_caja '[E]jecutar' '[V]er resultado' 
+               linea_caja '[C]onfigurar con doxywizard' 'C[o]nfigurar con gvim'
+               linea_caja 'Exportar a [P]DF'
+               cierra_caja
+            fi
+
+            if [ "$archivos_afectados" != "" ] ; then ## Solo tenemos proyecto
+               abre_caja 'Sobre archivos afectados'
+               linea_caja 'E[j]ecutar sobre selección' 'Ver resultado sobre archivos [a]fectados'
+               linea_caja 'E[x]portar a PDF'
+               cierra_caja
+            fi
+
+            if [ -e $registro ] ; then
+               abre_caja 'Otros'
+               linea_caja 'Ver e[r]rores' '[I]ncluir lista de errores a vim'
+               cierra_caja
+            fi
+
+                             
+            if [ "$debug" = "true" ] ; then
+               echo
+               echo Debug
+               echo -----
+               echo
+               echo "Archivo de configuración: $fich_doxygen"
+               echo "Fichero de registro:      $fichero_log"
+               echo "Directorio destino:       $dir_final"
+               echo "Navegador:                $md_navegador"
+               echo "Terminal:                 $md_terminal" 
+               echo "Formato de registro:      $formato_registro" 
+               echo "filtrar archivos:         $filtrar_archivos"  
+               echo "Comando filtrado:         $comando_filtrado"
+               echo "Proyecto propio:          $con_proyecto"
+               echo
+            fi
+
+            read -n 1 -s -p 'Opción: ' OPCION
+            case $OPCION in
+               e|E) _doxygen ejecutar ;;
+               v|V) _doxygen ver ;;
+               c|C) _doxygen configurar ;;
+               o|O) _doxygen configurar_con_gvim ;;
+               r|R) _doxygen verErrores ;;
+               j|J) _doxygen ejecutar_archivos ;;
+               x|X) _doxygen ejecutar_archivos pdf ;;
+               a|A) _doxygen ver_temporal ;;
+               i|I) _doxygen errores2vim ;;
+               f|F) _doxygen filtrar ;;
+               p|P) _doxygen exportar_pdf ;;
+               *) return ;;
+            esac
+            _doxygen menu
+            ;;
+         *) # Lista de archivos afectados
+            archivos_afectados=$(echo "$*")
+            shift
+            ;;
+
+
+      esac
+
+   done
+
+}
+
+_doxygen $*

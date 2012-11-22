@@ -1,0 +1,233 @@
+#!/bin/bash
+
+## @file maggit
+## @brief manejando control de versiones con git
+
+## menú propio para git
+
+function git_magcontrolversion_menu() {
+
+   abre_caja
+   linea_caja 'Editar últ[i]mo mensaje publicado' 
+   linea_caja '[G]uardar cambios y volver al estado sin cambios' '[R]estaura cambios Restaurar cambios'
+   cierra_caja
+
+   }
+
+## Acciones para el menú propio
+
+function git_magcontrolversion_acciones_menu() {
+
+   case "$1" in
+   
+      i|I) git commit --amend ;; # Editar último mensaje
+      g|G) git stash          ;; # Guardar cambios
+      r|R) git stash apply    ;; # Restaurar cambios
+      *) return 0 ;;
+
+   esac
+
+   }
+
+
+## Listado de archivos modificados
+
+function git_magcontrolversion_lista_modificados() {
+
+   DIFS="$IFS" ; IFS=$'\n'
+   echo
+   for x in $(git status --porcelain | colrm 1 3) ; do
+      echo "'$x'"
+   done
+   IFS="$DIFS"
+   }
+
+## Listado de archivos eliminados
+
+function git_magcontrolversion_lista_eliminados() {
+
+   DIFS="$IFS" ; IFS=$'\n'
+   echo
+   for x in $(git status --porcelain | grep 'D' | colrm 1 3) ; do
+      echo "'$x'"
+   done
+   IFS="$DIFS"
+   }
+
+## Listado de archivos nuevos
+
+function git_magcontrolversion_lista_nuevos() {
+
+   DIFS="$IFS" ; IFS=$'\n'
+   echo
+   for x in $(git status --porcelain | grep '??' | cut -d' ' -f 2) ; do
+      echo "'$x'"
+   done
+   IFS="$DIFS"
+   }
+
+## Mover archivos
+## 
+## $1 Origen
+## $2 Destino
+
+function git_magcontrolversion_mover() {
+
+    origen="$1"
+   destino="$2"
+
+   git move "$origen" "$destino"
+   while [ $? != 0 ] ; do
+      echo 'Parece que el archivo a sido modificado'
+      echo '¿Que quieres hacer?'
+      echo
+      echo '1) Forzar cambio   2) commit sobre archivo antes de eliminar   0) Salimos'
+      read opcion
+      case $opcion in
+         1) git move --force "$origen" "$destino" ;;
+         2) git ci $origen ; magcontrolversion mover "$origen" "$destino" ;;
+         0) exit 1 ;;
+      esac
+   done
+
+   }
+
+## Commit 
+##
+## Opciones:
+##
+## -F [archivo]       La descripción viene en archivo 
+## -m [Descripción]   Se añade la descripción
+## todo               Se hace commit sobre todos los cambios
+## 
+## Archivos o directorio sobre los que hacer commit sino no se hace
+
+function git_magcontrolversion_commit() {
+
+  cmd="git commit "
+  local todo=0
+  local archivos=""
+
+   while [ "$1" != "" ] ; do
+
+      case $1 in
+         todo) # Hacemos commit sobre todos los cambios
+            shift 1
+            todo=1
+            cmd="$cmd -a "
+            ;;
+         -F) # La descripción viene en un fichero
+            shift 1
+            cmd="$cmd -F '$1'"
+            shift 1
+            ;;
+         -m) # La descripción viene en el siguiente parametro
+            shift 1
+            cmd="$cmd -m '$1'"
+            shift 1
+            ;;
+         *) # listado de archivos
+            archivos="$archivos '$1'"
+            shift 1
+            ;;
+      esac
+   done
+
+   cmd="$cmd $archivos"
+
+   if [ "$archivos" != "" ] || [ "$todo" = "1" ] ; then
+      echo
+      echo "$cmd"
+      echo
+      echo -n 'Ejecutar comando (s/n): '
+      read -n 1 -s OPCION
+      if [ "$OPCION" == 's' ] ; then
+         eval $cmd
+      else
+         aviso " Commit cancelado"
+         tecla
+      fi
+   else
+      aviso "No hay archivos especificados, no se hace commit"
+      tecla
+   fi
+
+  }
+
+## borrar
+
+function git_magcontrolversion_del() {
+
+   git rm $@
+   while [ $? != 0 ] ; do
+      echo 'Parece que el archivo a sido modificado'
+      echo '¿Que quieres hacer?'
+      echo
+      echo '1) Forzar borrado   2) commit sobre archivo antes de eliminar   0) Salimos'
+      read  opcion
+      case $opcion in
+         1) git rm --force $@ ;;
+         2) git commit $@ ; _subversion borrar $@ ;;
+         0) exit ;;
+      esac
+   done
+   }
+
+## update
+
+function git_magcontrolversion_update() { ejecutarComando "git pull origin master" ; }
+
+## status
+
+function git_magcontrolversion_status() { git status --porcelain $@ 2> /dev/null ; }
+
+## Añadir
+
+function git_magcontrolversion_add() { git add $@ ; }
+
+## log
+
+function git_magcontrolversion_log() { git log -p ; }
+
+## rama actual
+
+function git_magcontrolversion_rama_actual() { 
+   git branch | grep '*' | colrm 1 2
+   }
+
+## listar ramas
+##
+## Devolver una lista limpia de las ramas actuales
+
+function git_magcontrolversion_listar_ramas() { git branch | sed 's/*/ /g' | colrm 1 2 ; }
+
+## Cambio de ramas
+
+function git_magcontrolversion_cambia_rama() { git checkout "$1" ; }
+
+## Crear nueva rama
+
+function git_magcontrolversion_rama_nueva() { git branch "$1" ; }
+
+## Borrar rama
+
+function git_magcontrolversion_borrar_rama() { git branch -d "$1" ; }
+
+## Iniciar 
+
+function git_magcontrolversion_iniciar() {
+
+   git init
+   git add "./"
+   git commit -m 'Iniciamos control de versiones'
+
+   aviso "Proyecto iniciado" ; tecla
+   }
+
+## Fusionar rama
+
+function git_magcontrolversion_merge() { git merge "$1" ; }
+
+## Deshacer cambios
+
+

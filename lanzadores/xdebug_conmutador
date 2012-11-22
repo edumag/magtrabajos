@@ -1,0 +1,77 @@
+#!/bin/bash 
+
+## @file xdebug_conmutador
+## @brief Conmutar xdebug
+##
+## Uso: xdebug_conmutador [on|off]
+## 
+##    Se debe tener en la carpeta $dir_prog los archivos $on y $off para activar o desactivar xdebug.
+## 
+## @author   Eduardo Magrané
+##
+## @internal
+##
+##       web  http://www.mamedu.com
+##
+##      mail  eduardo.mamedu.com
+##
+##  Revision  SVN $Id: $
+##
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+archivo_xdebug="/etc/php5/apache2/conf.d/xdebug.ini"
+
+dir_prog="/home/eduardo/.xdebug_conmutador/"
+on="${dir_prog}xdebug.ini.on"
+off="${dir_prog}xdebug.ini.off"
+
+error() {
+   echo
+   echo "ERROR"
+   echo
+   echo "$1"
+   echo
+   }
+
+# Si no estamos en una consola lanzamos terminal
+
+tty > /dev/null
+salida="$?"
+
+if [ "$salida" != "0" ] ; then
+   cmd="${terminal} '$0 \"$dPeliculas\" ; read'"
+   eval `echo "$cmd"` &
+   [[ "$?" != 0 ]] && error "Al lanzar terminal, comando: \n$cmd"
+   exit
+fi
+
+help() { doxygen2help "$0" ; }
+
+if [ ! -e "$on" ] ; then help ; exit ; fi
+if [ ! -e "$off" ] ; then help ; exit ; fi
+
+accion="$1"
+
+if [ -z "$accion" ] ; then
+
+   echo 
+   echo '[A]ctivar o [D]esactivar xdebug'
+   echo
+   read -p 'Opción: ' OPCION
+
+   [[ "$OPCION" == "" ]] && exit;
+   [[ "$OPCION" == "a" ]] && accion='on' || accion='off'
+
+fi
+
+if [ "$accion" == "on" ] ; then
+   sudo cp "$on" "$archivo_xdebug"
+else 
+   sudo cp "$off" "$archivo_xdebug"
+fi
+
+sudo apache2ctl restart
+

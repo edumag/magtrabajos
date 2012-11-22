@@ -1,0 +1,195 @@
+#!/bin/bash
+
+## @file magsvn
+## @brief manejando control de versiones con subversion
+
+## menú propio para svn
+
+function svn_magcontrolversion_menu() { return; }
+
+## Acciones para el menú propio
+
+function svn_magcontrolversion_acciones_menu() { return; }
+
+## Listado de archivos modificados
+
+function svn_magcontrolversion_lista_modificados() {
+
+   DIFS="$IFS" ; IFS=$'\n'
+   echo
+   for x in $(svn status | awk -v FS='       ' '{printf "%s\n",$2}') ; do
+      echo "'$x'"
+   done
+   IFS="$DIFS"
+   }
+
+## Listado de archivos eliminados
+
+function svn_magcontrolversion_lista_eliminados() {
+
+   DIFS="$IFS" ; IFS=$'\n'
+   echo
+   for x in $(svn status | grep ^! | awk -v FS='!       ' '{print $2}') ; do
+      echo "'$x'"
+   done
+   IFS="$DIFS"
+   }
+
+## Listado de archivos nuevos
+
+function svn_magcontrolversion_lista_nuevos() {
+
+   DIFS="$IFS" ; IFS=$'\n'
+   echo
+   for x in $(svn status | grep ^? | awk -v FS='?       ' '{print $2}') ; do
+      echo "'$x'"
+   done
+   IFS="$DIFS"
+   }
+
+## Mover archivos
+## 
+## $1 Origen
+## $2 Destino
+
+function svn_magcontrolversion_mover() {
+
+    origen="$1"
+   destino="$2"
+
+   svn move "$origen" "$destino"
+   while [ $? != 0 ] ; do
+      echo 'Parece que el archivo a sido modificado'
+      echo '¿Que quieres hacer?'
+      echo
+      echo '1) Forzar cambio   2) commit sobre archivo antes de eliminar   0) Salimos'
+      read opcion
+      case $opcion in
+         1) svn move --force "$origen" "$destino" ;;
+         2) svn ci $origen ; magcontrolversion mover "$origen" "$destino" ;;
+         0) exit 1 ;;
+      esac
+   done
+
+   }
+
+## Commit 
+##
+## Opciones:
+##
+## -F [archivo]       La descripción viene en archivo 
+## -m [Descripción]   Se añade la descripción
+## todo               Se hace commit sobre todos los cambios
+## 
+## Archivos o directorio sobre los que hacer commit sino no se hace
+
+function svn_magcontrolversion_commit() {
+
+  cmd="svn ci "
+  local todo=0
+
+   while [ "$1" != "" ] ; do
+
+      case $1 in
+         todo) # Hacemos commit sobre todos los cambios
+            shift 1
+            todo=1
+            cmd="$cmd "
+            ;;
+         -F) # La descripción viene en un fichero
+            shift 1
+            cmd="$cmd -F '$1'"
+            shift 1
+            ;;
+         -m) # La descripción viene en el siguiente parametro
+            shift 1
+            cmd="$cmd -m '$1'"
+            shift 1
+            ;;
+      esac
+   done
+
+   cmd="$cmd $@"
+
+   if [ "$@" != "" ] || [ $todo = 1 ] ; then
+      echo
+      echo "$cmd"
+      echo
+      echo -n 'Ejecutar comando (s/n): '
+      read -n 1 -s OPCION
+      if [ "$OPCION" == 's' ] ; then
+         eval $cmd
+      else
+         aviso " Commit cancelado"
+      fi
+   else
+      aviso "No hay archivos especificados, no se hace commit"
+   fi
+
+  }
+
+## borrar
+
+function svn_magcontrolversion_del() {
+
+   svn del $@
+   while [ $? != 0 ] ; do
+      echo 'Parece que el archivo a sido modificado'
+      echo '¿Que quieres hacer?'
+      echo
+      echo '1) Forzar borrado   2) commit sobre archivo antes de eliminar   0) Salimos'
+      read  opcion
+      case $opcion in
+         1) svn del --force $archivos_afectados ;;
+         2) svn ci $* ; _subversion borrar $archivos_afectados ;;
+         0) exit ;;
+      esac
+   done
+   }
+
+## update
+
+function svn_magcontrolversion_update() { svn update ; }
+
+## status
+
+function svn_magcontrolversion_status() { svn status $@ 2> /dev/null ; }
+
+## Añadir
+
+function svn_magcontrolversion_add() { svn add $@ ; }
+
+## log
+
+function svn_magcontrolversion_log() { svn log ; }
+
+## rama actual
+
+function svn_magcontrolversion_rama_actual() { basename "`pwd`"; }
+
+## listar ramas
+##
+## Devolver una lista limpia de las ramas actuales
+
+function svn_magcontrolversion_listar_ramas() { aviso "Pendiente de programar" ;}
+
+## Cambio de ramas
+
+function svn_magcontrolversion_cambia_rama() { aviso "Pendiente de programar" ; tecla ;}
+
+## Crear nueva rama
+
+function svn_magcontrolversion_rama_nueva() { aviso "Pendiente de programar" ; tecla ;}
+
+## Borrar rama
+
+function svn_magcontrolversion_borrar_rama() { aviso "Pendiente de programar" ; tecla ;}
+
+## Iniciar 
+
+function svn_magcontrolversion_iniciar() { aviso "Pendiente de programar" ; tecla ;}
+
+## Fusionar rama
+
+function svn_magcontrolversion_merge() { aviso "Pendiente de programar" ; tecla ; }
+

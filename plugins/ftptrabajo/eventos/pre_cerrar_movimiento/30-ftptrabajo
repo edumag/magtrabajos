@@ -1,0 +1,23 @@
+## @file 30-ftptrabajo
+## @brief Subir archivos afectados si los hay
+
+# Antes de cerrar buscar archivos afectados que estén bloqueados y subirlos
+
+echo "ftptrabajo: Si tenemos archivos bloqueados los subimos..."
+echo
+
+if [ "`plugin_activado ftptrabajo`" != "" ] ; then 
+   salida="$(listarArchivos --listar | grep ^Blq)"
+   echo -e "$salida"
+   echo
+   if [ "$salida" != "" ] ; then
+      echo "Sunir archivos..."
+      echo
+      subirArchivos
+   fi
+else
+   echo "Sin archivos bloqueados"
+   echo
+fi
+
+

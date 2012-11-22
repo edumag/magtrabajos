@@ -1,0 +1,42 @@
+## @file 05-ftptrabajo
+## @brief Comprobar si están bloqueados sino preguntamos si se desean bajar
+
+echo
+echo Comprobar bloqueo de archivos
+echo -----------------------------
+echo
+
+BLOQ=''
+for n in `seq 0 ${#e_archivos_seleccionados[*]}` ; do
+   x="${e_archivos_seleccionados[$n]}"
+   if [ "$x" != "" ] ; then
+      echo -n "- $x "
+      if [ "`ftptrabajo --proyecto $proyecto -vb | grep ^${x}$ `" = "" ] ; then
+         BLOQ="$BLOQ $x"
+         echo "[ko]"
+      else
+         echo "[ok]"
+      fi
+   fi
+done
+
+if [ "$BLOQ" != "" ] ; then
+   echo
+   echo "Hay archivos sin bloquear"
+   echo "-------------------------"
+   echo
+   echo -e "¿Quieres bajarlos del servidor? (s/n): \c "
+   read OPCION
+   if [ "$OPCION" = 's' ] ; then
+      ftptrabajo --proyecto $proyecto  -b $BLOQ
+   fi
+
+fi
+
+# if [ "$proyecto_ftp" != "" ] && [ "$proyecto_ftp" != "NULL" ] ; then 
+#    echo ""
+#    read -p "Bajar archivos desde el servidor: (s/n)" OPCION
+#    if [ "$OPCION" = "s" ] ; then
+#       comandoExterno "$mt_comando_ftp --proyecto $proyecto  -b ${e_archivos_seleccionados[*]}" &
+#    fi
+# fi

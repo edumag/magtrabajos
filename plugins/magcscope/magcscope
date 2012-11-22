@@ -1,0 +1,122 @@
+#!/bin/bash 
+
+## @file magcscope
+## @brief Lanzar cscope con los datos del proyecto
+##
+## @todo generar configuración al vuelo y para el proyecto
+##
+## @author   Eduardo Magrané
+##
+## @internal
+##
+##       web  http://www.mamedu.com
+##
+##      mail  eduardo.mamedu.com
+##
+##  Revision  SVN $Id: $
+##
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+# mcs_cseditor=${mcs_csexclude[*]:-$(eval "echo $mt_editor_dev")}
+
+mcs_cseditor=${mcs_cseditor:-gvim}                     ##< Editor para cscope
+mcs_csdir_codigo=${mcs_csdir_codigo:-./}               ##< Directorio de proyecto
+mcs_csexclude=(${mcs_csexclude[*]:-ext/ doc/})         ##< Directorios a excluir, separados por espacios
+mcs_cspatron=(${mcs_cspatron[*]:-php html js})         ##< Extensiones de archivo a incluir
+
+desc_mcs_cseditor='Editor para cscope'
+desc_mcs_csdir_codigo='Directorio para codigo fuente'
+desc_mcs_csexclude='Patron de ficheros a descartar con (grep -v)'
+desc_mcs_cspatron='Extensión de archivos de código a buscar separados por espacios (find -name <extensión> -print)'
+
+[ -e "$BASH_SOURCE".conf ] && source "$BASH_SOURCE".conf
+
+## Menú
+
+function _cscope() {
+
+   local cmd ult num
+
+   ## Menú para manejar cscope
+
+   clear
+   echo '======'
+   echo 'cscope'
+   echo '======'
+   echo
+   echo $desc_mcs_cseditor: $mcs_cseditor 
+   echo $desc_mcs_csdir_codigo: $mcs_csdir_codigo
+   echo $desc_mcs_csexclude: ${mcs_csexclude[*]}
+   echo $desc_mcs_cspatron: ${mcs_cspatron[*]}
+   echo
+   echo ' [L]anzar                       Abrir nueva terminal con cscope'
+   echo ' [G]enerar datos                Generar base de datos'
+   echo ' [c]browser                     Gui de cscope'
+   echo
+
+   read -p 'Opcion: ' -n 1 -s OPCION
+
+   case $OPCION in
+
+      c|C)
+         cbrowser cscope.out &
+         ;;
+      l|L) 
+         echo Editor para cscope: $mcs_cseditor 
+         export CSCOPE_EDITOR="$mcs_cseditor"
+         cscope -d
+         ;;
+      g|G) 
+         # echo
+         # echo
+         # read -p "Extensiones de archivos de código, por defecto: '${mcs_cspatron[*]}' " -a patron
+         # echo 
+         # if [ -z $patron ] ; then
+         #    patron=($mcs_cspatron)
+         # fi
+
+         local -a patron=($mcs_cspatron)
+
+         cmd="find $mcs_csdir_codigo "
+         ult=$((${#patron[*]}-1))
+         for num in `seq 0 $ult` ; do 
+            cmd="$cmd -name '*.${patron[$num]}' -print "
+            [[ $num -ne $ult ]] && cmd="$cmd -o "
+         done
+         for num in `seq 0 $ult` ; do 
+            cmd="$cmd  | grep -v '${mcs_csexclude[$num]}' "
+         done
+         cmd="$cmd | tee cscope.files"
+         #eval "cmd=$cmd"
+         echo Comando:
+         echo
+         echo $cmd
+         echo
+         echo -n Generando base de datos...
+         eval $(echo $cmd)
+         if [ $? = 0 ] && [ -e cscope.files ] ; then
+            echo [Ok]
+         else
+            echo [KO]
+            echo
+            echo Error al generar lista de archivos
+            tecla
+         fi
+         echo 'cscope -b'
+         cscope -b
+         echo 'rm cscope.files'
+         rm cscope.files
+         echo 'Base de datos de cscope generada'
+         ;;
+      *) return ;;
+
+   esac
+
+   _cscope
+
+}
+
+[[ "`basename "$BASH_SOURCE"`" != "`basename "$0"`" ]] || (_cscope $@)

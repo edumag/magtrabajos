@@ -1,0 +1,1026 @@
+#!/bin/bash
+
+## @file magfacturacion
+## @brief Programa de facturación basado en mysql
+## 
+## @author   Eduardo Magrané
+## @internal
+##       web  http://www.mamedu.com
+##
+##      mail  eduardo.mamedu.com
+##
+##   Created  13/03/11
+##
+##  Revision  SVN $Id: $
+##
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+## Recoger configuración de magtrabajos
+source "`dirname "$BASH_SOURCE"`/../../config"
+
+## Menú para Facturas
+
+function menuFacturacion() {
+
+   clear
+
+   encabezado
+
+   abre_caja "Facturación"
+
+   linea_caja ' [N]ueva              ' '        Creamos factura con las tareas seleccionadas'
+   linea_caja ' [S]eleccionar        ' '        Listar facturas existente y seleccionar'
+   linea_caja ' [V]er posible factura' '        Visualizar posible factura con tareas seleccionadas'
+   linea_caja ' [P]endientes         ' '        Facturas pendientes de pago'
+   linea_caja ' [Ú]ltimos movimientos' '        Últimos movimientos'
+   linea_caja ' [A]ñadir tarea a factura'
+   linea_caja ' [L]istar facturas y pagos' ' Listado de facturas y sus pagos'
+
+   cierra_caja
+
+   # Buscamos numero total de facturas de proyecto
+   declare -a facturasIds
+   facturasIds=($(ejecutarSQL "select id from facturas WHERE idProyecto=$proyectoId" '-N'))
+   if [ "$num_factura" = '' ] ; then
+      num_factura=${#facturasIds[*]}
+   fi
+   if [ "$facturaId" != '' ] ; then
+
+      abre_caja "Facturas: ${#facturasIds[*]}"
+
+      # Si tenemos factura la presentamos
+      if [ "$facturaId" != '' ] ; then
+         linea_caja ''
+         presentarDatosFactura
+         linea_caja ''
+         linea_caja ' [M]odificar factura'
+         linea_caja ' [D]etalle de factura'
+         linea_caja ' [I]mprimir factura'
+         linea_caja ' [B]orrar factura'
+         linea_caja ' M[o]vimientos de facturas seleccionada'
+         linea_caja ''
+         linea_caja "Factura Seleccionada: < $num_factura > "
+      fi
+
+      cierra_caja
+
+   fi
+
+   mensajes -get  # Si hay mensajes los presentamos
+
+   read -n 1 -s -p " Opcion: " OPCION
+
+   case $OPCION in
+
+      '>') # Seleccionamos factura siguiente
+         if [ "$num_factura" = "${#facturasIds[*]}" ] ; then
+            num_factura=1
+         else
+            num_factura=$(($num_factura+1))
+         fi
+         facturaId=${facturasIds[$(($num_factura-1))]}
+         ;;
+      '<') # Seleccionamos factura anterior
+         if [ "$num_factura" = "1" ] ; then
+            num_factura=${#facturasIds[*]}
+         else
+            num_factura=$(($num_factura-1))
+         fi
+         facturaId=${facturasIds[$(($num_factura-1))]}
+         ;;
+
+      o|O) movimientos_factura ;;
+
+      a|A) # Añadir tareas seleccionadas a una factura
+        # Comprobar que no tenemos una factura seleccionada
+        if [ "$facturaId" != '' ] ; then
+           clear
+           echo
+           echo 'No podemos Añadir tareas nuevas si tenemos una factura seleccionada'
+           echo 'Selecciona las tareas que quieres incluir primero'
+           echo
+           tecla
+
+        # Comprobar que tenemos tareas seleccionadas
+        elif [ "${tareasIds[*]}" = "" ] ; then
+           clear
+           echo
+           echo 'Se necesita tener tareas seleccionadas para insertar en una factura'
+           echo
+           tecla
+
+        else
+
+           echo
+           echo 'Tareas seleccionadas'
+           echo
+           ejecutarSQL "$SQL_TAR $CONDICION"
+           echo
+           read -p 'Confirmar (s/n): ' OPCION
+           if [ "$OPCION" = "s" ] ; then
+              SQL="SELECT * FROM facturas WHERE idProyecto=$proyectoId"
+              ejecutarSQL "$SQL" "-t"
+              read -p 'Numero de factura: ' facturaId
+              [[ $facturaId ]] || return
+              for tareaId in ${tareasIds[*]} ; do
+                 SQL="UPDATE tareas SET idFactura=$facturaId, idEstado=4 WHERE id=$tareaId"
+                 ejecutarSQL "$SQL"
+                 echo "Tarea $tareaId añadida a factura $facturaId"
+              done
+              actualizarTotalFactura $facturaId
+           else
+              mensajes 'Añadir tareas a factura Cancelado'
+           fi
+
+        fi
+        ;;
+
+      b|B) # Eliminando factura
+         [[ $facturaId ]] || seleccionarFactura
+         [[ $facturaId ]] || return
+         echo
+
+         echo 'Borrado de factura'
+         echo '------------------'
+         echo
+         SQL="SELECT * FROM facturas WHERE id=$facturaId"
+         ejecutarSQL "$SQL" "-t"
+         echo
+
+         echo 'Movimientos en factura'
+         echo '----------------------'
+         echo
+         SQL="SELECT * FROM rFacturasPagos WHERE idFactura=$facturaId"
+         ejecutarSQL "$SQL" "-t"
+         echo
+
+         echo 'Tareas afectadas'
+         echo '----------------'
+         echo
+         SQL="SELECT id, nombre FROM tareas WHERE idFactura=$facturaId"
+         ejecutarSQL "$SQL" "-t"
+         read -p 'Borrar factura (s/n): ' OPCION
+
+         [[ "$OPCION" != "s" ]] && return
+
+         SQL="DELETE FROM facturas WHERE id=$facturaId"
+         ejecutarSQL "$SQL"
+         mensajes " Factura $facturaId borrada"
+
+         SQL="DELETE FROM rFacturasPagos WHERE idFactura=$facturaId"
+         ejecutarSQL "$SQL"
+         mensajes " Movimientos de factura $facturaId borrados"
+
+         ;;
+
+      n|N) nueva_factura ;;
+
+      s|S) # listar facturas
+         seleccionarFactura
+         ;;
+
+      m|M) # Modificar factura
+         # Si no tenemos una factura seleccionada la tenemos que seleccionar
+         [[ $facturaId ]] || seleccionarFactura
+         clear
+         echo
+         echo "Modificando factura"
+         echo "-------------------"
+         echo
+         presentarDatosFactura
+         echo
+         echo
+         echo 'Nota'
+         echo '  En el momento que tengamos una fecha de pagado pasaremos las tareas de la factura'
+         echo '  al estado de pagado.'
+         echo
+         echo '  [ENTER] Deja la el valor ya establecido y [c] Cancela la operación'
+         echo
+         read -p "Comentario:_____" COMENTARIO ; [[ "$COMENTARIO" = 'c' ]] && return
+         read -p "fechaFactura:___" FECHA_FACTURA ; [[ "$FECHA_FACTURA" = 'c' ]] && return
+         read -p "fechaPagado:____" FECHA_PAGADO ; [[ "$FECHA_PAGADO" = 'c' ]] && return
+         read -p "Total:__________" TOTAL ; [[ "$TOTAL" = 'c' ]] && return
+
+         SQL="UPDATE facturas SET comentario='${COMENTARIO:-$dComentario}', fechaFactura='${FECHA_FACTURA:-$dFechaFactura}', fechaPagado='${FECHA_PAGADO:-$dFechaPagado}', Total='${TOTAL:-$dTotal}' WHERE id=$facturaId"
+         log $FUNCNAME 'Modificando factura'
+         ejecutarSQL "$SQL"
+
+         # si hay fecha de pago se pone el estado de las tareas a pagadas
+         if [ "$FECHA_PAGADO" != "" ] AND [ "$FECHA_PAGADO" != 'NULL' ] AND [ "$FECHA_PAGADO" != '0000-00-00' ] ; then
+            SQL="UPDATE tareas SET idEstado=5 WHERE idFactura=$facturaId"
+            log "$FUNCNAME" "Añadimos estado pagado a tareas de factura $facturaId"
+            ejecutarSQL "$SQL"
+         fi
+
+         mensajes 'Factura modificada'
+         ;;
+
+      p|P)  # Listado de facturas pendientes de pago
+         pendiente_facturas
+          read -n 1 -s
+          ;;
+      d|D)  # Ver detalle de factura
+          facturaDetalle
+          ;;
+
+      v|V) # Factura con tareas seleccionadas
+          generarFactura | tee $TMP 
+          tecla
+          ;;
+
+      i|I) # Pasar factura a pdf
+          [[ $facturaId ]] || seleccionarFactura
+          generarFactura | tee $TMP
+          exportar p "$TMP"
+          ;;
+
+       u|U) # Últimos movimientos
+          ultimosMovimientos
+          tecla
+          ;;
+
+      l|L) # Listar facturas y pagos 
+         lista_facturas_pagos
+         ;;
+
+      *) return ;;
+
+   esac
+
+   menuFacturacion
+
+}
+
+## Listado de tareas con total
+##
+## @todo Si no hay tareas no presentar nada
+
+function listado_tareas_totales() {
+
+   if [ "$1" != "" ] ; then 
+      local CONDICION_TOTAL_TAREAS="$1"
+   else
+      local CONDICION_TOTAL_TAREAS=$CONDICION
+   fi
+
+   SUBSQL="
+      SELECT t.nombre as tarea, 
+      t.fechaInicio,
+      t.fechaFinal,
+      IF (t.presupuesto>0,t.presupuesto + (t.compensacion),       
+      ROUND(t.euroshora * (sum(UNIX_TIMESTAMP(ti.fechaFinal)- UNIX_TIMESTAMP(ti.fechaInicio))/60)/60,2) + 	(t.compensacion) ) total
+            FROM tareas t, tiempos ti, movimientos m       
+      WHERE m.idTarea=t.id AND ti.idMovimiento=m.id AND t.idProyecto=$proyectoId $CONDICION_TOTAL_TAREAS  GROUP BY t.id
+   "
+   SQL="SELECT CONCAT( tarea, '\t', fechaInicio, '\t',  fechaFinal, '\t',  sum(total)), '\nnn' FROM ($SUBSQL) AS subsql GROUP BY tarea"
+
+   LINEA="====================================================== ================ ================ ==============="
+   # [ $DEV ] && echo -e "\nSQL::$SQL"
+   SALIDA=$(ejecutarSQL "$SQL" "-N")
+   [[ "$SALIDA" == "" ]] && return ;
+   echo ""
+   echo $LINEA 
+   echo " Tareas                                                   Data Inici       Data Final       Total    "
+   echo $LINEA 
+   echo -e "$(echo -e $SALIDA | awk  -v RS='\nnn' -v FS='\t' '{ printf "%-50s  %15s  %15s %+15s\n",$1,$2,$3,$4 }')"
+   [[ "$total" != "" ]] && echo -e "$(echo -e "**$total**" | awk '{ printf "%-76s %+10s\n","**Total:**",$1 }')" 
+   echo $LINEA 
+   }
+
+function totalesFactura() {
+
+   ## Devolver el total de la factura
+   ## 
+   ## $1 Identificador de factura
+
+   if [ "$1" != "" ] ; then 
+      CONDICION=" AND t.idFactura=$1 "
+   fi
+
+   SQL="
+   SELECT min(fechaInicio), max(fechaFinal), sum(total) 
+   FROM (
+      SELECT t.fechaInicio, t.fechaFinal,  
+      IF (t.presupuesto>0,t.presupuesto + (t.compensacion),
+         ROUND(t.euroshora * (sum(UNIX_TIMESTAMP(ti.fechaFinal)- UNIX_TIMESTAMP(ti.fechaInicio))/60)/60 + (t.compensacion),2)
+      ) as total 
+      FROM tareas t, tiempos ti, movimientos m 
+      WHERE m.idTarea=t.id AND ti.idMovimiento=m.id $CONDICION
+      GROUP BY t.id
+   ) as totalsql
+   "
+
+   log $SQL
+
+   local SALIDA=$(ejecutarSQL "$SQL" "-N")
+   local finicio=$(echo -e $SALIDA | cut -d' ' -f 1)
+   local ffinal=$(echo -e $SALIDA | cut -d' ' -f 2)
+   local total=$(echo -e $SALIDA | cut -d' ' -f 3)
+
+   echo "finicio=$finicio ; ffinal=$ffinal ; total=$total ; "
+
+   }
+
+function seleccionarFactura() {
+
+   ## Seleccionar una factura
+   ## Si recibimos un parametro deducimos que es el id de factura
+
+   local SALIDA
+   local cmd
+   local resultado_listado
+
+
+   if [ "$1" = "" ] ; then
+      echo "Listado de facturas"
+      # sino tenemos proyecto de todos
+      if [ "$proyectoId" != "" ] ; then
+         SQL="SELECT CONCAT('\'',id,'\t',fechaFactura,'\t',comentario,'\t',Total,'\'')  from facturas WHERE idProyecto=$proyectoId"
+      else
+         SQL="SELECT CONCAT('\'',id,'\t',fechaFactura,'\t',comentario,'\t',Total,'\'') from facturas"
+      fi
+      log "$FUNCNAME" "listado facturas"
+      SALIDA=$(ejecutarSQL "$SQL" "-N")
+      resultado_listado=''
+      cmd="generar_listado --ocultar-ayuda -t 'Seleccionar factura' $SALIDA"
+      eval $cmd
+      facturaId=$resultado_listado
+      num_factura=$OPCION
+   else
+      facturaId="$1"
+   fi
+
+   if [ "$facturaId" != "" ] ; then
+      CONDICION=" AND idFactura=$facturaId "
+      definirProyecto -f $facturaId
+      SQL="SELECT id FROM tareas WHERE idProyecto=$proyectoId $CONDICION"
+      [[ $DEV ]] && echo "$SQL"
+      tareasIds=($(ejecutarSQL "$SQL" "-N"))
+      movimientoId=''
+   else
+      mensajes "Seleccionar factura, cancelado"
+   fi
+
+   }
+
+## Nueva factura con movimientos seleccionados
+
+function nueva_factura() {
+
+    echo "Generamos nueva factura con tareas seleccionadas"
+
+    # comprobar que tenemos tareas
+
+    if [ ! ${#tareasIds[*]} -gt 0 ] ; then
+       mensajes "No tenemos tareas seleccionadas para generar una factura"
+       return
+    fi
+
+    # comprobar que las tareas seleccionadas no tienen ya una factura asignada
+
+    SQL="SELECT id FROM tareas WHERE id in (`echo ${tareasIds[*]} | tr ' ' ,`) AND ( idFactura IS NOT NULL OR idFactura != 0 )"
+
+    local tareas_asignadas=($(ejecutarSQL "$SQL" "-N"))
+
+    if [ ${#tareas_asignadas[*]} -gt 0 ] ; then
+       echo
+       listar_tareas ${tareas_asignadas[*]}
+       echo
+       echo " Hay tareas con factura asignada, no se puede realizar factura"
+       echo
+       tecla
+       return
+    fi
+
+    # listar tareas seleccionadas
+
+    listar_tareas ${tareasIds[*]}
+
+    # confirmar que se desea ejecutar la orden
+
+    read -s -n 1 -p "Crear nueva factura (S/n): " OPCION
+
+    if [ "$OPCION" != "s" ] ; then
+       mensajes "Crear nueva factura cancelado"
+       return
+    fi
+
+    clear
+    echo
+    echo '+---------------+'
+    echo '| Nueva factura |'
+    echo '+---------------+'
+    echo
+    read -p "Comentario: " COMENTARIO
+    SQL="INSERT INTO facturas (fechaFactura, comentario, idProyecto, fechaPagado) VALUES ('`AHORA`', '`protegerTexto $COMENTARIO`', $proyectoId, '0000-00-00')"
+    ejecutarSQL "$SQL"
+    # obtenemos ultimo id de factura
+    facturaId=$(ejecutarSQL "SELECT id FROM facturas order by id desc limit 1" "-N")
+    for tareaId in ${tareasIds[*]} ; do
+       SQL="UPDATE tareas SET idFactura=$facturaId, idEstado=4 WHERE id=$tareaId"
+       ejecutarSQL "$SQL"
+       echo "Tarea $tareaId añadida a factura $facturaId"
+    done
+    eval "$(totalesFactura $facturaId)"
+    SQL="UPDATE facturas SET Total=$total WHERE id=$facturaId"
+    ejecutarSQL "$SQL"
+    mensajes 'Nueva factura generada'
+
+   }
+
+function generarFactura() {
+
+   ## Generar una factura tal como se presentaría al cliente
+
+   #echo "--no-xml-declaration" > $TMP
+
+   tituloFactura="MamEdu"
+   echo
+   echo $tituloFactura | sed s/./=/g
+   echo $tituloFactura
+   echo $tituloFactura | sed s/./=/g
+   echo " "
+
+   # Recogemos datos de factura si estamos imprimiendo una factura
+   if [ "$facturaId" != "" ] ; then
+      log $FUNCNAME 'Datos de factura'
+      SQL="SELECT CONCAT( 'id_factura=',id,' ; fechaFactura=', fechaFactura) from facturas where id=$facturaId"
+      SALIDA=$(ejecutarSQL "$SQL" "-N")
+      eval "$SALIDA"
+      echo " "
+      echo ":Factura: $id_factura"
+      echo ":Fecha: $fechaFactura"
+   
+   fi
+
+   # Cremos tabla con los datos propios y de los del cliente
+   echo " "
+   # local linea='============================================= ==================================================='
+   local linea="\n+----------------------------------------+----------------------------------------+"
+
+   echo -en $linea
+   printf "\n|%-40s|%40s|" "EDUARDO MAGRANE SANCHEZ" "CLIENTE $proyecto"
+   printf "\n|%-40s|%40s|" "" ""
+   printf "\n|%-40s|%40s|" "CIF/NIF 46135489-L" ""
+   printf "\n|%-40s|%40s|" "" ""
+   printf "\n|%-40s|%40s|" "Plaza de Ros i Reig N9" ""
+   printf "\n|%-40s|%40s|" "" ""
+   printf "\n|%-40s|%40s|" "Les Olives - Garrigoles" ""
+   printf "\n|%-40s|%40s|" "" ""
+   printf "\n|%-40s|%40s|" "17466 GIRONA" ""
+   printf "\n|%-40s|%40s|" "" ""
+   printf "\n|%-40s|%40s|" "TEL 972768281" ""
+   echo -e $linea
+   echo " "
+   
+
+   # Primera tabla con los totales linkeados a los detalles de cada tarea
+
+   # Totales
+   log $FUNCNAME 'Totales de factura'
+   eval "$(totalesFactura $facturaId)"
+
+   echo " "
+   echo "**Periodo:** *${finicio} / $ffinal*"
+   #SALIDA="Periodo: $finicio / $ffinal"
+   # echo
+   # echo $SALIDA
+   # echo $SALIDA | sed s/./~/g
+   # echo " "
+
+   echo " "
+
+   # detalle factura
+   log $FUNCNAME 'Detalles de factura'
+   listado_tareas_totales
+
+   # Nos volvemos sin procesar los detalles de cada tarea.
+   return
+
+
+}
+
+function facturaTareas(){
+
+   ## Presentar las tareas de una factura
+
+   [[ $facturaId ]] || seleccionarFactura
+   [[ $facturaId ]] || return
+   echo
+   echo 'Tareas de factura'
+   echo '-----------------'
+   echo
+   SQL="SELECT t.id, t.nombre as Tarea FROM tareas t WHERE t.idFactura=$facturaId GROUP BY t.id ORDER BY t.id "
+   log $FUNCNAME 'Detalle de facturas'
+   ejecutarMysql2rst "$SQL"
+
+}
+
+function facturaTiemposTareas(){
+
+   ## Presentar los tiempos de tareas de una factura
+
+   [[ $facturaId ]] || seleccionarFactura
+   [[ $facturaId ]] || return
+   echo
+   echo 'Tiempos de Tareas'
+   echo '-----------------'
+   echo
+   SQL="SELECT ti.id, t.nombre AS Tarea, m.nombre AS Movimiento, ti.fechaInicio, ti.fechaFinal, $SQL_TOTAL $SQL_TOTAL_FROM WHERE t.idFactura=$facturaId GROUP BY ti.id ORDER BY t.id, m.id, ti.id"
+   log $FUNCNAME 'Detalle de facturas'
+   ejecutarMysql2rst "$SQL"
+
+}
+
+function facturaDetalle() {
+
+   [[ -e "$TMP" ]] && rm "$TMP"
+
+   ## Detallar factura
+
+   clear
+   echo | tee -a $TMP
+   echo 'Detalle de facturas' | tee -a $TMP
+   echo '-------------------' | tee -a $TMP
+   echo | tee -a $TMP
+
+   SQL="SELECT DISTINCT
+     f.id, f.comentario AS \\\`Detalle Factura\\\`, f.fechaFactura AS \\\`Fecha Factura\\\`
+     ,f.fechaPagado AS \\\`Fecha pago\\\`, f.Total AS \\\`Total factura\\\`, sum(rfp.pagado) AS Pagado
+     FROM facturas f LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id"
+
+   SQL_GROUP=" GROUP BY f.id"
+     
+   if [ $facturaId ] ; then
+      SQL="$SQL WHERE f.id=$facturaId $SQL_GROUP"
+   else
+      SQL="$SQL $SQL_GROUP"
+   fi 
+
+   ejecutarMysql2rst "$SQL" | tee -a $TMP
+    
+    echo | tee -a $TMP
+    if [ "$facturaId" = "" ] ; then
+       echo
+       echo ' Puedes seleccionar una factura para ver sus detalles o [ENTER] sale.'
+       echo
+       read -p ' Identificador de factura: ' facturaId
+    fi
+    [[ "$facturaId" ]] || return
+    caja ' [T]areas - M[o]vimientos factura - To[d]o junto ' Visualizar
+    read -n 1 -s -p " Opcion: " OPCION
+    case $OPCION in
+       d|D) clear
+            facturaMovimientos | tee -a $TMP
+            facturaTareas | tee -a $TMP
+            aviso_informe
+            tecla ;;
+       t|T) clear; facturaTareas | tee -a $TMP ;  aviso_informe ; tecla ;;
+       o|O) clear; facturaMovimientos | tee -a $TMP ; aviso_informe ; tecla ;;
+       *) return ;;
+    esac
+    facturaDetalle
+}
+
+function aviso_informe() {
+
+   [[ -e "$TMP" ]] || return
+
+   echo
+   echo "Archivo de informe: $TMP"
+
+}
+
+## Presentar los movimientos de una factura
+
+function movimientos_factura() {
+
+   if [ "$facturaId" = '' ] ; then
+      clear
+      echo
+      echo Se necesita tener una factura seleccionada
+      echo
+      tecla
+   else
+      facturaMovimientos
+      echo
+      echo Numero de movimiento para seleccionar
+      echo
+      echo [A]ñadir nuevo movimiento
+      echo 
+      read -p 'Opcion: ' OPCION
+
+      if [ "$OPCION" = 'a' ] ; then
+         echo
+         echo 'Añadir movimiento a factura'
+         echo '---------------------------'
+         echo
+         echo [C]ancelar
+         echo
+
+         read -p "Fecha de movimiento (Hoy): " FECHA ; [[ "$FECHA" = 'c' ]] && return
+         read -p "Descripción: " DESCRIPCION ; [[ "$DESCRIPCION" = 'c' ]] && return
+         read -p "Total pagado: " TOTAL ; [[ "$TOTAL" = 'c' ]] && return
+
+         SQL="INSERT INTO rFacturasPagos ( idFactura, pagado, fecha, descripcion ) VALUES ($facturaId, $TOTAL, '${FECHA:-$HOY}', '$DESCRIPCION')"
+         ejecutarSQL "$SQL"
+         mensajes 'Movimiento añadido'
+
+      elif [ "$OPCION" = "" ] ; then
+         echo 'Salimos de movimientos'
+      else
+         id=$(ejecutarSQL "SELECT id FROM rFacturasPagos WHERE id=$OPCION" "-N")
+         pagado=$(ejecutarSQL "SELECT pagado FROM rFacturasPagos WHERE id=$OPCION" "-N")
+         fecha=$(ejecutarSQL "SELECT fecha FROM rFacturasPagos WHERE id=$OPCION" "-N")
+         descripcion=$(ejecutarSQL "SELECT descripcion FROM rFacturasPagos WHERE id=$OPCION" "-N")
+         echo
+         echo Movimiento $id
+         echo --------------
+         echo
+         echo Fecha: $fecha
+         echo Descripción: $descripcion
+         echo Pagado: $pagado
+         echo
+         echo ' [M]odificar - [B]orrar '
+         echo
+         read -p ' Opcion: ' OPCION
+         if [ "$OPCION" = "m" ] ; then
+            echo
+            read -p 'Fecha:       ' FECHA
+            read -p 'Descripción: ' DESCRIPCION
+            read -p 'Pagado:      ' PAGADO
+            SQL="UPDATE rFacturasPagos SET fecha='${FECHA:-$fecha}'
+              , descripcion='${DESCRIPCION:-$descripcion}'
+              , pagado='${PAGADO:-$pagado}'
+              WHERE id=$id"
+            ejecutarSQL "$SQL"
+            mensajes 'Movimiento de factura modificado'
+         elif [ "$OPCION" = "b" ] ; then
+            echo
+            ejecutarSQL "DELETE FROM rFacturasPagos WHERE id=$id"
+            mensajes 'Movimiento de factura borrado'
+         else
+            echo ' Salimos de movimientos de facturas'
+         fi
+      fi
+   fi
+   }
+
+function ultimosMovimientos() {
+
+   ## Presentar los últimos movimientos
+   ##
+   ## Los movimientos son los pagos que se realizan que pueden ser partidos y así
+   ## vamos teniendo un registro de lo que nos va entrando para un mejor control
+
+   echo
+   echo 'Movimientos'
+   echo '-----------'
+   echo
+   SQL='SELECT rfp.id, f.comentario AS Factura, f.fechaFactura AS \`Fecha factura\`, rfp.fecha AS \`Fecha pagado\`, rfp.pagado AS Pagado FROM rFacturasPagos rfp LEFT JOIN facturas f ON f.id=rfp.idFactura WHERE f.idProyecto='$proyectoId' ORDER BY rfp.id desc LIMIT 5'
+   ejecutarMysql2rst "$SQL"
+
+}
+
+function facturaMovimientos() {
+
+   ## Presentar los movimientos de factura
+   ##
+   ## Los movimientos son los pagos que se realizan que pueden ser partidos y así
+   ## vamos teniendo un registro de lo que nos va entrando para un mejor control
+
+   [[ $facturaId ]] || seleccionarFactura
+   [[ $facturaId ]] || return
+   echo
+   echo 'Movimientos de factura'
+   echo '----------------------'
+   echo
+   SQL='SELECT rfp.id, f.comentario AS Factura, f.fechaFactura AS \`Fecha factura\`, rfp.fecha AS \`Fecha pagado\`, rfp.pagado AS Pagado, rfp.descripcion AS \`Descripcion\` FROM rFacturasPagos rfp LEFT JOIN facturas f ON f.id=rfp.idFactura WHERE rfp.idFactura='$facturaId
+   ejecutarMysql2rst "$SQL"
+
+}
+
+function presentarDatosFactura() {
+
+    # dComentario=$(ejecutarSQL "select comentario from facturas where id=$facturaId" "-N")
+    # dFechaFactura=$(ejecutarSQL "select fechaFactura from facturas where id=$facturaId" "-N")
+    # dFechaPagado=$(ejecutarSQL "select fechaPagado from facturas where id=$facturaId" "-N")
+    # dTotal=$(ejecutarSQL "select Total from facturas where id=$facturaId" "-N")
+   
+    sql='SELECT '
+    sql="$sql CONCAT('dComentario=\'',f.comentario,'\'; dFechaFactura=',f.fechaFactura,'; dFechaPagado=',f.fechaPagado,'; dTotal=',f.Total,'; pagado=',if (sum(rfp.pagado),sum(rfp.pagado),0),';') FROM facturas f"
+    sql="$sql LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id"
+    sql="$sql WHERE f.id=$facturaId"
+    sql="$sql GROUP BY f.id"
+
+    cmd=`ejecutarSQL "$sql" "-N"`
+    eval $cmd
+
+    CONDICION=" AND idFactura=$facturaId "
+    definirProyecto -f $facturaId
+    SQL="SELECT id FROM tareas WHERE idProyecto=$proyectoId $CONDICION"
+    [[ $DEV ]] && echo "$SQL"
+    tareasIds=($(ejecutarSQL "$SQL" "-N"))
+    movimientoId=''
+
+    linea_caja "| Id:_________________$facturaId"
+    linea_caja "| Comentario:_________$dComentario"
+    linea_caja "| Fecha de factura:___$dFechaFactura"
+    linea_caja "| Fecha pagado:_______$dFechaPagado"
+    linea_caja "| Total:______________$dTotal"
+    linea_caja "| Pagado:_____________$pagado"
+    linea_caja "|"
+    linea_caja "| Tareas: ${#tareasIds[*]}"
+    linea_caja "|"
+
+
+}
+
+function pendiente_facturas(){
+
+   ## Presentar lista de facturas pendiente de pagos
+
+   SQL_WHERE=" WHERE f.fechaPagado IS NULL OR f.fechaPagado = '' OR f.fechaPagado = '0000-00-00' AND f.idProyecto=$proyectoId"
+
+   SQL="SELECT DISTINCT
+     f.id, f.fechaFactura AS \\\`Fecha Factura\\\`
+     ,f.fechaPagado AS \\\`Fecha pago\\\`, f.Total AS \\\`Total factura\\\`, sum(rfp.pagado) AS Pagado, TRUNCATE(f.Total - sum(if(rfp.pagado,rfp.pagado,0)),2) as Pendiente
+     FROM facturas f LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id"
+
+   SQL_GROUP=" GROUP BY f.id"
+
+   SQL_TOTAL="SELECT TRUNCATE((sum(tot.\\\`Total factura\\\`)-sum(if(tot.Pagado,tot.Pagado,0)) ),2) AS Pemdiente  
+     FROM ($SQL $SQL_WHERE $SQL_GROUP) AS tot"
+
+   log $FUNCNAME 'Facturas pendientes'
+
+   salida=$(ejecutarSQL "$SQL $SQL_WHERE $SQL_GROUP" "-N")
+
+   [[ "$salida" == "" ]] && return
+
+   echo  
+   echo  
+   echo "Facturas pendientes en $proyecto"
+   echo "Facturas pendientes en $proyecto" | sed 's/./-/g'
+   echo 
+   echo ":fecha: $HOY"
+   echo 
+
+   # ejecutarMysql2rst "$SQL $SQL_WHERE $SQL_GROUP" 
+
+   echo -e "$salida" | awk '{ printf "**Factura:%s**\n\n| Fecha factura: %s\n| Total: %s\n| Pagado: %s\n| Pendiente: %s\n\n\n",$1,$2,$4,$5,$6, $7 }'
+
+   SALIDA="Total pendiente: `ejecutarSQL \"$SQL_TOTAL\" '-N'`"
+   echo $SALIDA
+   echo
+
+   if [ "$per_informe_indice" == "SI" ] ; then
+      echo -e "${nivel_indice}\`Facturas pendientes en $proyecto\`_" >> $fich_indice   
+   fi
+   }
+
+## Listar tareas, se necesita pasar el id de las tareas como parámetros
+
+function listar_tareas() {
+
+   sql="
+      SELECT t.id, t.nombre, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, f.fechaPagado AS Pagado, f.id as Factura 
+      FROM tareas t LEFT JOIN estados e ON t.idEstado=e.id 
+      LEFT JOIN facturas f ON f.id=t.idFactura
+      WHERE t.id in (`echo $* | tr ' ' ,`)
+      ORDER BY t.id desc 
+   "
+
+   ejecutarMysql2rst "$sql"
+
+   }
+
+## Actualizar total de factura
+
+function actualizarTotalFactura() {
+
+   if [ "$1" == "" ] ; then 
+      echo "Error, necesito identificador de factura"
+      exit 1
+   fi
+
+   eval "$(totalesFactura $1)"
+   SQL="UPDATE facturas SET Total=$total WHERE id=$1"
+   ejecutarSQL "$SQL"
+   }
+
+## Listado de facturas y sus pagos
+
+function lista_facturas_pagos() {
+
+   sql="
+   SELECT f.id AS factura_id, f.comentario, 
+      f.fechaFactura, f.fechaPagado, f.Total,
+      pagado, fecha
+      FROM facturas f
+      LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id
+      WHERE idProyecto=$proyectoId"
+
+   echo                                                | tee -a $TMP
+   echo 'Listado de facturas y pagos'                  | tee -a $TMP
+   echo 'Listado de facturas y pagos' | sed 's/./-/g'  | tee -a $TMP
+   echo                                                | tee -a $TMP
+   ejecutarMysql2rst "$sql" | tee -a "$TMP"
+
+   sql="
+      SELECT f.id AS factura_id, f.comentario, 
+      f.fechaFactura, f.fechaPagado, f.Total,
+      sum(pagado) AS total_pagado
+      FROM facturas f
+      LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id
+      WHERE idProyecto=$proyectoId
+      GROUP BY f.id
+      "
+
+   echo                                                | tee -a $TMP
+   echo 'Totales pagado por factura'                   | tee -a $TMP
+   echo 'Totales pagado por factura'  | sed 's/./-/g'  | tee -a $TMP
+   echo                                                | tee -a $TMP
+   ejecutarMysql2rst "$sql" | tee -a "$TMP"
+
+   }
+
+# si se llama al script directamente
+
+if [ "`basename $BASH_SOURCE`" = "`basename $0`" ] ; then
+   
+   declare -a facturasIds
+   CONDICION=''
+
+   function encabezado() {
+
+      echo
+      echo 'MyFacturas'
+      echo
+
+      }
+
+   function ejecutarSQL() {
+
+      CMD="mysql --default-character-set=utf8 $2 -u$mt_usuario_mysql -p`contrasenya mysql` -e \"$1\" trabajos"
+      log "$FUNCNAME" "$SQL"
+      eval "$CMD"
+      if [ $? != 0 ] ; then
+         echo -e "$color_2 ERROR::$?::$CMD $color_0"
+         log "$FUNCNAME" "ERROR::$CMD"
+         log "SQL" "ERROR::$1"
+         exit 3
+      fi
+
+   }
+
+   function ejecutarMysql2rst() {
+
+      CMD="mysql2rst $2 -u$mt_usuario_mysql -p`contrasenya mysql` -e '$1' trabajos"
+      log "$FUNCNAME" "$1"
+      eval "$CMD"
+      if [ $? != 0 ] ; then
+         echo -e "$color_2 ERROR::$?::$CMD $color_0"
+         log "$FUNCNAME" "ERROR::$CMD"
+         log "SQL" "ERROR::$1"
+         return 1
+      fi
+
+   }
+
+   menConta=0;               ##< Numero de mensaje guardado
+
+   ## Función para manejar los mensajes que queremos mostrar
+   ## La idea es ir acumulando los mensajes hasta mostrarlos
+   ## y limpiarlos.
+   ##
+   ## Sin parametros añadimos nuevo mensaje que se acumula hasta pedirlos
+   ##
+   ## $1 -log Mensajes a log
+   ## $1 -get Mensajes a caja
+
+   function mensajes() {
+
+      case "$1" in
+
+         -log)
+         # Enviamos mensajes a log y ponemos a cero
+            if [  $menConta -lt 1 ] ; then return 1 ; fi
+            FIN=$((${#MEN[*]}-1))
+            for x in `seq 0 $FIN` ; do
+               if [ $x = $FIN ] ; then
+                  log "$FUNCNAME" "${MEN[$x]}"
+               fi
+            done
+            MEN=()
+            menConta=0
+            ;;
+         -crudo)
+            # imprimimos mensaje y ponemos a cero
+            if [  $menConta -lt 1 ] ; then return 1 ; fi
+            FIN=$((${#MEN[*]}-1))
+            for x in `seq 0 $FIN` ; do
+               echo "- ${MEN[$x]}"
+            done
+            MEN=()
+            ;;
+         -get)
+            # imprimimos mensaje y ponemos a cero
+            if [  $menConta -lt 1 ] ; then return 1 ; fi
+            FIN=$((${#MEN[*]}-1))
+            #echo -n $linea
+            #echo -n ' ESTADO: '
+            SALIDA=''
+            for x in `seq 0 $FIN` ; do
+               if [ $x = $FIN ] ; then
+                  #tput bold ; echo -n "${MEN[$x]} " ; tput sgr0
+                  SALIDA="$SALIDA ${MEN[$x]}"
+               else
+                  #tput bold ; echo -n "${MEN[$x]} " ; tput sgr0
+                  #echo -n "${MEN[$x]} | "
+                  SALIDA="$SALIDA ${MEN[$x]} |"
+               fi
+            done
+            caja "$SALIDA" 'Mensajes' $colAviso 0
+            #echo 
+            MEN=()
+            menConta=0
+            ;;
+         *)
+            # Recibimos un nuevo mensaje y lo añadimos a la pila
+            # Por defecto ingresamos nuevo mensaje a la pila
+            MEN[$menConta]="$1"
+            let menConta++
+            # Enviamos mensaje a log
+            log "$FUNCNAME" "$1"
+            [[ $consulta != 0 ]] && echo "$1"
+            ;;
+      esac
+   }
+
+   ## @brief Enviar mensaje de log a fichero
+   ##
+   ## Generamos registro del programa.
+   ##
+   ## $1 Función de la que viene
+   ## $2 Texto
+
+   function log() {
+
+      local archivo_log="${DIR_TMP}${proyecto:-registro}.log"
+
+      echo Archivo log: $archivo_log
+
+      echo "` date +'%Y-%m-%d %H:%M'` $1 :: $2" >> $archivo_log
+
+   }
+
+   [[ -e ~/.libashrc ]] && source ~/.libashrc         # Buscamos configuración personal sobre libash
+
+   # Si es un enlace hay que buscar el directorio de programas sobre al que apunta
+   if [ -L "$0" ] ; then
+      DIR_PROGRAMAS=$(dirname "`readlink $0`")
+   else
+      DIR_PROGRAMAS=$(dirname "$0")
+   fi
+
+   LIBS='pantalla mysql2rst general'  # Librerías a cargar
+
+   for LIB in $LIBS ; do
+      DIR_LIB="${DIR_PROGRAMAS}/../../libash/"
+      LIBRERIA="${DIR_LIB}$LIB"
+      log "INICIO" "Librería insertada: $LIBRERIA"
+      if [ -e "$LIBRERIA" ] ; then
+         source "$LIBRERIA"
+         if [ $? != 0 ] ; then
+            echo "ERROR::Insertando librería $LIBRERIA"
+            exit
+         fi
+      else
+         echo "Falta la librería $LIBRERIA de libash o no se encuentra"
+         exit
+      fi
+   done
+
+   ## Pedir la pulsación de una tecla para continuar
+
+   function tecla() {
+
+      echo -e "\n\n"
+      echo " +--------------------------------+"
+      echo " | Presione una tecla para seguir |"
+      echo " +--------------------------------+"
+      read -n 1
+
+   }
+
+   ## Archivo de informe en rst
+   TMP=${TMP:-${DIR_TMP}magfacturacion.rst}
+
+   menuFacturacion
+
+fi
+

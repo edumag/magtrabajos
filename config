@@ -1,0 +1,80 @@
+## @file config
+## @brief Configuración básica para cualquier script que estemos utilizando
+##
+## Añadir con source a cualquier script que se utilice, nos automatiza:
+##
+## - Tener disponible las variables:
+##   
+##   + DIR_MAGTRABAJOS: Directorio de magtrabajos
+##   + DIR_TMP: Directorio temporal
+##   + parte_dir: Contenido de la dirección que debemos sustituir por localhost
+##                si queremos tener la url local.
+##   + DIR_PROGRAMA: Directorio del script actual
+##   + PROGRAMA: Nombre del acript actual.
+##
+## - Añadir librerías de libash
+##   Por defecto nos añade la general, pero podemos antes de llamarlo indicar más 
+##   librerias a incluir mediante LIBS="pantalla configuracion" por ejemplo.
+##
+## - Si estamos en un componente o pluging buscara su configuración por defecto en
+##   su directorio y la del usuarios si la hay.
+##
+## @todo Aplicar este sistema a todos los sripts de magtrabajos
+
+# Creamos directorio temporal
+[[ -d '/tmp/magtrabajos' ]] && cambiar_permisos=0 || cambiar_permisos=1
+DIR_TMP="/tmp/magtrabajos/$USER/"
+[[ -d "$DIR_TMP" ]] || mkdir -p "$DIR_TMP"
+# Añadir permisos para que cualquier usuario pueda crear su carpeta dentro de magtrabajos
+[[ $cambiar_permisos == 1 ]] && chmod go+rwx "/tmp/magtrabajos"
+
+## Para construir la url del servidor local donde se genera la documentación 
+## cambiamos la parte del directorio correspondiente por localhost/
+parte_dir='/home/eduardo/SERVIDOR'
+
+## Directorio de magtrabajos
+DIR_MAGTRABAJOS=$(dirname "$BASH_SOURCE")
+
+# Si es un enlace hay que buscar el directorio de programas sobre al que apunta
+if [ -L "$0" ] ; then
+   DIR_PROGRAMA=$(dirname "`readlink $0`")  ##< Directorio del script actual
+   PROGRAMA=$(basename "`readlink $0`")     ##< Nombre del script actual
+else
+   DIR_PROGRAMA=$(dirname "$0")
+   PROGRAMA=$(basename "$0")
+fi
+
+# Añadimos configuración por defecto
+
+[[ -e ~/.libashrc ]] && source ~/.libashrc         # Buscamos configuración personal sobre libash
+
+source $HOME/.magtrabajos/configuracion/magtrabajos
+
+confxdefecto="${0}.conf"
+[[ -e "$confxdefecto" ]] && source "$confxdefecto"
+
+# Configuración usuario
+CONF=$HOME/.magtranajos/configuracion/$PROGRAMA
+[[ -e "$CONF" ]] && source "$CONF"
+
+# Añadimos librerías necesarias
+
+LIBS="general $LIBS"  # Librerías a cargar
+DIR_LIB="${DIR_MAGTRABAJOS}/componentes/libash/"
+
+for LIB in $LIBS ; do
+   LIBRERIA="${DIR_LIB}$LIB"
+   if [ -e "$LIBRERIA" ] ; then
+      source "$LIBRERIA"
+      if [ $? != 0 ] ; then
+         echo "ERROR::Insertando librería $LIBRERIA"
+         exit
+      fi
+   else
+      echo "Falta la librería $LIBRERIA de libash o no se encuentra"
+      exit
+   fi
+   log "INICIO" "Librería insertada: $LIBRERIA"
+done
+
+

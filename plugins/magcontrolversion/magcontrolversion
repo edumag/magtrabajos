@@ -1,0 +1,483 @@
+#!/bin/bash
+
+## @file magcontrolversion
+## @brief manejando control de versiones
+##
+##  'uso: magcontrolversion [opción] [Archivos o directorios afectados]'
+## 
+##  Opciones:
+## 
+##    commit    Hacer commit sobre archivos afectados
+##    todo      Hacer commit sobre todos los archivos
+##    update    Actualizamos
+##    status    Ver estado actual
+##    menu      Presentamos menú
+##    borrar    Borramos archivo, necesitamos archivos como parámetros
+##    mover     Mover archivo, necesitamos archivos como parámetros. [origen] [destino]
+##    nuevos    Añadir archivos recientemente creados a control de versiones
+##    quitar    Eliminar de control de versiones los archivos que han sido borrados localmente
+##    help      Pantalla de ayuda
+## 
+## Dependencias: gawk, subversion
+##
+## @todo Comprobar permisos de escritura para ahorrarnos problemas
+## @todo Al ejecutar subversión permitir editar la descripción
+##
+## @author   Eduardo Magrané
+## @internal
+##       web  http://www.mamedu.com
+##
+##      mail  eduardo.mamedu.com
+##
+##   Created  13/03/11
+##
+##  Revision  SVN $Id: $
+##
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+texto=''                 ##< Texto a introducir en magcontrolversion
+archivos_afectados=''    ##< Archivos sobre los que hacer el commit
+movimiento=''            ##< Identificador de movimiento
+motor=''                 ##< Soportados subversion y git
+rama_actual=''           ##< Rama actual
+
+function aviso() { echo "[[ $1 ]]"; echo ;}
+
+## Recoger configuración de magtrabajos
+source "`dirname "$BASH_SOURCE"`/../../config"
+
+if [ -e '.svn' ] ; then
+   motor='svn'
+elif [ -e '.git' ] ; then
+   motor='git' 
+else
+   echo 
+   echo El directorio actual no está bajo control de versiones.
+   echo
+   echo ¿Quieres iniciarlo?
+   echo
+   echo 'Definir motor para control de versiones'
+   echo 
+   echo 1 - git
+   echo 2 - subversion
+   echo 0 - salir
+   echo
+   read OPCION
+   case $OPCION in
+      1) motor=git;;
+      2) motor=svn;;
+      *) exit ;;
+   esac
+   fichero_de_motor="`dirname $BASH_SOURCE`/motores/mag$motor"
+   source "$fichero_de_motor"
+   ${motor}_magcontrolversion_iniciar
+fi
+
+fichero_de_motor="`dirname $BASH_SOURCE`/motores/mag$motor"
+
+[[ "$DEBUG" = "SI" ]] && echo $fichero_de_motor
+source "$fichero_de_motor"
+
+rama_actual="$(${motor}_magcontrolversion_rama_actual)"
+
+function _subversion() {
+
+   while [ "$1" != "" ] ; do
+
+      case $1 in
+
+         mostrar_seleccionados)
+            shift 1
+            if [ "$archivos_afectados" != "" ] ; then
+               echo
+               echo Archivos seleccionados
+               echo ----------------------
+               echo
+               for a in $archivos_afectados ; do
+                  func="${motor}_magcontrolversion_status $a"
+                  salida=`eval "$func"`
+                  if [ "$salida" == "" ] ; then
+                     echo "$a [sin cambios]"
+                  else
+                     echo -e "$salida"
+                  fi
+               done
+               echo
+            else
+               aviso "No hay archivos seleccionad"
+            fi
+            tecla
+            ;;
+         help|-h|--help|-help)
+            echo
+            local mostrar=false
+            while read linea ; do 
+               if [ "$(echo $linea | grep '@todo')" != "" ] ; then
+                  return
+               fi
+               if [ "$mostrar" = "true" ] ; then
+                  if [ "$(echo $linea | grep 'pre>')" != "" ] ; then
+                     echo
+                  else
+                     echo -e "$linea" | sed 's/##//'
+                  fi
+               else
+                  if [ "$(echo $linea | grep '@file')" != "" ] ; then
+                     mostrar=true
+                  fi
+               fi
+            done < $BASH_SOURCE
+            echo
+            exit
+            ;;
+
+         mov)
+            movimiento=$2
+            shift 2
+            ;;
+
+         ramas)
+            # Menú para las ramificaciones
+            echo '+----------------+'
+            echo '| Ramificaciones |'
+            echo '+----------------+'
+            echo
+            echo "Rama actual: $(${motor}_magcontrolversion_rama_actual)"
+            echo
+            echo ' [L]istar / Seleccionar            '
+            echo ' [F]usionar una rama con la actual '
+            echo ' [N]ueva                           '
+            echo ' [B]orrar                          '
+            echo
+            read -n 1 -s -p ' ' OPCION
+
+            case $OPCION in
+
+               l|L) 
+                  echo 
+                  echo Seleccionar rama
+                  echo
+                  DIFS="$IFS" ; IFS=$'\n'
+                  OPCIONES=$(${motor}_magcontrolversion_listar_ramas)
+                  select opt in $OPCIONES; do
+                     if [ "$opt" != "" ]; then
+                        ${motor}_magcontrolversion_cambia_rama "$opt"
+                     fi
+                     break
+                  done
+                  IFS="$DIFS"
+                  ;;
+               n|N) 
+                  echo
+                  read -p 'Nombre para la nueva rama: ' rama 
+                  if [ "$rama" != "" ] ; then
+                     ${motor}_magcontrolversion_rama_nueva "$rama"
+                     ${motor}_magcontrolversion_cambia_rama "$rama"
+                  fi
+                  ;;
+               f|F)
+                  echo
+                  echo Fusionar una rama con la actual
+                  echo
+                  echo Selecciona una rama para la fusión
+                  echo
+                  OPCIONES=$(${motor}_magcontrolversion_listar_ramas)
+                  DIFS="$IFS" ; IFS=$'\n'
+                  select opt in $OPCIONES; do
+                     if [ "$opt" != "" ]; then
+                        ${motor}_magcontrolversion_merge "$opt"
+                     fi
+                     break
+                  done
+                  IFS="$DIFS"
+                  tecla
+                  ;;
+               b|B)
+                  echo
+                  echo Borrar una rama
+                  echo
+                  OPCIONES=$(${motor}_magcontrolversion_listar_ramas)
+                  DIFS="$IFS" ; IFS=$'\n'
+                  select opt in $OPCIONES; do
+                     if [ "$opt" != "" ]; then
+                        ${motor}_magcontrolversion_borrar_rama "$opt"
+                     fi
+                     break
+                  done
+                  IFS="$DIFS"
+                  tecla
+                  ;;
+               *) return ;;
+
+            esac
+            _subversion menu
+            ;;
+
+         modificados2movimiento)
+            
+            shift 1
+
+            # Añadir archivos con modificaciones a movimiento actual
+                  
+            if [ "$movimiento" == "" ] ; then
+               cmd="magtrabajos -ta -a "
+            else
+               cmd="magtrabajos -m $movimiento -a "
+            fi
+
+            local parametros=''
+
+            func="${motor}_magcontrolversion_lista_modificados"
+            parametros=`eval "$func"`
+            for file in $parametros ; do echo "- $file"; done
+
+            echo
+            read -n 1 -s -p 'Añadir (s/n): ' OPCION
+            if [ "$OPCION" = 's' ] ; then
+               echo
+               echo
+               cmd="$cmd $parametros" ; echo $cmd ; echo ; eval $cmd
+               [[ $? = 0 ]] || mensajes "Error al lanzar comando"
+            else
+               echo "Cancelado añadir archivos"
+            fi 
+            ;;
+
+         quitar)
+            shift 1
+            ## Quitamos de magcontrolversion los archivos que han sido borrados ya en local
+            cmd="${motor}_magcontrolversion_del "
+
+            func="${motor}_magcontrolversion_lista_eliminados"
+            parametros=`eval "$func"`
+            for file in $parametros ; do echo "- $file"; cmd="$cmd $file" ; done
+
+            if [ "$file" != "" ] ; then 
+               echo
+               echo $cmd
+               echo
+               read -n 1 -s -p 'Borrar (s/n): ' OPCION
+               if [ "$OPCION" = 's' ] ; then
+                  eval $cmd
+                  [[ $? = 0 ]] || aviso "Error al lanzar comando"
+               else
+                  aviso "Cancelado borrar archivos"
+               fi
+            else
+               aviso 'No hay archivos borrados' ; tecla
+            fi
+            ;;
+
+         nuevos)
+            shift 1
+            cmd="${motor}_magcontrolversion_add "
+
+            func="${motor}_magcontrolversion_lista_nuevos"
+            parametros=`eval "$func"`
+            for file in $parametros ; do echo "- $file"; cmd="$cmd $file" ; done
+
+            if [ "$file" != "" ] ; then
+               echo
+               echo $cmd
+               echo
+               read -n 1 -s -p 'Añadir (s/n): ' OPCION
+               if [ "$OPCION" = 's' ] ; then
+                  eval $cmd
+                  [[ $? = 0 ]] || aviso "Error al lanzar comando"
+               else
+                  aviso "Cancelado añadir nuevos archivos"
+               fi
+            else
+               aviso "Sin archivos nuevos"
+               tecla
+
+            fi
+            ;;
+
+         mover)
+            ## Movemos archivo
+            shift 1
+            if [ "$1" != "" ] ; then
+               origen="$1"
+            else
+               aviso 'Faltan parámetros'
+               exit 1
+            fi
+            shift 1
+            if [ "$1" != "" ] ; then
+               destino="$1"
+            else
+               aviso 'Faltan parámetros'
+               exit 1
+            fi
+            func="${motor}_magcontrolversion_mover '$origen' '$destino'" ; eval "$func"
+            if [ "$?" != "1" ] ;then
+               # generamos comiit para que se refleje el camio en local
+               func="${motor}_magcontrolversion_commit -m 'Movido a $destino' '$origen' "
+               eval "$func"
+               #svn ci $origen -m "Movido a $destino"
+            fi
+            ;;
+         borrar)
+            ## Borramos archivos
+            shift 1
+            [[ "$archivos_afectados" == "" ]] && archivos_afectados=$(echo "$*")
+            if [ "$archivos_afectados" != "" ] ; then
+               echo
+               echo Archivos a borrar
+               echo
+               for a in $archivos_afectados ; do
+                  echo - "$a"
+               done
+               read -p 'Borrar archivos (s/n): ' OPCION
+               [[ "$OPCION" != 's' ]] && exit 
+               func="${motor}_magcontrolversion_del $archivos_afectados" ; eval "$func"
+            else
+               aviso 'Necesito archivos como parámetros para realizar el borrado'
+            fi
+            ;;
+         update) 
+            shift 1
+            echo 'Actualizado código con magcontrolversion...'
+            func="${motor}_magcontrolversion_update" ; eval "$func"
+            ;;
+
+         status)
+            shift 1
+            if [ "$motor" = "" ] ; then
+               echo 'El directorio no esta bajo control de versiones'
+               exit 1
+            fi
+            func="${motor}_magcontrolversion_status"
+            salida=$(eval $func)
+            if [ "$salida" != "" ] ; then
+               echo -e "$salida"
+            fi
+            echo
+            ;;
+
+         commit) # commit
+
+            shift 1
+
+            if [ "$texto" != "" ] ; then
+               func="${motor}_magcontrolversion_commit $texto $archivos_afectados"
+            else
+               func="${motor}_magcontrolversion_commit $archivos_afectados"
+            fi
+
+            echo "$func"
+            eval "$func"
+            ;;
+
+         texto)
+            # Puede ser un texto o un archivo que con él
+            if [ -e "$2" ] ; then 
+               texto="-F '$2'"
+            else
+               texto="-m '$2'"
+            fi
+            shift 2
+            ;;
+
+         todo)
+            shift 1
+            if [ "$texto" == "" ] ; then
+               func="${motor}_magcontrolversion_commit todo "
+            else
+               func="${motor}_magcontrolversion_commit todo $texto"
+            fi
+            eval "$func"
+            ;;
+
+         editar)
+            shift 1
+            if [ "$texto" != "" ] ; then
+               marca=$(echo $texto | cut -d' ' -f 1)
+               texto_tmp=$(echo $texto | cut -d' ' -f 2)
+               if [ "$marca" = '-F' ] ; then 
+                  eval "vim $texto_tmp"
+               else
+                  echo -e "$texto_tmp" > ${DIR_TMP}magcontrolversion_texto
+                  texto='-F ${DIR_TMP}magcontrolversion_texto'
+                  eval "vim $texto"
+               fi
+            else
+               echo
+               echo 'No hay texto para editar'
+               echo
+               tecla
+            fi
+            ;;
+
+         menu)
+
+            shift 1
+
+            rama_actual="$(${motor}_magcontrolversion_rama_actual)"
+
+            [[ "$archivos_afectados" == "" ]] && archivos_afectados=$(echo "$*")
+
+            clear
+
+            func="${motor}_magcontrolversion_status "
+            local modificaciones=`eval $func | wc -l`
+            local salida="$proyecto $motor / $rama_actual "
+            if [ "$modificaciones" != 0 ] ; then
+               salida="$salida / Cambios [$modificaciones]"
+            else
+               salida="$salida / Sin cambios"
+            fi
+
+            caja "$salida" "Control de versiones" 
+
+            abre_caja
+            linea_caja "M[o]strar archivos seleccionados" "Ver/[E]ditar texto"
+            linea_caja '[U]pdate con servidor' '[C]ommit sobre archivos seleccionados'
+            linea_caja 'Subir [t]odos los cambios' '[S]tatus'
+            linea_caja '[L]og Ver registros' '[N]uevos archivos a control de versiones'
+            linea_caja '[Q]uitar archivos de CV ya eliminados' '[M]odificaciones a movimiento actual'
+            linea_caja '[R]amificaciones'
+            cierra_caja
+            ${motor}_magcontrolversion_menu
+            abre_caja
+            linea_caja '[B]ash' '[X] Cancelar'
+            cierra_caja
+
+            read -n 1 -s -p ' ' OPCION
+
+            case $OPCION in
+
+               n|N) _subversion nuevos ; _subversion menu ;;
+               q|Q) _subversion quitar ; _subversion menu ;;
+               u|U) _subversion update ; _subversion menu ;;
+               c|C) _subversion commit ; _subversion menu ;;
+               s|S) _subversion status ; tecla ; _subversion menu ;;
+               l|L) ${motor}_magcontrolversion_log log | less ; _subversion menu ;;
+               t|T) _subversion todo ; _subversion menu ;;
+               o|O) _subversion mostrar_seleccionados ; _subversion menu ;;
+               e|E) _subversion editar ; _subversion menu ;;
+               m|M) _subversion modificados2movimiento ; _subversion menu ;;
+               r|R) _subversion ramas ; _subversion menu ;;
+               b|B) bash ; _subversion menu;;
+               x) exit 1 ;;
+               *) ${motor}_magcontrolversion_acciones_menu $OPCION ; _subversion menu  ;;
+
+            esac
+            ;;
+
+         *) # Lista de archivos afectados
+            archivos_afectados=$(echo "$*")
+            ;;
+
+      esac
+
+   done
+
+   }
+
+_subversion $*
+

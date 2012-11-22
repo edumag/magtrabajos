@@ -1,0 +1,635 @@
+#!/bin/bash
+
+## @file maginformes
+## @brief  Informes para magTrabajos
+##
+## Administrar los diferentes perfiles de informes disponibles.
+## Presentar todas las posibilidades, y permitir configurarlas
+##
+## @todo maginformes independiente
+## @todo Al modificar un informe guardar en carpeta de perfiles de usuario
+## @todo Mirar primero si el perfil seleccionado esta en zona de usuario
+## @todo La lista de @todos con - al inicio
+
+# Informe por defecto
+
+perfil_actual='default'                                                       ##< Perfil por defecto
+perfil_actual_fich=''                                                         ##< Fichero con el perfil actual
+dir_perfiles="`dirname "$BASH_SOURCE"`/perfiles"                              ##< Directorio de perfiles predifinidos
+dir_perfiles_usuario="$HOME/.magtrabajos/perfiles"                            ##< Directorio de perfiles de usuario
+dir_perfiles_proyecto="$HOME/.magtrabajos/proyectos/$proyecto/perfiles"       ##< Directorio de perfiles de proyecto
+
+## @name Perfil por defecto
+##
+## Perfil por defecto y sus descripciones
+## @{
+
+## @var per_informe_titulo
+## Título del informe un SI hará que añadamos "proyecto / tarea / movimiento" otra cosa será el mismo titulo a poner
+
+per_informe_titulo=NO
+
+## @var per_informe_indice
+## Presentar indice al inicio del documento (SI/NO)
+
+per_informe_indice=NO
+
+## @var per_informe_enlaces
+## Añadir enlaces en los informes para lanzar magtrabajos desde navegador (SI/NO)
+
+per_informe_enlaces=NO
+
+## @var per_informe_formato_enlaces
+## Enlace a generar para editar TODOs, (fichero, Num de linea)
+
+per_informe_formato_enlaces='vim://%s@%s'
+
+## @var per_informe_incluir_readme.dox
+## Incluir dentro de la documentación el contenido de los archivos readme.dox de la lista de archivos afectados. (SI/NO)
+
+per_informe_incluir_readme=SI
+
+## @var per_proyecto_contabilidad
+## Información contable sobre proyecto
+
+per_proyecto_contabilidad=SI
+
+## @var per_proyecto_cabecera
+## Información sobre proyecto puede ser -nombre o -completo para mostrar más información
+
+per_proyecto_cabecera=SI
+
+## @var per_proyecto_notas
+## Mostra archivo con las notas del proyecto
+
+per_proyecto_notas=SI
+
+## @var per_proyecto_control_versiones
+## Mostrar estado de control de versiones
+
+per_proyecto_control_versiones=SI
+
+## @var per_proyecto_pendiente_codigo
+## Mostrar lineas con etiqueta \todo y \bug en código, puede resultar muy lento, pero podemos configurar carpetas
+## que queremos descartar del proyecto a la hora de hacer busquedas en buscar_codigo
+
+per_proyecto_pendiente_codigo=SI
+
+## @var per_proyecto_tareas_pendientes
+## Mostrar tareas pendientes en proyecto
+
+per_proyecto_tareas_pendientes=SI
+
+## @var per_tarea_cabecera
+##
+## - completa: Con estado, total, fechas y descripción
+## - rst: Titulo rst y descripción   
+## - txt: Titulo y descripción
+
+per_tarea_cabecera=completa
+
+## @var per_tarea_futurible
+## Presentar futuribles de tarea(SI/NO)
+
+per_tarea_futurible=SI
+
+## @var per_tarea_arch_afectados
+## Archivos afectados de tarea (SI/NO)
+
+per_tarea_arch_afectados=SI
+
+## @var per_tarea_literales_pendientes
+## Literales pendientes de tarea (SI/NO)
+
+per_tarea_literales_pendientes=SI
+
+## @var per_tarea_TODOs
+## Lista de cosas pendientes en el código en los archivos afectados de tarea "@todo" (SI/NO)
+
+per_tarea_TODOs=SI
+
+## @var per_tarea_contabilidad
+## Numeros contables de tarea (SI/NO)
+
+per_tarea_contabilidad=SI
+
+## @var per_tarea_recursiva
+## Recursividad, en caso de estar en una tarea, mirar también en sus movimientos
+
+per_tarea_recursiva=SI
+
+## @var per_movimiento_cabecera
+##
+## - completa
+## - rst
+## - txt
+
+per_movimiento_cabecera=completa
+
+## @var per_movimiento_arch_afectados
+## Archivos afectados de movimiento (SI/NO)
+
+per_movimiento_arch_afectados=SI
+
+## @var per_movimiento_literales_pendientes
+## Literales pendientes de movimiento (SI/NO)
+
+per_movimiento_literales_pendientes=SI
+
+## @var per_movimiento_contabilidad
+## Numeros contables de movimiento (SI/NO)
+
+per_movimiento_contabilidad=SI
+
+## @var per_movimiento_TODOs
+## Lista de cosas pendientes en el código en los archivos afectados de movimiento "@todo" (SI/NO)
+
+per_movimiento_TODOs=NO
+
+## @var per_pie_totales
+## Totales general (SI/NO)
+
+per_pie_totales=SI
+
+## @var per_pie_codigo_magtrabajos
+## Añadir código con el numero de proyecto, tarea y movimiento al que pertenece el informe
+
+per_pie_codigo_magtrabajos=NO
+
+## @}
+
+## Mostrar lista de informes posibles
+
+function lista_informes() {
+
+   dir_perfiles_proyecto="$HOME/.magtrabajos/proyectos/$proyecto/perfiles"
+
+   if [ $consulta == 1 ] ; then
+      (if [ "`ls $dir_perfiles`" != "" ] ; then
+         for informe in "$dir_perfiles/"* ; do 
+            echo `basename $informe`
+         done
+      fi
+      if [ "`ls $dir_perfiles_usuario`" != "" ] ; then
+         for informe in "$dir_perfiles_usuario/"* ; do 
+            echo `basename $informe`
+         done
+      fi
+      if [ "$proyecto" != "" ] && [ -d "$dir_perfiles_proyecto" ] ; then
+         if [ "`ls $dir_perfiles_proyecto`" != "" ] ; then
+            for informe in "$dir_perfiles_proyecto/"* ; do 
+               echo `basename $informe`
+            done
+         fi
+      fi
+         ) | uniq
+   else
+      echo -e "\nSistema\n--------"
+      for informe in "$dir_perfiles/"* ; do 
+         echo - `basename $informe`
+      done
+      if [ "`ls $dir_perfiles_usuario`" != "" ] ; then
+      echo -e "\nUsuario\n--------"
+         for informe in "$dir_perfiles_usuario/"* ; do 
+            echo - `basename $informe`
+         done
+      fi
+      if [ "$proyecto" != "" ] && [ -d "$dir_perfiles_proyecto" ] ; then
+         if [ "`ls $dir_perfiles_proyecto`" != "" ] ; then
+            echo -e "\n$proyecto\n--------"
+            for informe in "$dir_perfiles_proyecto/"* ; do 
+               echo - `basename $informe`
+            done
+         fi
+      fi
+   fi
+   }
+
+## Definir el perfil actual
+
+function definir_perfil_actual() {
+
+   dir_perfiles_proyecto="$HOME/.magtrabajos/proyectos/$proyecto/perfiles"
+
+   ## Recoger la información del perfil actual.
+   perfil_actual=${perfil_actual:default}
+
+   ## Definir el fichero de perfil que debe cargarse
+   perfil_actual_fich="$dir_perfiles"
+
+   if [ "$proyecto" != "" ] && [ -e "$dir_perfiles_proyecto/$perfil_actual" ] ; then
+
+      perfil_actual_fich="$dir_perfiles_proyecto/$perfil_actual"
+
+   elif [ -e "$dir_perfiles_usuario/$perfil_actual" ] ; then
+
+      perfil_actual_fich="$dir_perfiles_usuario/$perfil_actual"
+
+   elif [ -e "$dir_perfiles/$perfil_actual" ] ; then
+
+      perfil_actual_fich="$dir_perfiles/$perfil_actual"
+
+   else
+
+      echo 'Error: No se pudo encontrar archivo con perfil definido'
+      echo "Perfil: $perfil_actual"
+      echo
+      echo "Se tendría que definir un nuevo informe con el nombre del perfil"
+      echo
+      exit 1
+
+   fi
+
+   # Si ya tenemos un perfil por defecto definido lo insertamos
+   [[ -e "$perfil_actual_fich" ]] && source "$perfil_actual_fich"
+
+   }
+
+## Menú de informes
+
+function menuInformes(){
+
+   log $FUNCNAME "$*"
+
+   OPCION=${1:-menu}
+
+   case $OPCION in
+
+      menu)
+         clear
+         encabezado
+         # Informes generales
+         caja '[C]ontrol del trabajo realizado entre fechas' 'Informes generales'
+         caja 'Generar [I]nforme | [A]brir | [G]uardar | G[u]ardar como | [E]ditar | [V]isualizar actual' 'Perfiles para informes'
+         echo -e " Perfil actual: ${color_1}$perfil_actual${color_0}"
+         echo
+         read -n 1 -s OPCION
+         echo
+         menuInformes $OPCION
+         ;;
+      l|L) # listado de perfiles
+         lista_informes
+         ;;
+      a|A) # Abrir perfil
+
+         [ -e ${DIR_TMP}listado ] && rm ${DIR_TMP}listado
+
+         if [ -e "$dir_perfiles_proyecto" ] ; then
+            for perfil in "$dir_perfiles_proyecto"/* ; do
+               if [ -e "$perfil" ] ; then
+                  echo -e "${perfil}\t`basename "$perfil"`" >> ${DIR_TMP}listado
+               fi
+            done
+         fi
+
+         if [ -e "$dir_perfiles_usuario" ] ; then
+            for perfil in "$dir_perfiles_usuario"/* ; do
+               if [ -e "$perfil" ] ; then
+                  echo -e "${perfil}\t`basename "$perfil"`" >> ${DIR_TMP}listado
+               fi
+            done
+         fi
+
+         for perfil in "$dir_perfiles"/* ; do
+            echo -e "${perfil}\t`basename "$perfil"`" >> ${DIR_TMP}listado
+         done
+
+         generar_listado_fichero --ocultar-ayuda -o
+
+         if [ "$resultado_listado" = '' ] ; then
+            mensajes 'Abrir perfil, cancelado'
+         else
+            perfil_actual_fich="$resultado_listado"
+            source $perfil_actual_fich
+            perfil_actual=`basename $perfil_actual_fich`
+            mensajes "Perfil $perfil_actual abierto"
+         fi
+         ;;
+      v|V) # ver perfil actual
+         echo "Visualizar perfil actual: $perfil_actual"
+         # for variable in ${!per_*} ; do
+         #    d="desc_$variable"
+         #    printf "\n%s: %s" "${!d}" "${!variable}"
+         # done
+         configuracion_ver per_ "$BASH_SOURCE"
+         echo
+         echo
+         read -n1 -s 
+         menuInformes
+         ;;
+      g|G) #Guardar
+         configuracion_guardar per_ "$perfil_actual_fich"
+         if [ $? = 0 ] ; then
+            mensajes "Archivo de perfil $perfil_actual guardado"
+         else
+            mensajes "Error al guardar $perfil_actual"
+         fi
+         ;;
+      u|U) #Guardar como
+         read -p "Nombre de perfil: " perfil_actual
+         perfil_actual_fich="$dir_perfiles_usuario"
+         # si no tenemos directorio de perfiles lo creamos
+         [[ -d "$perfil_actual_fich" ]] || mkdir "$perfil_actual_fich"
+         perfil_actual_fich=$perfil_actual_fich/$perfil_actual
+
+         configuracion_guardar per_ "$perfil_actual_fich"
+         if [ $? = 0 ] ; then
+            mensajes "Archivo de perfil $perfil_actual guardado"
+         else
+            mensajes "Error al guardar $perfil_actual"
+         fi
+         ;;
+      e|E) # editar
+         echo "Editar perfil: $perfil_actual"
+         configuracion_editar per_ "$BASH_SOURCE"
+         menuInformes
+         ;;
+      i|I) 
+
+         fich_indice=${TMP}_indice
+         fich_cabecera=${TMP}_cabecera
+         nivel_indice='* '
+
+         [[ -e "$TMP" ]] && rm "$TMP"
+         [[ -e "$fich_indice" ]] && rm "$fich_indice"
+         [[ -e "$fich_cabecera" ]] && rm "$fich_cabecera"
+
+         definir_perfil_actual
+
+         # Encabezado de documento
+         if [ "$per_informe_titulo" != "" ] && [ "$per_informe_titulo" != "NO" ] ; then 
+            if [ "$per_informe_titulo" != "SI" ] ; then
+               titulo="$per_informe_titulo"
+            else
+               if [ "$movimientoId" != "" ] ; then
+                  titulo="Informe sobre $movimiento"
+               elif [ "$tareaId" != "" ] ; then
+                  titulo="Informe sobre $tarea"
+               elif [ "$proyectoId" != "" ] ; then
+                  titulo="Informe sobre $proyecto"
+               else
+                  titulo=""
+               fi
+            fi
+            if [ "$titulo" != "" ] ; then
+               echo -e "$(echo -e $titulo | awk -v FS='\t' '{ titulo=$1 ; gsub(".","=",$1) ; printf "\n%s\n%s\n%s\n",$1,titulo,$1}')" | tee $fich_cabecera
+               echo "" | tee -a $fich_cabecera
+               echo ":fecha: `date +'%d de %B %Y'`" | tee -a $fich_cabecera
+               echo "" | tee -a $fich_cabecera
+            fi
+
+         fi
+
+         if [ "$per_informe_indice" == "SI" ] ; then
+            echo "Indice" > $fich_indice
+            echo "======" >> $fich_indice
+            echo >> $fich_indice
+         fi
+
+         [[ -n $DEV ]] && echo "Proyecto: $proyecto"                       # DEV
+         [[ -n $DEV ]] && echo "Perfil: $perfil_actual"                    # DEV
+         [[ -n $DEV ]] && echo "fichero de perfil: $perfil_actual_fich"    # DEV
+
+         # Estamos en movimiento
+
+         if [ "$movimientoId" != "" ] ; then
+            
+            presentarCabeceraMovimiento $per_movimiento_cabecera
+
+            [[ "$per_incluir_readme" == "SI"  ]] && presentarReadme -m
+            [[ "$per_tarea_literales_pendientes" == 'SI' ]] &&  presentarLiterales -m
+            [[ "$per_tarea_arch_afectados" == 'SI' ]] && presentarArchivosAfectados -m
+            [[ "$per_tarea_TODOs" == 'SI' ]] && presentarTODOs -m $movimientoId
+            [[ "$per_tarea_contabilidad" == 'SI' ]] && presentarTotalMovimiento
+
+         # Estamos en tarea
+
+         elif [ "$tareaId" != "" ] ; then
+
+            presentarCabeceraTarea $per_tarea_cabecera
+
+            nivel_indice='\t* '
+
+            [[ "$per_informe_incluir_readme" == "SI"  ]] && presentarReadme -t
+
+            # Acciones sobre sus movimientos si hay recursividad
+            if [ "$per_tarea_recursiva" != 'NO' ] ; then
+               movimientoAnterior=$movimientoId
+               CMD="$mt_comando_mysql \"SELECT m.id from movimientos m WHERE m.idTarea=$tareaId \""
+               movimientosIds="()"
+               movimientosIds=(`eval $CMD`)
+
+               if [ "${movimientosIds[*]}" != "" ] ; then
+
+                  nivel_indice='\t* '
+                  echo                                       | tee -a $TMP
+                  echo "Bitácoras de $tarea"                 | tee -a $TMP
+                  echo "Bitácoras de $tarea" | sed 's/./-/g' | tee -a $TMP
+                  echo                                       | tee -a $TMP
+                  if [ "$per_informe_indice" == "SI" ] ; then
+                     echo -e "${nivel_indice}\`Bitacoras de $tarea\`_" >> $fich_indice
+                  fi
+
+                  nivel_indice='\t\t+ '
+                  for movimientoId in ${movimientosIds[*]} ; do
+
+                     presentarCabeceraMovimiento $per_movimiento_cabecera
+                     [[ "$per_movimiento_contabilidad" == "SI" ]] && presentarTotalMovimiento
+                     movimientoId=""
+                  done
+                  nivel_indice='\t* '
+               fi
+               movimientoId=$movimientoAnterior
+            fi
+            [[ "$per_tarea_arch_afectados" != "NO" ]] && presentarArchivosAfectados -t
+            [[ "$per_tarea_literales_pendientes" != "NO" ]] && presentarLiterales -t
+            [[ "$per_tarea_TODOs" != "NO" ]] && presentarTODOs -t $tareaId
+            [[ "$per_tarea_contabilidad" != "NO" ]] && presentarTotalTarea -t
+
+         # Tareas varias seleccionadas
+
+         elif [ "$tareasIds" != "" ] ; then
+
+            for tareaId in ${tareasIds[*]} ; do
+               presentarCabeceraTarea $per_tarea_cabecera
+               [[ "$per_tarea_contabilidad" != "NO" ]] && presentarTotalTarea -t
+            done
+
+         # Estamos en proyecto
+
+         elif [ "$proyectoId" != "" ] ; then
+
+            nivel_indice='\t* '
+
+            # Informes sobre proyecto
+            [[ "$per_proyecto_cabecera" != "NO" ]] && presentarProyecto
+            [[ "$per_proyecto_contabilidad" != "NO" ]] && contabilidad_proyecto
+            [[ "$per_proyecto_notas" != "NO" ]] && presentarNotas
+            [[ "$per_proyecto_control_versiones" != "NO" ]] && estado_control_versiones
+            [[ "$per_proyecto_pendiente_codigo" != "NO" ]] && pendienteCodigo
+            [[ "$per_proyecto_tareas_pendientes" != "NO" ]] && tareas_pendientes
+            [[ "$per_proyecto_TODOs" == "SI" ]] && presentarTODOs
+            
+
+         # Sin proyecto definido
+
+         else
+
+            ## Mostramos solamente los proyectos en los que hemos trabajado
+            ## en los últimos tres meses y que estén activados
+
+            SQL="SELECT p.id from proyectos p
+                 LEFT JOIN tareas t ON t.idProyecto=p.id 
+                 LEFT JOIN movimientos m ON m.idTarea=t.id 
+                 LEFT JOIN tiempos ti    ON ti.idMovimiento=m.id 
+                 WHERE ti.fechaFinal >= (now() - INTERVAL 90 DAY)
+                 AND p.activado = 1
+                 GROUP BY p.id
+                 ORDER BY ti.fechaFinal desc
+                 "
+            echo $SQL # DEV
+
+            SALIDA=$(ejecutarSQL "$SQL" "-N")
+            for p in $SALIDA ; do
+               proyectoId=$p
+               definirProyecto -p $proyectoId
+               nivel_indice='* '
+               [[ "$per_proyecto_cabecera" != "NO" ]] && presentarProyecto
+               nivel_indice='\t* '
+               [[ "$per_proyecto_contabilidad" != "NO" ]] && contabilidad_proyecto
+               [[ "$per_proyecto_notas" != "NO" ]] && presentarNotas
+               [[ "$per_proyecto_control_versiones" != "NO" ]] && estado_control_versiones
+               [[ "$per_proyecto_pendiente_codigo" != "NO" ]] && pendienteCodigo
+               [[ "$per_proyecto_tareas_pendientes" != "NO" ]] && tareas_pendientes
+               [[ "$per_proyecto_TODOs" == "SI" ]] && presentarTODOs
+            done
+
+         fi
+
+         # Añadimos cabecera y si queremos indice lo añadimos al informe
+
+         [[ -e "${TMP}_old" ]] && rm "${TMP}_old"
+
+         if [ "$per_informe_indice" == "SI" ] && [ "$titulo" != "" ] ; then
+            [[ -e "$fich_cabecera" ]] && cat "$fich_cabecera" > "${TMP}_old"
+            [[ -e "$fich_indice" ]] && cat "$fich_indice" >> "${TMP}_old"
+            cat "$TMP" >> "${TMP}_old"
+            mv "${TMP}_old" "$TMP"
+         elif [ "$per_informe_indice" != "SI" ] && [ "$titulo" != "" ] ; then
+            [[ -e "$fich_cabecera" ]] && cat "$fich_cabecera" > "${TMP}_old"
+            cat "$TMP" >> "${TMP}_old"
+            mv "${TMP}_old" "$TMP"
+         elif [ "$per_informe_indice" != "SI" ] && [ "$titulo" == "" ] ; then
+            [[ -e "$fich_indice" ]] && cat "$fich_indice" > "${TMP}_old"
+            cat "$TMP" >> "${TMP}_old"
+            mv "${TMP}_old" "$TMP"
+         fi
+         ;;
+      c|C) # ver movimientos por fecha
+         ## @todo colocar todo esto en una función a parte
+         echo "Buscar movimientos entre fechas"
+
+         SEMANA=`date -d '17 days ago' "+%Y-%m-%d"`
+         read -p "Fecha Inicio: ($SEMANA): " FECHA_INICIO
+         FECHA_INICIO=${FECHA_INICIO:-$SEMANA}
+
+         read -p "Fecha Final: ($HOY): " FECHA_FINAL
+         FECHA_FINAL=${FECHA_FINAL:-$HOY}
+
+         echo "Fechas: $FECHA_INICIO - $FECHA_FINAL"
+
+         FECHA_INICIO="$FECHA_INICIO 00:00:00"
+         FECHA_FINAL="$FECHA_FINAL 23:59:59"
+
+         SUBSELECT="
+            SELECT p.nombre as Proyecto, LEFT(t.nombre,20) as Tarea, LEFT(m.nombre,15) as Mov, 
+            month(ti.fechaInicio) as mes, week(ti.fechaInicio) as sem,  
+            DATE_FORMAT(ti.fechaInicio, '%Y-%m-%d %W') as dia, 
+            FORMAT((IF (ti.fechaFinal!='0000-00-00 00:00:00',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now()))- 
+            UNIX_TIMESTAMP(ti.fechaInicio) ) / 60,0) as min,
+            t.euroshora as \\\`e/h\\\`,
+            IF (t.presupuesto>0, 
+               'P.', \
+               ROUND(
+                  t.euroshora * (((UNIX_TIMESTAMP(ti.fechaFinal)- UNIX_TIMESTAMP(ti.fechaInicio))/60)/60),
+                  2
+                  ) 
+               ) as euros
+            FROM tiempos ti, movimientos m, tareas t, proyectos p 
+            WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND p.id=t.idProyecto 
+            AND ( ti.fechaInicio >= '$FECHA_INICIO' AND ti.fechaFinal <= '$FECHA_FINAL' )
+            "
+         SQL="
+            SELECT Proyecto, Tarea, Mov, mes, sem, dia, CONCAT(FORMAT((sum(min)/60),0),':' , 
+            IF ( (sum(min)%60)<10,0,'' ) , FORMAT((sum(min)%60),0)  ) as tiempo,
+            SUM(euros) AS euros
+            FROM ($SUBSELECT) as sMinutos 
+            "
+
+         if [ -e $TMP ] ; then rm $TMP ; fi
+
+         echo "" | tee -a $TMP
+         echo "-----------------" | tee -a $TMP
+         echo "Todos los tiempos" | tee -a $TMP
+         echo "-----------------" | tee -a $TMP
+         echo "" | tee -a $TMP
+         ejecutarSQL "$SUBSELECT ORDER BY ti.fechaInicio " "-t" | tee -a $TMP
+
+         echo "" | tee -a $TMP
+         echo "------------------------------" | tee -a $TMP
+         echo "Agrupar por dias y movimientos" | tee -a $TMP
+         echo "------------------------------" | tee -a $TMP
+         echo "" | tee -a $TMP
+         GROUP="GROUP BY sMinutos.Mov, sMinutos.dia "
+         ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+
+         echo "" | tee -a $TMP
+         echo "------------------" | tee -a $TMP
+         echo "Agrupar por tareas" | tee -a $TMP
+         echo "------------------" | tee -a $TMP
+         echo "" | tee -a $TMP
+         SQL="
+            SELECT Proyecto, Tarea, CONCAT(FORMAT((sum(min)/60),0),':' ,   
+            IF ( (sum(min)%60)<10,0,'' ) , FORMAT((sum(min)%60),0)  ) as tiempo,
+            SUM(euros) AS euros
+            FROM ($SUBSELECT) as sMinutos 
+            "
+         GROUP="GROUP BY sMinutos.Tarea "
+         ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+
+         echo "" | tee -a $TMP
+         echo "----------------" | tee -a $TMP
+         echo "Agrupar por Dias" | tee -a $TMP
+         echo "----------------" | tee -a $TMP
+         echo "" | tee -a $TMP
+         SQL="
+            SELECT dia, CONCAT(FORMAT((sum(min)/60),0),':' , 
+            IF ( (sum(min)%60)<10,0,'' ) , FORMAT((sum(min)%60),0)  ) as tiempo,
+            SUM(euros) AS euros
+            FROM ($SUBSELECT) as sMinutos 
+            "
+         GROUP="GROUP BY sMinutos.dia ORDER BY sMinutos.dia "
+         ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+
+         echo "" | tee -a $TMP
+         echo "-------------------" | tee -a $TMP
+         echo "Agrupar por Semanas" | tee -a $TMP
+         echo "-------------------" | tee -a $TMP
+         echo "" | tee -a $TMP
+         GROUP="GROUP BY sMinutos.sem "
+         ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+
+
+         read -p "(ENTER) SALE"
+         ;;
+      *)
+         return
+         ;;
+
+   esac
+
+
+   }
+
+definir_perfil_actual
+

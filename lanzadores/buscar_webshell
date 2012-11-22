@@ -1,0 +1,15 @@
+#!/bin/bash
+
+## @file buscar_webshell
+##
+## @brief buscamos webshell en el código
+##
+## Se puede pasar extensión de archivos a buscar, sino 
+## buscamos en todos.
+
+if [ "$1" != "" ] ; then
+   find -name '*'.$1  -type f -print0  | xargs -0 egrep -R 'c99|r57' | cut -d: -f1
+else
+   egrep -R 'c99|r57' * | cut -d: -f1
+fi
+

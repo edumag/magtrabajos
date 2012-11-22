@@ -1,0 +1,248 @@
+#!/bin/bash 
+
+## @file magtestunit
+## @brief Interface para phpUnit
+##
+## Este programa esta sujeto a la licencia GNU/GPL.
+##
+## En esta página podeis encontrar una traducción en castellano
+## http://gugs.sindominio.net/licencias/gples.html
+##
+## y aquí la versión original http://www.gnu.org/licenses/gpl-3.0.html
+
+[[ `tty` ]] || ( ( exec ${TERM:-xterm} -e "$0 $* ; read" & ) ;  exit )
+
+autor='Eduardo Magrané'
+mail='eduardo.mamedu.com'
+licencia='GNU/GPL 3.0'
+web='http://www.mamedu.com'
+prog=`basename $0`
+version='0.1'
+
+descripcion="Ejecución de test unitarios desde PHPUnit
+
+Buscamos tests que coincidan con el patron '*Test.php' y los lanzamos individualmente desde su directorio.
+
+En caso de error se informa y se envía email con informe.
+"
+
+pendiente=""
+
+dependencias='phpunit zenity'
+
+## Si no hemos incluido pantalla lo hacemos
+
+[[ -z "$libash_general_incluida" ]] && source "$(dirname "${BASH_SOURCE}")/general"
+
+# Variables configurables
+
+var_fich_conf="$HOME/.${prog}rc"
+desc_var_fich_conf="Archivo de configuración"
+var_color=si
+desc_var_color='Presentar colores'
+
+var_comando='phpunit --verbose '
+desc_var_comando='Comando a lanzar para ejecutar el test'
+var_mail='eduardo@localhost'
+desc_var_mail='Email para enviar informe'
+
+# Si tenemos fichero de configuración recogemos lo insertamos
+[[ -e "$var_fich_conf" ]] && source $var_fich_conf
+
+function info_magtestunit() {
+
+   echo
+   echo ":version: $version"
+   echo ":licencia: $licencia"
+   echo ":autor: $autor"
+   echo ":web: $web"
+   echo
+   
+   if [ -n "$descripcion" ] ; then
+      echo
+      echo Descripción
+      echo "Descripción" | sed s/./-/g
+      echo
+      echo -e "$descripcion"
+      echo
+   fi
+
+   help_magtestunit
+
+   if [ -n "$dependencias" ] ; then
+      echo
+      echo 'Programas externos necesarios'
+      echo 'Programas externos necesarios' | sed s/./-/g
+      echo
+      for dep in $dependencias ; do echo -e "   - $dep" ; done
+      echo
+   fi
+
+   if [ -n "${!var_*}" ] ; then
+      echo
+      echo 'Variables configurables'
+      echo 'Variables configurables' | sed s/./-/g
+      echo
+      for var in ${!var_*} ; do d="desc_$var" ; echo -e "   - ${!d}: ${!var}" ; done
+      echo
+   fi
+
+   if [ -n "$pendiente" ] ; then
+      echo
+      echo Pendiente
+      echo Pendiente | sed s/./-/g
+      echo
+      echo -e "$pendiente"
+   fi
+}
+
+function help_magtestunit() {
+
+   echo
+   echo "uso"
+   echo "uso" | sed s/./-/g
+   echo
+   echo "$prog"
+   echo
+   echo Opciones:
+   echo
+   echo " -help | -h              Pantalla de ayuda"
+   echo " --dependencias | -d     Comprobar dependencias"
+   echo
+   echo "$prog -info, Para más información"
+   echo
+
+}
+
+function error_magtestunit() {
+
+    if [ `tty` ] ; then
+        echo
+        echo -e "`color colError` $1 `color`"
+        echo
+    else
+        zenity --error --text="$1\n\nAyuda:\n\n`help_magtestunit`"
+    fi
+
+    exit ${2:-1}
+   }
+
+function comprobar_dependencias() {
+
+   local salir=no
+
+   echo
+   echo Comprobar dependencias
+   for d in $dependencias ; do
+   s="`whereis $d`"
+   s="${s/#*:}"
+   if [ -z "$s" ] ; then
+         echo "   - $d `color colError`[NO]`color`"
+         salir=si
+      else
+         echo "   - $d `color colAfirmativo`[si]`color`"
+      fi
+   done
+
+   if [ "$salir" = "si" ] ; then
+      echo
+      echo `color colError`Necesitas instalar los programas no encontrados`color`
+      exit 1
+   fi
+}
+
+function ejecuta_tests() {
+
+   ## Ejecutar los tests que coincidan con '*Test\.php'
+
+   echo
+   echo $prog 
+   echo $prog | sed s/./=/g
+   echo 
+
+   read -p "Ejecutar tests de integridad (s/n): " OPCION
+   [[ "$OPCION" != "s" ]] && exit
+
+   # local LANG=es_ES.UTF-8
+   local salida=${DIR_TMP}test_salida.txt
+   local DIR_TMP=${DIR_TMP}phpunit/
+   local DIR_ACTUAL=`pwd`
+   local EMAIL=
+
+   local -a errores
+
+   local listado=scripts/tests_ejecutar.txt    ##< Fichero con lista de test a realizar
+
+   # Descomentar tipo de informe si se desea alguno
+
+   #informe='--testdox-html  ${DIR_TMP}${testunit}.html'
+   #informe='--report ${DIR_TMP}$testunit' 
+   #informe='--testdox-text ${DIR_TMP}${testnom}.txt'
+
+   # Si existe el directorio temporal lo borramos
+
+   [[ -d "$DIR_TMP" ]] || mkdir "$DIR_TMP" && rm -fr "$DIR_TMP/*"
+
+   for testunit in `find -name '*Test\.php' -type f` ; do
+
+      ERROR=''
+      testnom="`basename $testunit`"
+      tests="$tests $testunit"
+      cd `dirname $testunit`
+      #echo -e "- $testnom\t$testunit"
+
+      eval "cmd=\"$var_comando $informe $testnom\""
+      #echo "Comando: $cmd"
+      $cmd | tee $salida
+
+      if [ $? != 0 ] ; then
+         ERROR="Error en la ejecución del test $testnom"
+      fi
+
+      if [ "`grep -n Incomplete "$salida"`" != "" ] ; then
+         ERROR="Test $testnom Incompleto"
+      fi
+
+      if [ "`grep -n Errors: "$salida"`" != "" ] ; then
+         ERROR="Test $testnom con errores"
+      fi
+
+      if [ "$ERROR" != "" ] ; then
+         nError=${#errores[*]}
+         errores[$nError]="\n$ERROR\n\n$(cat $salida)\n\n"
+      fi
+
+      cd $DIR_ACTUAL
+
+   done
+
+   if [ "$informe" != "" ] ; then
+      echo Informe de test en $DIR_TMP
+   fi
+
+   if [ ${#errores[*]} -gt 0 ] ; then
+      echo ${#errores[*]} Error/es, enviamos email con errores
+      echo -e ${errores[*]} | mail -s "${#errores[*]} error/es en tests" $var_mail
+      error_magtestunit "${errores[*]}"
+      exit 1
+   fi
+
+   }
+
+
+while [ -n "$1" ] ; do
+
+   case "$1" in
+      
+      -h|-help|--help) help_magtestunit ; exit ;;
+      -info) info_magtestunit ; exit ;;
+      --dependencias|-d) comprobar_dependencias ; exit ;;
+      *) break ;;
+
+   esac
+
+done
+
+# si se llama al script directamente ejecutamos ejecuta_test
+
+[[ "`basename $BASH_SOURCE`" = "`basename $0`" ]] && ejecuta_tests

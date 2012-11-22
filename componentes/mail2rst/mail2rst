@@ -1,0 +1,54 @@
+#!/bin/bash
+
+## @file mail2rst 
+## @brief Transformar email en rst
+##
+## @todo Quitar cabecera de emails
+
+programa=`basename "$0"`
+
+codificacion_salida='UTF-8'  ## codificación de salida
+
+if [ "$1" = "" ] ; then 
+
+   echo
+   echo "uso: $programa <archivo de correo>"
+   echo
+   exit
+
+fi
+
+eval "EMAIL=$1"
+
+codificacion_email=$(grep 'Content-Type:' "$EMAIL" | grep 'charset' | awk -v FS='=' '{ print $2; exit}')
+codificacion_email=$(eval "echo $codificacion_email")
+codificacion_email=`echo $codificacion_email | tr '[a-z]' '[A-Z]' `
+codificacion_email=${codificacion_email:-codificacion_salida}
+# echo "codificación de email: $codificacion_email" # dev
+
+from=$(grep 'From:' "$EMAIL" | cut -d: -f2)
+fecha=$(grep 'Date:' "$EMAIL" | cut -d: -f2)
+
+concepto=$(basename "$EMAIL" | sed s/_/\ /g)
+titulo="correo electrónico: $concepto"
+
+echo                           # > ${DIR_TMP}$programa 
+echo $titulo                   # >> ${DIR_TMP}$programa
+echo $titulo | sed 's/./~/g'   # >> ${DIR_TMP}$programa
+echo                           # >> ${DIR_TMP}$programa
+echo ":De: $from"              # >> ${DIR_TMP}$programa
+echo ":Fecha: $fecha"          # >> ${DIR_TMP}$programa
+echo                           # >> ${DIR_TMP}$programa
+
+mailtextbody < "$EMAIL" > ${DIR_TMP}$programa
+
+if [ "$codificacion_email" != "$codificacion_salida" ] ; then
+   cmd="iconv -f $codificacion_email -t $codificacion_salida -o \"${DIR_TMP}${programa}2\" \"${DIR_TMP}${programa}\""
+   eval "$cmd"
+   if [ $? != 0 ] ; then echo " Error al ejecutar: $cmd" ; exit 1 ; fi
+   cp "${DIR_TMP}${programa}2" "${DIR_TMP}$programa"
+fi
+
+cat "${DIR_TMP}$programa"
+
+# rm ${DIR_TMP}$programa

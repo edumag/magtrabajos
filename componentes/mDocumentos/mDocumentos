@@ -1,0 +1,383 @@
+#!/bin/bash
+
+## @file mDocumentos
+##
+## @brief Manejador de documentos adjuntos de proyectos
+## 
+##  Uso: `basename $0` -p [proyecto] [opciones] [archivos]
+## 
+##  Opciones:
+##  
+##  -p Nombre de proyecto
+##  -i Insertar documentos
+##  -l Listar documentos
+## 
+## @todo Implementar la relación entre movimiento y adjuntos
+## @todo Configurar comando que abre los documentos
+
+## @defgroup configuracion Configuración
+## @{
+## @defgroup configuracion_mDocumentos Configuración para mDocumentos
+## @{
+
+## @var mdoc_comando_abrir
+## Comando que se lanza para abrir los documentos
+
+mdoc_comando_abrir="xdg-open"
+
+## @}
+## @}
+
+declare -a lista_documentos
+documentos_seleccionados=('')
+menConta=${menConta:-0}
+dir_proyecto=
+dir_adjuntos=
+fich_conf=
+
+
+function comprobaciones (){
+
+   dir_proyecto="$HOME/.magtrabajos/proyectos/$proyecto"
+   dir_adjuntos="$dir_proyecto/documentos/"
+   fich_conf="${dir_proyecto}/configuracion/mDocumentos"
+
+   if [ -z "$proyecto" ] ; then
+      echo "Es necesario indicar proyecto: $proyecto"
+      help_documentos
+      exit
+   fi
+
+   if [ ! -d "$dir_proyecto" ] ; then
+      echo "No existe directorio de proyecto: $dir_proyecto"
+      help_documentos
+      exit
+   fi
+
+   if [ ! -d "$dir_adjuntos" ] ; then
+      mkdir "$dir_adjuntos"
+      if [ $? != 0 ] ; then
+         echo "Error al crear directorio de proyecto: $dir_adjuntos"
+         help_documentos
+         exit
+      fi
+   fi
+   }
+
+function configurar_documentos () {
+
+   echo FICH: $fich_conf
+   configuracion_menu 'mdoc' "$fich_conf"
+
+}
+
+function help_documentos () {
+
+   doxygen2help "$0"
+
+   }
+
+function menuDocumentos () {
+
+   encabezado
+
+   abre_caja "Documentos de $proyecto"
+
+   linea_caja ' [A]brir' '[I]nsertar'
+   linea_caja ' [B]orrar' '[L]istar'
+
+   cierra_caja
+   
+   mensajes -get
+
+   read -n 1 -s -p "Opcion: " OPCION
+
+   opcionesDocumentos "$OPCION"
+
+   }
+
+function opcionesDocumentos () {
+   
+   case "$1" in
+
+      a|A) abrirDocumento ;;
+      i|I) insertarDocumento ;;
+      b|B) borrarDocumento ;;
+      l|L) listadoDocumentos ;;
+      *) return ;;
+   esac
+
+   menuDocumentos
+
+   }
+
+function borrarDocumento () {
+
+   local pwd_a="`pwd`"
+   cd "$dir_adjuntos"
+   [[ $? = 0 ]] || ( echo "No se pudo acceder a directorio de documentos $dir_adjuntos" ; help_documentos ; exit )
+
+   e_archivos_seleccionados=()
+   elegirArchivo --titulo 'Seleccionar archivos para borrar' --excluir "$mt_ocultar_ficheros"
+
+   for c in `seq 0 $((${#e_archivos_seleccionados[*]}-1))` ; do
+
+      x="${e_archivos_seleccionados[$c]}"
+      echo
+      echo "- $x"
+      echo
+      read -n 1 -s -p "Opcion: " OPCION
+      if [ "$OPCION" = 's' ] ; then
+         SQL="DELETE FROM documentos WHERE idMovimiento=$movimientoId AND url='`basename $x`'"
+         ejecutarSQL "$SQL"
+         rm "$x"
+      fi
+   
+   done
+
+   cd "$pwd_a"
+   }
+
+function abrirDocumento () {
+
+   local pwd_a="`pwd`"
+   cd "$dir_adjuntos"
+   [[ $? = 0 ]] || ( echo "No se pudo acceder a directorio de documentos $dir_adjuntos" ; help_documentos ; exit )
+
+   e_archivos_seleccionados=()
+   elegirArchivo --titulo 'Seleccionar archivos para abrir' --excluir "$mt_ocultar_ficheros"
+
+   for c in `seq 0 $((${#e_archivos_seleccionados[*]}-1))` ; do
+
+      x="${e_archivos_seleccionados[$c]}"
+      echo "- $x"
+      $mdoc_comando_abrir "$x"
+   
+   done
+
+   cd "$pwd_a"
+   }
+
+function insertarDocumento () {
+
+   if [ -z "${documentos_seleccionados[*]}" ] ; then
+
+      read -p 'Documento: ' DOC
+      documentos_seleccionados=($DOC)
+
+   else
+
+      echo
+      echo "Insertar: "
+      echo
+      for x in ${documentos_seleccionados[*]} ; do
+         echo - $x
+      done
+      echo
+
+   fi
+
+   read -n 1 -s -p "Insertar documentos (s/n): " OPCION
+
+   if [ "$OPCION" = 's' ] ; then
+      for x in ${documentos_seleccionados[*]} ; do
+         cp "$x" ${dir_adjuntos}/
+         if [ $? != 0 ] ; then
+            mensajes "Error al adjuntar documento: $x"
+            break
+         fi
+         SQL="INSERT INTO documentos VALUES ($movimientoId,'`basename $x`') "
+         ejecutarSQL "$SQL"
+         echo "Insertado $x"
+      done
+   else
+      mensajes "Insertar cancelado"
+   fi
+
+   }
+
+function listadoDocumentos () {
+
+   local pwd_a="`pwd`"
+   cd "$dir_adjuntos"
+   [[ $? = 0 ]] || ( echo "No se pudo accedeer a directorio de documentos $dir_adjuntos" ; help_documentos ; exit )
+   local -i c=0
+   for documento in * ; do
+      [[ -z "$documento" ]] && break
+      set c=c++
+      lista_documentos[$c]="$documento"
+   done
+
+   echo
+   echo Numero de documentos: ${#lista_documentos[*]}
+   echo
+   for d in ${lista_documentos[*]} ; do
+      echo "$c) $documento"
+   done
+
+   cd "$pwd_a"
+
+   }
+
+# si se llama al script directamente
+
+if [ "`basename $BASH_SOURCE`" = "`basename $0`" ] ; then
+   
+   function encabezado() {
+
+      echo
+      echo 'Documentos'
+      echo
+
+      }
+
+   function mensajes() {
+
+      ## Función para manejar los mensajes que queremos mostrar
+      ## La idea es ir acumulando los mensajes hasta mostrarlos
+      ## y limpiarlos.
+      ##
+      ## Sin parametros añadimos nuevo mensaje que se acumula hasta pedirlos
+      ##
+      ## $1 -log Mensajes a log
+      ## $1 -get Mensajes a caja
+
+      case "$1" in
+
+         -log)
+         # Enviamos mensajes a log y ponemos a cero
+            if [  $menConta -lt 1 ] ; then return 1 ; fi
+            FIN=$((${#MEN[*]}-1))
+            for x in `seq 0 $FIN` ; do
+               if [ $x = $FIN ] ; then
+                  log "$FUNCNAME" "${MEN[$x]}"
+               fi
+            done
+            MEN=()
+            menConta=0
+            ;;
+         -crudo)
+            # imprimimos mensaje y ponemos a cero
+            if [  $menConta -lt 1 ] ; then return 1 ; fi
+            FIN=$((${#MEN[*]}-1))
+            for x in `seq 0 $FIN` ; do
+               echo "- ${MEN[$x]}"
+            done
+            MEN=()
+            ;;
+         -get)
+            # imprimimos mensaje y ponemos a cero
+            if [  $menConta -lt 1 ] ; then return 1 ; fi
+            FIN=$((${#MEN[*]}-1))
+            #echo -n $linea
+            #echo -n ' ESTADO: '
+            SALIDA=''
+            for x in `seq 0 $FIN` ; do
+               if [ $x = $FIN ] ; then
+                  #tput bold ; echo -n "${MEN[$x]} " ; tput sgr0
+                  SALIDA="$SALIDA ${MEN[$x]}"
+               else
+                  #tput bold ; echo -n "${MEN[$x]} " ; tput sgr0
+                  #echo -n "${MEN[$x]} | "
+                  SALIDA="$SALIDA ${MEN[$x]} |"
+               fi
+            done
+            caja "$SALIDA" 'Mensajes' 2 0
+            #echo 
+            MEN=()
+            menConta=0
+            ;;
+         *)
+            # Recibimos un nuevo mensaje y lo añadimos a la pila
+            # Por defecto ingresamos nuevo mensaje a la pila
+            MEN[$menConta]="$1"
+            let menConta++
+            # Enviamos mensaje a log
+            log "$FUNCNAME" "$1"
+            [[ $consulta != 0 ]] && echo "$1"
+            ;;
+      esac
+   }
+
+   function log() {
+
+      ## @brief Enviar mensaje de log a fichero
+      ##
+      ## Generamos registro del programa.
+      ##
+      ## 1 Función de la que viene
+      ## 2 Texto
+
+      local archivo_log="${archivo_log:-$HOME/`basename '$0'`.log}"
+
+      echo "` date +'%Y-%m-%d %H:%M'` $1 :: $2" >> $archivo_log
+
+   }
+
+   [[ -e ~/.libashrc ]] && source ~/.libashrc         # Buscamos configuración personal sobre libash
+
+   # Si es un enlace hay que buscar el directorio de programas sobre al que apunta
+   if [ -L "$0" ] ; then
+      DIR_PROGRAMAS=$(dirname "`readlink $0`")
+   else
+      DIR_PROGRAMAS=$(dirname "$0")
+   fi
+
+   LIBS='elegirArchivo pantalla configuracion'  # Librerías a cargar
+
+   for LIB in $LIBS ; do
+      DIR_LIB="${DIR_PROGRAMAS}/../../libash/"
+      LIBRERIA="${DIR_LIB}$LIB"
+      log "INICIO" "Librería insertada: $LIBRERIA"
+      if [ -e "$LIBRERIA" ] ; then
+         source "$LIBRERIA"
+         if [ $? != 0 ] ; then
+            echo "ERROR::Insertando librería $LIBRERIA"
+            exit
+         fi
+      else
+         echo "Falta la librería $LIBRERIA de libash o no se encuentra"
+         exit
+      fi
+   done
+
+   function tecla() {
+
+      ## Pedir la pulsación de una tecla para continuar
+      echo -e "\n\n"
+      echo " +--------------------------------+"
+      echo " | Presione una tecla para seguir |"
+      echo " +--------------------------------+"
+      read -n 1
+
+   }
+
+fi
+
+while [ -n "$1" ] ; do
+
+   case "$1" in
+      
+      -h|-help|--help) help_documentos ; exit ;;
+      -info) info_documentos ; exit ;;
+      --dependencias|-d) comprobar_dependencias ; exit ;;
+      --configurar) configurar_documentos ; exit ;;
+      -p|--proyecto) proyecto="$2" ; shift 2 ; comprobaciones ;;
+      -a|-A) accion=abrirDocumento ; shift 1 ;;
+      -i|-I) accion=insertarDocumento ; shift 1  ;;
+      -b|-B) accion=borrarDocumento ; shift 1  ;;
+      -l|-L) accion=listadoDocumentos ; shift 1  ;;
+      *) documentos_seleccionados[$((${#documentos_seleccionados[*]}-1))]="$1" ; shift 1 ;;
+
+   esac
+
+done
+
+comprobaciones
+
+if [ -z "$accion" ] ; then
+   menuDocumentos
+else
+   echo "Acción: $accion"
+   $accion
+fi

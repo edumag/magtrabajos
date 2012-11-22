@@ -1,0 +1,362 @@
+#!/bin/bash
+
+## @file buscar_codigo
+##
+## @brief Buscar palabras seleccionadas en el código
+##
+## Por defecto @todo para tener un listado de tareas pendientes.
+##
+## Podemos enviar la lista a vim como si se tratara de una lista de errores para hacer
+## su seguimiento
+##
+## Uso: buscar_codigo [opciones] [archivos o directorios seleccionados]
+## 
+## Opciones:
+## <pre>
+## buscar [palabra a buscar]   Palabra a buscar dentro del código
+## formato [formato]           Por defecto txt una lista de las lineas encontradas 
+##                             que podremos incluir en vim, otros posibles: rst, enlaces.
+## menu                        Presentar menú
+## encoding_entrada [encoding] Especificar encoding de archivos de entrada, por defecto
+##                             utf-8
+## encoding_salida [encoding]  Encoding de salida, por defecto utf-8
+## servidor_vim [servername]   Nombre del servidor vim al que enviar la lista con el resultado
+## debug                       Muestra mensajes de programa
+## help                        Pantalla de ayuda
+## </pre>
+##
+## En caso de no seleccionar ninguna ubicación se entenderá que se quiere buscar en el directorio
+## actual.
+## 
+## Para modificar el encoding se utiliza iconv, con iconv -l tendremos una lista de posibles
+## encodings
+##
+## @author   Eduardo Magrané
+## @internal
+##       web  http://www.mamedu.com
+##
+##      mail  eduardo.mamedu.com
+##
+##   Created  13/03/11
+##
+##  Revision  SVN $Id: $
+##
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+## Recoger configuración de magtrabajos
+source "`dirname "$BASH_SOURCE"`/../../config"
+
+programa=$(basename "$0")                 ##< Nombre del programa
+
+## Si definimos un proyecto se recogerá la configuración del mismo
+proyecto=''
+
+## comando según configuración
+comando=''
+
+## @defgroup configuracion Configuración 
+## @{
+##
+## @defgroup configuracion_buscar_codigo Configuración para buscar_codigo 
+## @{
+
+## @var buscar_codigo_formato_enlaces
+## Formato de enlace para formato enlaces, nos permite editar el archivo desde el listado
+## del navegador con magtrabajos --editar 
+
+buscar_codigo_formato_enlaces="${buscar_codigo_formato_enlaces:-vim://%s@%s}"
+
+## @var buscar_codigo_paginador
+## Paginador: less, more... 
+
+buscar_codigo_paginador="${buscar_codigo_paginador:-less}"
+
+## @var buscar_codigo_exclude_dir
+## Directorios a excluir en la búsqueda separados con espacios
+
+buscar_codigo_exclude_dir=".svn cache docs ext"
+
+## @var buscar_codigo_exclude
+## Excluir archivos en la búsqueda separados con espacios y entre comillas simple
+
+buscar_codigo_exclude="'*.swp' 'tags' 'cscope.out' '.git' '.svn'"
+
+## @}
+## @}
+
+## Si tenemos configuración de usuario la recogemos
+[[ -e "$HOME/.magtrabajos/configuracion/$programa" ]] && source "$HOME/.magtrabajos/configuracion/$programa"
+
+## definimos la configuración según proyecto
+
+definir_configuracion() {
+
+   ## Si tenemos configuración de proyecto la recogemos
+   [[ -e "$HOME/.magtrabajos/proyectos/$proyecto/configuracion/$programa" ]] && source "$HOME/.magtrabajos/proyectos/$proyecto/configuracion/$programa"
+
+   ## Comando de busqueda
+
+   comando='egrep -nHR '
+
+   for exclude_dir in $buscar_codigo_exclude_dir ; do
+      comando="$comando --exclude-dir='$exclude_dir' "
+   done
+
+   for exclude in $buscar_codigo_exclude; do
+      comando="$comando --exclude=$exclude "
+   done
+
+   comando="$comando  \"$buscar\" ${archivos_afectados:-./}"
+
+   # guardamos salida a fichero temporal
+   comando="$comando > $resultado"
+   }
+
+
+buscar='@todo|@bug'                       ##< Palabra a buscar
+archivos_afectados=""                     ##< Selección en la que buscar
+formato=txt                               ##< Tipo de salida, puede ser rst o vim
+encoding_entrada='utf-8'                  ##< Encoding de archivos del código
+encoding_salida='utf-8'                   ##< Encoding de salida, por defecto utf-8
+servidor_vim='GVIM'                       ##< Servidor de vim al que enviar la lista
+
+resultado="${DIR_TMP}resultado_buscar_codigo"  ##< Fichero de salida, diferenciamos entre distintas búsquedas
+debug=false                               ##< Debug true/false 
+
+[[ -e "$resultado" ]] && rm "$resultado"
+
+## Ejecutar comando
+
+ejecutar_comando(){
+
+   definir_configuracion
+
+   ejecutarComando "$comando"
+
+   }
+
+## Ejecutar el escaneo de código
+
+function escanear_codigo() {
+
+   local salida=$resultado
+
+   [[ "$debug" = "true" ]] && echo "Escanear: [$buscar] en ${archivos_afectados:-`pwd`}"
+
+   case "$formato" in
+
+      rst)
+         ejecutar_comando "$comando" | egrep '(//|#)' | sed 's/\*//g' | \
+            awk -v buscar="$buscar" -v FS=: '{printf "\n%s%s%s%s%s", $1, buscar, $2, buscar,  $3}' | \
+            awk -v FS="$buscar" 'BEGIN { fich_anterior = "" }  \
+              { fich_actual=$1 ; 
+                 if ( fich_actual != "" ) {
+                     if ( fich_actual != fich_anterior ) {
+                        linea=fich_actual;gsub(".","-",linea);
+                        printf "\n\n%s\n%s\n", fich_actual,linea;
+                        fich_anterior = fich_actual;
+                     }
+                     printf "\n* %s : %s ", $3, $6;
+                  }
+               }' 
+         ;;
+
+      enlaces)
+         ejecutar_comando "$comando" | \
+            awk -v FS=':' "{ printf \"- \`%s:%s %s <${buscar_codigo_formato_enlaces}>\`_\n\",\$1,\$2,\$3,\$1,\$2 }" | \
+            sed "s/$buscar//g" 
+         ;;
+      *)
+         ejecutar_comando "$comando" 
+         ;;
+
+   esac
+
+   # Si no coinciden el encoding de entrada con el de salida
+   # transformamos salida
+
+   if [ "$encoding_entrada" != "$encoding_salida" ] ; then
+
+      [[ "$debug" = "true" ]] && echo "Modificamos salida a $encoding_salida"
+      iconv -f $encoding_entrada -t $encoding_salida "$salida" > "$salida"-2
+      mv "$salida"-2 "$salida"
+
+   fi
+
+   cat $salida
+
+   }
+
+## Manejamos los parámetros de entrada y el menú
+
+function _buscar_codigo() {
+
+   while [ "$1" != "" ] ; do
+
+      case "$1" in
+
+         proyecto) proyecto="$2" ; shift 2 ;;
+
+         formato) formato="$2" ; shift 2 ;;
+
+         servidor_vim) servidor_vim="$2" ; shift 2 ;;
+
+         debug) debug=true ; shift 1 ;;
+
+         buscar)
+            buscar="$2"
+            shift 2
+            ;;
+
+         encoding_entrada)
+            encoding_entrada="$2"
+            shift 2
+            ;;
+
+         encoding_salida)
+            encoding_salida="$2"
+            shift 2
+            ;;
+
+         enviar_vim)
+            shift 1
+
+            # Si el formato no es txt hay que volver a generarlo antes de enviarlo a vim
+
+            #if [ "$formato" != "txt" ] ; then
+            #   formato=txt
+            #   escanear_codigo
+            #fi
+            if [ "`vim --serverlist | grep -i $servidor_vim`" != "" ] ; then
+               cmd="gvim --servername $servidor_vim --remote-send '<C-\><C-N>:set errorformat=%f:%l:%m<CR>:cfile $resultado<CR>:copen<CR>'"
+            else
+               local -a servidores_vim=(`vim --serverlist`)
+               echo ${servidores_vim[0]}
+               if [ ${#servidores_vim[*]} -gt 1 ] ; then
+                  echo
+                  echo 'Hay más de un servidor de vim disponible, selecciona uno'
+                  echo
+                  for x in `seq 0 $((${#servidores_vim[*]}-1))` ; do
+                     echo "$x) ${servidores_vim[$x]}"
+                  done
+                  echo
+                  read -p 'Opcion: ' OPCION
+                  [[ "$OPCION" = "" ]] && return
+                  servername=${servidores_vim[$OPCION]}
+               else
+                  servername=${servidores_vim[*]}
+                  if [ "$servername" == "" ] ; then
+                     servername=$servidor_vim
+                     gvim --servername $servername
+                  fi
+               fi
+               cmd="gvim --servername $servername --remote-send '<C-\><C-N>:set errorformat=%f:%l:%m<CR>:cfile $resultado<CR>:copen<CR>'"
+            fi
+            ejecutarComando "$cmd"
+            ;;
+
+         paginar)
+            $buscar_codigo_paginador "$resultado"
+            shift 1
+            ;;
+
+         help|-h|--help|-help)
+            echo
+            local mostrar=false
+            while read linea ; do 
+               if [ "$(echo $linea | grep '@author')" != "" ] ; then
+                  return
+               fi
+               if [ "$mostrar" = "true" ] ; then
+                  if [ "$(echo $linea | grep 'pre>')" != "" ] ; then
+                     echo
+                  else
+                     echo -e "$linea" | sed 's/##//'
+                  fi
+               else
+                  if [ "$(echo $linea | grep '@file')" != "" ] ; then
+                     mostrar=true
+                  fi
+               fi
+            done < $BASH_SOURCE
+            echo
+            exit
+            ;;
+         menu)
+            shift 1
+            [[ "$archivos_afectados" = "" ]] && archivos_afectados=$*
+            clear
+            echo
+            echo '+---------------+'
+            echo '| Buscar código |'
+            echo '+---------------+'
+            echo
+            if [ "$archivos_afectados" != "" ] ; then
+               echo
+               echo Selección:
+               echo
+               for a in $archivos_afectados ; do
+                  echo "- $a"
+               done
+               echo
+            fi
+
+            echo "Palabra a buscar:       $buscar"
+            [[ "$encoding_entrada" != "$encoding_salida" ]] && echo "Encoding para salida:   $encoding_salida"
+            [[ "$debug" = "true" ]] && echo "Resultado:              $resultado"
+            echo "Formato:                $formato"
+            echo
+            echo ' [C]ambiar palabra a buscar'
+            [[ -e "$resultado" ]] && echo ' [V]er resultado'
+            [[ -e "$resultado" ]] && echo ' [E]nviar a vim'
+            echo ' [B]uscar'
+            [[ "$archivos_afectados" ]] && echo ' B[u]scar solo en selección'
+            echo
+            [[ -e "$resultado" ]] && echo -e " Resultados: `wc -l $resultado`\n"
+
+            read -n 1 -s -p 'Opción: ' OPCION
+
+            case "$OPCION" in
+
+               c) echo -e "\n" ; read -p "Nueva palabra: " buscar ; _buscar_codigo menu ;;
+               v) _buscar_codigo paginar ; _buscar_codigo menu  ;;
+               e) _buscar_codigo enviar_vim ; _buscar_codigo menu  ;;
+               u) escanear_codigo ; _buscar_codigo menu  ;;
+               b) 
+                  local seleccion_anterior=$archivos_afectados
+                  archivos_afectados=''
+                  escanear_codigo
+                  archivos_afectados=$seleccion_anterior
+                  _buscar_codigo menu  
+                  ;;
+               *) exit ;;
+            esac
+            ;;
+
+         *) 
+            archivos_afectados="$*"
+
+            local archivos_afectados2=''
+            # Comprobar que los archivos existen sino los sacamos para que la aplicación no pare
+            for file in $archivos_afectados ; do
+               [[ -e "$file" ]] && archivos_afectados2="$archivos_afectados2 $file" || echo - $file no existe >&2 
+            done
+            archivos_afectados="$archivos_afectados2"
+            shift $#
+            [[ "$debug" = "true" ]] && echo "Archivos afectados: $archivos_afectados"
+            ;;
+
+      esac
+
+   done
+
+   }
+
+if [ "$1" = "" ] ; then
+   escanear_codigo
+else
+   _buscar_codigo "$@"
+fi
