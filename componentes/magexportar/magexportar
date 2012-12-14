@@ -69,7 +69,7 @@ function menuExportar() {
    read -n 1 -s OPCION
    echo
 
-   [[ "$OPCION" = "" ]] && exit 0 
+   [[ "$OPCION" = "" ]] && return 0 
 
    exportar $OPCION "$archivo_rst"
 
@@ -133,7 +133,11 @@ function exportar() {
               cmd="cat "$origen" | grep -v 'trabajos -t' | $mt_rst2html | sed -e 's/\&quot\;/_/g'  > ${DIR_TMP}trabajos.html"
            fi
            #eval $cmd 2> ${DIR_TMP}rst2html.err
-           ejecutarComando "$cmd" 2> ${DIR_TMP}rst2html.err
+           if [ $consulta = 0 ] ; then
+              ejecutarComando "$cmd" 2> ${DIR_TMP}rst2html.err
+           else
+              eval "$cmd" 2> ${DIR_TMP}rst2html.err
+           fi
 
            if [ "`cat ${DIR_TMP}rst2html.err`" != "" ] ; then
               mensajes "Error al exportar a html"
@@ -187,7 +191,7 @@ function exportar() {
 
       menu) menuExportar;;
    
-      *) echo Opción [$1] no encontrada ; shift ; exit 1 ;;
+      *) echo Opción [$1] no encontrada ; shift ; return 0 ;;
 
       esac
 

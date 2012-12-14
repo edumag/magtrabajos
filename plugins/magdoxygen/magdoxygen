@@ -187,8 +187,6 @@ function _doxygen() {
             shift 1
             ;;
 
-         conf) fich_doxygen="$2" ; shift 2 ;;
-
          ejecutar)
             shift 1
             construir_variables 
