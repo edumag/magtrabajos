@@ -343,6 +343,7 @@ function _buscar_codigo() {
             # Comprobar que los archivos existen sino los sacamos para que la aplicación no pare
             for file in $archivos_afectados ; do
                [[ -e "$file" ]] && archivos_afectados2="$archivos_afectados2 $file" || echo - $file no existe >&2 
+               #[[ -e "$file" ]] && archivos_afectados2="$archivos_afectados2 $file"
             done
             archivos_afectados="$archivos_afectados2"
             shift $#

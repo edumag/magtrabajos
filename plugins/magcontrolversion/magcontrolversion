@@ -47,6 +47,7 @@ rama_actual=''           ##< Rama actual
 function aviso() { echo "[[ $1 ]]"; echo ;}
 
 ## Recoger configuración de magtrabajos
+LIBS="$LIBS listado"
 source "`dirname "$BASH_SOURCE"`/../../config"
 
 if [ -e '.svn' ] ; then
@@ -446,6 +447,9 @@ function _subversion() {
             abre_caja
             linea_caja '[B]ash' '[X] Cancelar'
             cierra_caja
+
+            # Si tenim missatge el presentem
+            mensajes -get
 
             read -n 1 -s -p ' ' OPCION
 
