@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo 'Evento generado desde magcontrolversion.
+
+Es el momento de regenerar la documentación, ya que estamos creando una nueva release'

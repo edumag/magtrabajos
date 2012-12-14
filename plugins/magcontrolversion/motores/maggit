@@ -2,14 +2,25 @@
 
 ## @file maggit
 ## @brief manejando control de versiones con git
+##
+## La metodología que utilizamos esta basada en git-flow
+## http://sysvar.net/es/entendiendo-git-flow/
+
+## Versión actual
+version_actual='0.0.0'
 
 ## menú propio para git
 
 function git_magcontrolversion_menu() {
 
-   abre_caja
+   abre_caja  ' git '
    linea_caja 'Editar últ[i]mo mensaje publicado' 
    linea_caja '[G]uardar cambios y volver al estado sin cambios' '[R]estaura cambios Restaurar cambios'
+   cierra_caja
+   abre_caja  " Release actual: $version_actual "
+   linea_caja '[1] Inicia tarea' '[2] Cierra tarea'
+   linea_caja '[3] Inicia reparación de error' '[4] Cierra error'
+   linea_caja '[9] Crear release' '[0] Subir cambios al servidor'
    cierra_caja
 
    }
@@ -20,9 +31,15 @@ function git_magcontrolversion_acciones_menu() {
 
    case "$1" in
    
-      i|I) git commit --amend ;; # Editar último mensaje
-      g|G) git stash          ;; # Guardar cambios
-      r|R) git stash apply    ;; # Restaurar cambios
+      i|I) ejecutarComando "git commit --amend"      ;; # Editar último mensaje
+      g|G) ejecutarComando "git stash"               ;; # Guardar cambios
+      r|R) ejecutarComando "git stash apply"         ;; # Restaurar cambios
+      1)   ejecutarComando "git_crear_rama_tarea"    ;; # Crear rama tarea 
+      2)   ejecutarComando "git_cerrar_tarea"        ;; # Cerrar tarea
+      3)   ejecutarComando "git_abre_tarea_error"    ;; # Error urgente
+      4)   ejecutarComando "git_cerrar_tarea_error"  ;; # Cerrar error
+      9)   ejecutarComando "git_rama_version"        ;; # Crear release
+      0)   ejecutarComando "git push"                ;; # Subimos cambios al servidor
       *) return 0 ;;
 
    esac
@@ -230,4 +247,177 @@ function git_magcontrolversion_merge() { git merge "$1" ; }
 
 ## Deshacer cambios
 
+function deshacer_cambios() {
+
+   echo "$BASH_SOURCE $FUNCNAME [Pendiente]"
+   }
+
+## Sanear cadena de caracteres conflictivos
+
+function sanear() {
+
+   local cadena="$*"
+   cadena="`echo $1 | sed 's/ /-/g'`"
+   cadena="`echo $cadena | tr "ÁÉÍÓÚÑáéíóúñ" "AEIOUNaeioun"`"
+   echo $cadena
+   }
+
+## Creamos una rama sobre develop con la tarea a realizar
+##
+## @param $1 Nombre de la tarea a crear
+
+function git_crear_rama_tarea() {
+
+   local tarea
+
+   if [ "$1" != "" ] ; then 
+      tarea="`sanear '$1'`"
+   elif [ "$tarea" != "" ] ; then
+      tarea=`sanear $tarea`
+   else
+      read -p 'Nombre de tarea: ' tarea
+      tarea=`sanear "$tarea"`
+   fi
+   ejecutarComando "git checkout -b $tarea develop"
+   
+   }
+
+## Se cierra tarea, hacemos merge de tarea a develop, se borra rama de tarea
+## ya que quedara constancia de ella en develop.
+##
+## @param $1 Tarea a cerrar
+
+function git_cerrar_tarea() {
+
+   local tarea
+
+   git_magcontrolversion_listar_ramas | grep -v master | grep -v develop | tr ' ' \t > ${DIR_TMP}listado
+
+   generar_listado_fichero --ocultar-ayuda
+
+   tarea=$resultado_listado
+
+   if [ "$tarea" = "" ] ; then
+      mensajes 'Cerrar tarea cancelado'
+   else
+
+      ejecutarComando "git checkout develop"
+      ejecutarComando "git merge --no-ff $tarea"
+      ejecutarComando "git branch -d $tarea"
+
+   fi
+
+   }
+
+## Inicia tarea con error urgente a arreglar en el master
+
+function git_abre_tarea_error() {
+
+   git_nueva_subversion
+   local nomRelease="hotfix-$version_actual"
+   ejecutarComando "git checkout -b $nomRelease master"
+
+   }
+
+## Cerrar tarea de error por arreglar
+##
+## El error corregido se integra en master y en develop
+## creando una release nueva con el fallo corregido
+
+function git_cerrar_tarea_error() {
+
+   local nomRelease="`git_magcontrolversion_rama_actual`"
+   local version_error="`echo $nomRelease | cut -d- -f2`"
+   ejecutarComando "git checkout master"
+   ejecutarComando "git merge --no-ff $nomRelease"
+   ejecutarComando "git tag -a $version_error"
+   ejecutarComando "git checkout develop"
+   ejecutarComando "git merge --no-ff $nomRelease"
+
+   
+   }
+
+## Rama de versión
+## 
+## Pasamos a master los cambios realizados en develop pero de forma limpia
+
+function git_rama_version() {
+   
+   git_nueva_version
+   local nomRelease="release-$version_actual"
+   ejecutarComando "git checkout -b  $nomRelease develop"
+   echo "
+
+   acciones a realizar para acabar el proceso del lanzamiento de la nueva versión,
+   ejemplo lanzar doxygen para que actualice la documentación, modificar numero de 
+   versión en los archivos, etc...
+
+   "
+   evento "rama_version"
+
+   echo "
+
+   Si deseas hacer alguna otra acción antes de crear la release es el momento.
+
+   "
+
+   read -p "Continuar (s/n): " OPCION
+
+   if [ "$OPCION" = "s" ] ; then
+
+      ejecutarComando "git checkout master"
+      ejecutarComando "git merge --no-ff $nomRelease "
+      ejecutarComando "git tag -a $nomRelease "
+      ejecutarComando "git checkout develop"
+      ejecutarComando "git merge --no-ff $nomRelease"
+      ejecutarComando "git branch -d $nomRelease"
+      # subir a github
+      ejecutarComando "git push"
+      ejecutarComando "git push --tags"
+
+   else
+      mensajes "Release cancelada"
+   fi
+
+   }
+
+## Devolver versión actual
+
+function git_get_version() { echo $version_actual | cut -d. -f1 ; }
+
+## Devolver subversión actual
+
+function git_get_subversion() { echo $version_actual | cut -d. -f2 ; }
+
+## Devolver subversion de errores actual
+
+function git_get_subversion_error() { echo $version_actual | cut -d. -f3 ; }
+
+## Devolver versión actual +1
+
+function git_nueva_version() { 
+   version_actual="$((`git_get_version` + 1 )).0.0"
+   echo
+   echo "Versión nueva: $version_actual"
+   echo
+   read -p '[Enter] Acepta la nueva version, o pon una tu mismo: ' OPCION
+   [[ "$OPCION" != "" ]] && version_actual="$OPCION"
+   }
+
+## Devolver subversión actual +1
+
+function git_nueva_subversion() { version_actual="`git_get_version`.$((git_get_subversion + 1)).0" ; }
+
+## Devolver subversión de error +1
+
+function git_nueva_subversion_error() { version_actual="`git_get_version`.`git_get_subversion`.$((git_get_subversion_error + 1))" ; }
+
+## Buscamos en las ramas la última release, en caso de no existir 0.0.0
+
+if [ "`git tag | grep '-'`" != "" ] ; then
+   for v in `git tag | grep '-'` ; do
+      echo -e "\n- $v"
+      version_actual="`echo $v | cut -d- -f2`"
+   done
+fi
 
