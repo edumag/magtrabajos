@@ -898,6 +898,7 @@ function editarTarea(){
       SQL="SELECT id from tareas ORDER BY id desc LIMIT 1"
       tareaId=$(ejecutarSQL "$SQL" "-N")
       definirProyecto -t $tareaId
+      evento post_tarea_nueva
 
    else
 
@@ -2652,8 +2653,8 @@ case $ACCION in
       ;;
    *) # Por defecto
       echo "" | tee -a $TMP
-      echo "Total de tarea" | tee -a $TMP
-      echo "--------------" | tee -a $TMP
+      echo "Total de tarea $tarea" | tee -a $TMP
+      echo "Total de tarea $tarea" | sed 's/./-/g' | tee -a $TMP
       echo "" | tee -a $TMP
       fila="\n+------------+------------+----------------+-------------+-----------+-----------+---------+----------+----------+" 
       echo -e $fila  | tee -a $TMP
@@ -2666,7 +2667,7 @@ case $ACCION in
       echo "" | tee -a $TMP
 
       if [ "$per_informe_indice" == "SI" ] ; then
-         echo -e "${nivel_indice}\`Total de tarea\`_" >> $fich_indice   
+         echo -e "${nivel_indice}\`Total de tarea $tarea\`_" >> $fich_indice   
       fi
       ;;
 
@@ -2885,8 +2886,8 @@ function presentarTotalMovimiento() {
    fi
 
    echo "" | tee -a $TMP
-   echo "Total de movimiento" | tee -a $TMP
-   echo "-------------------" | tee -a $TMP
+   echo "Total de movimiento $movimiento" | tee -a $TMP
+   echo "Total de movimiento $movimiento" | sed 's/./-/g' | tee -a $TMP
    echo "" | tee -a $TMP
 
    fila="\n+-----------+----------+" 
@@ -2898,7 +2899,7 @@ function presentarTotalMovimiento() {
    echo "" | tee -a $TMP
 
    if [ "$per_informe_indice" == "SI" ] ; then
-      echo -e "${nivel_indice}\`Total de movimiento\`_" >> $fich_indice   
+      echo -e "${nivel_indice}\`Total de movimiento $movimiento\`_" >> $fich_indice   
    fi
    }
 

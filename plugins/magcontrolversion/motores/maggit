@@ -271,7 +271,7 @@ function git_crear_rama_tarea() {
    local tarea
 
    if [ "$1" != "" ] ; then 
-      tarea="`sanear '$1'`"
+      tarea="`sanear "$1"`"
    elif [ "$tarea" != "" ] ; then
       tarea=`sanear $tarea`
    else
@@ -291,11 +291,13 @@ function git_cerrar_tarea() {
 
    local tarea
 
-   git_magcontrolversion_listar_ramas | grep -v master | grep -v develop | tr ' ' \t > ${DIR_TMP}listado
-
-   generar_listado_fichero --ocultar-ayuda
-
-   tarea=$resultado_listado
+   if [ "$1" != "" ] ; then
+      tarea=`sanear "$1"`
+   else
+      git_magcontrolversion_listar_ramas | grep -v master | grep -v develop | tr ' ' \t > ${DIR_TMP}listado
+      generar_listado_fichero --ocultar-ayuda
+      tarea=$resultado_listado
+   fi
 
    if [ "$tarea" = "" ] ; then
       mensajes 'Cerrar tarea cancelado'

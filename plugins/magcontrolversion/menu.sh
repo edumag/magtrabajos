@@ -25,7 +25,9 @@ informe_subversion
 echo Archivo de informe: $TMP
 texto="$TMP"
 
-cmd='magcontrolversion '
+source "`dirname "$BASH_SOURCE"`/magcontrolversion"
+
+cmd='_subversion '
 
 if [ "$movimientoId" != "" ] ; then
    cmd="$cmd mov $movimientoId"

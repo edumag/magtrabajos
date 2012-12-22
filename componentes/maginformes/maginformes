@@ -427,7 +427,7 @@ function menuInformes(){
                   echo "Bitácoras de $tarea" | sed 's/./-/g' | tee -a $TMP
                   echo                                       | tee -a $TMP
                   if [ "$per_informe_indice" == "SI" ] ; then
-                     echo -e "${nivel_indice}\`Bitacoras de $tarea\`_" >> $fich_indice
+                     echo -e "${nivel_indice}\`Bitácoras de $tarea\`_" >> $fich_indice
                   fi
 
                   nivel_indice='\t\t+ '
