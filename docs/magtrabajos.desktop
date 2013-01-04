@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Magtrabajos
+Exec=terminator -f -e "/home/eduardo/desarrollo/magtrabajos/magtrabajos --lanzar %U"
+Name=MagTrabajos
+Comment=IDE de programación
+Icon=/home/eduardo/Imágenes/ojo.xpm
+Terminal=false
+Type=Application

@@ -1,0 +1,21 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Magtrabajos quicklist
+Exec=terminator -f -e "/home/eduardo/desarrollo/magtrabajos/magtrabajos --lanzar %U"
+Comment=IDE de programación
+Icon=/home/eduardo/Imágenes/ojo.xpm
+Terminal=false
+Type=Application
+
+X-Ayatana-Desktop-Shortcuts=Abrir;Editar;
+
+[Abrir Shortcut Group]
+Name=Abrir
+Exec=terminator -e "magtrabajos --lanzar"
+TargetEnvironment=Unity
+
+[Editar Shortcut Group]
+Name=Editar
+Exec=magtrabajos -e
+TargetEnvironment=Unity

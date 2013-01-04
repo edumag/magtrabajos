@@ -452,6 +452,8 @@ function error() {
 
 function lanzar_editor() {
 
+   # zenity --info --text "$*" # DEV
+
    log $FUNCNAME "$*"
    
    # comprobar que tenemos proyecto especificado, sino comprobamos movimientos abiertos.
@@ -1445,6 +1447,7 @@ function informacionMovimiento(){
 
    proyectoId=$(echo $SALIDA | awk -v FS="$separador" '{print $1 }')
    tareaId=$(echo $SALIDA | awk -v FS="$separador" '{print $2 }')
+   tarea=$(echo $SALIDA | awk -v FS="$separador" '{print $3 }')
    movimiento=$(echo $SALIDA | awk -v FS="$separador" '{print $4 }')
 
    log "$FUNCNAME" "movimiento: $movimiento"
@@ -2886,8 +2889,8 @@ function presentarTotalMovimiento() {
    fi
 
    echo "" | tee -a $TMP
-   echo "Total de movimiento $movimiento" | tee -a $TMP
-   echo "Total de movimiento $movimiento" | sed 's/./-/g' | tee -a $TMP
+   echo "Total de movimiento $tarea / $movimiento" | tee -a $TMP
+   echo "Total de movimiento $tarea / $movimiento" | sed 's/./-/g' | tee -a $TMP
    echo "" | tee -a $TMP
 
    fila="\n+-----------+----------+" 
@@ -2899,7 +2902,7 @@ function presentarTotalMovimiento() {
    echo "" | tee -a $TMP
 
    if [ "$per_informe_indice" == "SI" ] ; then
-      echo -e "${nivel_indice}\`Total de movimiento $movimiento\`_" >> $fich_indice   
+      echo -e "${nivel_indice}\`Total de movimiento $tarea / $movimiento\`_" >> $fich_indice   
    fi
    }
 
@@ -3861,7 +3864,8 @@ function menuHerramientas(){
       a|A) # Variables actuales de magtrabajos
          echo "Condición para sql:.....$CONDICION"
          echo "Archivo de informe:.....$TMP"
-         echo "Proyecto ID:............$proyectoId"
+         echo "proyectoId:.............$proyectoId"
+         echo "tareaId:................$tareaId"
          echo "tareasIds:..............${tareasIds[*]}"
          echo "movimientoId:...........$movimientoId"
          echo "archivo_log:....... ....$archivo_log"

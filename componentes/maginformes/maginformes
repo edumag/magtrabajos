@@ -406,6 +406,7 @@ function menuInformes(){
 
          elif [ "$tareaId" != "" ] ; then
 
+            nivel_indice='* '
             presentarCabeceraTarea $per_tarea_cabecera
 
             nivel_indice='\t* '
@@ -451,8 +452,50 @@ function menuInformes(){
          elif [ "$tareasIds" != "" ] ; then
 
             for tareaId in ${tareasIds[*]} ; do
+
+               nivel_indice='* '
+               informacionTarea
                presentarCabeceraTarea $per_tarea_cabecera
+
+               nivel_indice='\t* '
+
+               [[ "$per_informe_incluir_readme" == "SI"  ]] && presentarReadme -t
+
+               # Acciones sobre sus movimientos si hay recursividad
+               if [ "$per_tarea_recursiva" != 'NO' ] ; then
+                  movimientoAnterior=$movimientoId
+                  CMD="$mt_comando_mysql \"SELECT m.id from movimientos m WHERE m.idTarea=$tareaId \""
+                  movimientosIds="()"
+                  movimientosIds=(`eval $CMD`)
+
+                  if [ "${movimientosIds[*]}" != "" ] ; then
+
+                     nivel_indice='\t* '
+                     echo                                       | tee -a $TMP
+                     echo "Bitácoras de $tarea"                 | tee -a $TMP
+                     echo "Bitácoras de $tarea" | sed 's/./-/g' | tee -a $TMP
+                     echo                                       | tee -a $TMP
+                     if [ "$per_informe_indice" == "SI" ] ; then
+                        echo -e "${nivel_indice}\`Bitácoras de $tarea\`_" >> $fich_indice
+                     fi
+
+                     nivel_indice='\t\t+ '
+                     for movimientoId in ${movimientosIds[*]} ; do
+
+                        informacionMovimiento
+                        presentarCabeceraMovimiento $per_movimiento_cabecera
+                        [[ "$per_movimiento_contabilidad" == "SI" ]] && presentarTotalMovimiento
+                        movimientoId=""
+                     done
+                     nivel_indice='\t* '
+                  fi
+                  movimientoId=$movimientoAnterior
+               fi
+               [[ "$per_tarea_arch_afectados" != "NO" ]] && presentarArchivosAfectados -t
+               [[ "$per_tarea_literales_pendientes" != "NO" ]] && presentarLiterales -t
+               [[ "$per_tarea_TODOs" != "NO" ]] && presentarTODOs -t $tareaId
                [[ "$per_tarea_contabilidad" != "NO" ]] && presentarTotalTarea -t
+
             done
 
          # Estamos en proyecto
@@ -525,6 +568,7 @@ function menuInformes(){
             mv "${TMP}_old" "$TMP"
          fi
          ;;
+
       c|C) # ver movimientos por fecha
          ## @todo colocar todo esto en una función a parte
          echo "Buscar movimientos entre fechas"
