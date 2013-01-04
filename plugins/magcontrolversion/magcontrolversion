@@ -467,7 +467,7 @@ function _subversion() {
                m|M) _subversion modificados2movimiento ; _subversion menu ;;
                r|R) _subversion ramas ; _subversion menu ;;
                b|B) bash ; _subversion menu;;
-               x) exit 1 ;;
+               x) return ;;
                *) ${motor}_magcontrolversion_acciones_menu $OPCION ; _subversion menu  ;;
 
             esac
