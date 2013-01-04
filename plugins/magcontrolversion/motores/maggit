@@ -293,6 +293,14 @@ function git_cerrar_tarea() {
 
    if [ "$1" != "" ] ; then
       tarea=`sanear "$1"`
+      # comprobar tarea
+      if [ "`git_magcontrolversion_listar_ramas | grep $tarea`" = "" ] ; then
+         echo
+         echo "No hay una rama especifica para esta tarea"
+         echo
+         tecla
+         return
+      fi
    else
       git_magcontrolversion_listar_ramas | grep -v master | grep -v develop | tr ' ' \t > ${DIR_TMP}listado
       generar_listado_fichero --ocultar-ayuda
