@@ -5016,7 +5016,7 @@ log "INICIO" "$0 $@"
 
 if [ -e "$HOME/.magtrabajos/configuracion/" ] ; then
    for conf in $HOME/.magtrabajos/configuracion/* ; do
-      if [ -e "$conf" ] ; then
+      if [ -f "$conf" ] ; then
          log INICIO "Incluimos fichero de configuración: $conf"
          source $conf
       fi
