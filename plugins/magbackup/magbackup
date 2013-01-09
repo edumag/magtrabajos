@@ -1,0 +1,219 @@
+#!/bin/bash 
+
+## @file magbackup  
+## @brief magbackup es un script para generar copias de seguridad.
+##
+## Con los ficheros creamos una copia por mes y a partir de esta vamos creando
+## archivos por cada día de la semana con los cambios desde la copia por mes.
+##
+## Para generar las copias se debe crear un fichero de perfil en la carpeta
+## ~/.config/magscripts/magbackup/ficheros/perfil el nombre de la copia que se 
+## genera se basa en el nombre del archivo de perfil su formato es:
+## 
+## CS_DIR="/home/eduardo/" 
+## CS_COPIAR="Scripts .bashrc"
+##
+## CS_DIR: Nos indica la carpeta donde situarnos
+## CS_COPIAR: Las subcarpetas o archivos que deseamos copiar
+##
+## En caso de una copia de mysql en CS_DIR debera añadirse mysql <user> <password> y en 
+## CS_COPIAR los nombres de las bases de datos a copiar.
+##
+## En el caso de las copias de mysql no hay la posibilidad de copias incrementales con lo
+## cual se generara una copia completa cada vez.
+##
+## @todo Si pasamos un archivo o directorio creamos archivo comprimido
+## @todo Copias para mysql
+## @todo Copias para git
+##
+## @author   Eduardo Magrané
+## @internal
+##       web  http://www.mamedu.com
+##
+##      mail  eduardo.mamedu.com
+##
+##   Created  13/03/11
+##
+##  Revision  SVN $Id: $
+##
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+## @defgroup configuracion_magbackup Configuración magbackup
+##
+## Colocamos prefijo 'magbackup_' ha las variables para ser reconocibles
+##
+## @{
+
+   ## @var magbackup_dir
+   ## Directorio donde guardar las copias realizadas
+
+   magbackup_dir="$HOME/backup/"
+
+## @}
+
+# variables internas
+
+fichero_configuracion_magbackup="$HOME/.magtrabajos/configuracion/magbackup/config"  ##< Fichero configuración
+directorio_perfiles__ficheros_magbackup="$HOME/.magtrabajos/configuracion/magbackup/ficheros/"  ##< Fichero configuración
+directorio_perfiles__mysql_magbackup="$HOME/.magtrabajos/configuracion/magbackup/mysql/"  ##< Fichero configuración
+
+MES=`date +%B`
+DIA=`date +%A`
+
+## Recoger configuración de magtrabajos
+LIBS="$LIBS listado configuracion"
+source "`dirname "$BASH_SOURCE"`/../../config"
+
+
+# Si no encontramos fichero de configuración hay que generarlo
+if [ ! -e "$fichero_configuracion_magbackup" ] ; then
+   echo 
+   echo "No se encontro fichero de configuración"
+   echo
+   read -p "Configurar ahora (s/n): " OPCION
+   if [ "$OPCION" = "s" ] ; then
+      configuracion_menu magbackup_ "$fichero_configuracion_magbackup" "$BASH_SOURCE"
+   else
+      exit
+   fi
+fi
+
+# Recogemos archivo de configuracion
+. "$fichero_configuracion_magbackup"
+
+
+function magbackup_crear_copia_ficheros_perfil() {
+
+   for file in "$directorio_perfiles__ficheros_magbackup"* ; do
+
+      CMD='nice -10 tar -Pcjpf '
+
+      source "$file"
+
+      NOMBRE="$(basename $file)"
+      NOMBRE_MES="${NOMBRE}-`hostname`-${MES}.tar.bz2"
+      NOMBRE_DIA="${NOMBRE}-`hostname`-${DIA}.tar.bz2"
+
+      echo
+      echo ----------------
+      echo copias_seguridad
+      echo ----------------
+      echo
+      echo $NOMBRE
+      echo $NOMBRE | sed 's/./-/g'
+      echo
+      echo Inicio:  $CS_DIR
+      echo Mensual: $NOMBRE_MES
+      echo Diario:  $NOMBRE_DIA
+      echo
+
+      cd $CS_DIR
+
+      if [ ! -d $DIR ] ; then echo Directorio de inicio $CS_DIR no existe! ; exit ; fi
+
+      for origenes in $CS_COPIAR ; do
+         if [ -e $origenes ] ; then
+            echo -e "$origenes OK"
+         else
+            errores="$errores $origenes"
+         fi
+      done
+
+      if [ "$errores" != "" ] ; then
+         echo
+         echo Hay ubicaciones por copiar que no existen
+         echo
+         echo $errores | tr ' ' "\n"
+         exit
+      fi
+
+      # Si encontramos la copia del mes actual realizada
+      # hacemos una copia solo de los ficheros que se han
+      # modificado desde entonces
+
+      ANYO_ACTUAL=`date +%Y`
+
+      if [ -e "${magbackup_dir}$NOMBRE_MES" ] && [ "$ANYO_ACTUAL" = "`date +%Y -r "${magbackup_dir}$NOMBRE_MES"`" ]; then
+
+         # generamos copia diaria incremental
+         DESTINO="${magbackup_dir}$NOMBRE_DIA"
+         FECHA_INCREMENTAL="`date \"+%Y-%m-%d %H:%M\" -r "${magbackup_dir}$NOMBRE_MES"`"
+         CMD="$CMD $DESTINO --newer-mtime \"$FECHA_INCREMENTAL\" $CS_COPIAR"
+
+         echo
+         echo Realizamos copia incremental: $DESTINO
+         echo
+         echo Fecha ultima copia completa $FECHA_INCREMENTAL
+
+      else
+
+         # Generamos copia mensual
+         DESTINO="${magbackup_dir}$NOMBRE_MES"
+         CMD="$CMD $DESTINO $CS_COPIAR"
+
+         echo
+         echo Realizamos copia mensual: $DESTINO
+         echo
+
+      fi
+
+      # Hacer la copia sobre directorio temporal y solo
+      # en caso de exito pasarla al directorio final.
+
+      echo
+      echo Comando: $CMD
+      echo
+      eval "$CMD"
+
+      if [ $? = 0 ] ; then
+         echo Copia generada correctamente
+      else
+         echo Error al generar copia
+         exit 1
+      fi
+
+
+   done
+
+}
+
+function magbackup_crear_copia_mysql_perfil() {
+
+   for file in "$directorio_perfiles__mysql_magbackup"* ; do
+
+      echo -----
+      echo Mysql
+      echo -----
+      echo
+
+      source "$file"
+
+      for BD in $BASES_DATOS ; do
+         cmd="nice -10 mysqldump -u$USUARIO -p$PASS $BD | nice -10 bzip2 --best -c > ${magbackup_dir}mysql-${BD}-`hostname`-${DIA}.dump.bz2"
+         echo 
+         echo Comando: $cmd
+         eval "$cmd"
+      done
+
+   done
+
+}
+
+while [ -n "$1" ] ; do
+
+   case "$1" in
+      
+      -h|-help|--help) help ; exit ;;
+      -info) info ; help ; exit ;;
+      --dependencias|-d) comprobar_dependencias ; exit ;;
+
+   esac
+
+done
+
+magbackup_crear_copia_ficheros_perfil
+magbackup_crear_copia_mysql_perfil
+

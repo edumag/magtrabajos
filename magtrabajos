@@ -2121,7 +2121,7 @@ function cerrar(){
       FECHA="$(ejecutarSQL "$SQL" "-N")"
       if [ "$FECHA" = "0000-00-00 00:00:00" ] ; then                                        # Contador funcionando hay que pararlo
 
-         log "$FUNCNAME" "Contador funcionando"
+         mensajes "Contador funcionando, lo cerramos"
          contador -p
       fi
 
@@ -2131,6 +2131,8 @@ function cerrar(){
       SQL="UPDATE tareas SET fechaFinal='$FECHA' WHERE id=$tareaId"                         # Actualizamos fecha final a tarea
       ejecutarSQL "$SQL"
       mensajes "Se cierra movimiento: $movimientoId"
+
+      evento post_cerrar_movimiento
 
    else                                                                                     # No hay nada seleccinoado
 
@@ -5016,7 +5018,7 @@ log "INICIO" "$0 $@"
 
 if [ -e "$HOME/.magtrabajos/configuracion/" ] ; then
    for conf in $HOME/.magtrabajos/configuracion/* ; do
-      if [ -e "$conf" ] ; then
+      if [ -f "$conf" ] ; then
          log INICIO "Incluimos fichero de configuración: $conf"
          source $conf
       fi
