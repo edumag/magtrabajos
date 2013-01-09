@@ -257,7 +257,7 @@ function deshacer_cambios() {
 function sanear() {
 
    local cadena="$*"
-   cadena="`echo $1 | tr"ÁÉÍÓÚÑáéíóúñÇçÑn'\"" "AEIOUNaeiounCcNn  " | sed 's/ /-/g'`"
+   cadena=`echo $1 | tr "ÁÉÍÓÚÑáéíóúñÇçÑn'\"" "AEIOUNaeiounCcNn  " | sed 's/ /-/g'`
    echo $cadena
    }
 
