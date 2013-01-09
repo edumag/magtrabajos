@@ -2119,6 +2119,7 @@ function cerrar(){
       # Se coge la ultima fecha de los tiempos
       SQL="SELECT fechaFinal FROM tiempos WHERE idMovimiento=$movimientoId ORDER BY id DESC LIMIT 1"
       FECHA="$(ejecutarSQL "$SQL" "-N")"
+      echo FECHA: $FECHA
       if [ "$FECHA" = "0000-00-00 00:00:00" ] ; then                                        # Contador funcionando hay que pararlo
 
          mensajes "Contador funcionando, lo carramos"
