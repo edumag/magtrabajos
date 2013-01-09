@@ -2121,7 +2121,7 @@ function cerrar(){
       FECHA="$(ejecutarSQL "$SQL" "-N")"
       if [ "$FECHA" = "0000-00-00 00:00:00" ] ; then                                        # Contador funcionando hay que pararlo
 
-         log "$FUNCNAME" "Contador funcionando"
+         log "$FUNCNAME" "Contador funcionando, lo carramos"
          contador -p
       fi
 
@@ -2131,6 +2131,8 @@ function cerrar(){
       SQL="UPDATE tareas SET fechaFinal='$FECHA' WHERE id=$tareaId"                         # Actualizamos fecha final a tarea
       ejecutarSQL "$SQL"
       mensajes "Se cierra movimiento: $movimientoId"
+
+      evento post_cerrar_movimiento
 
    else                                                                                     # No hay nada seleccinoado
 
