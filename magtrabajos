@@ -2121,7 +2121,7 @@ function cerrar(){
       FECHA="$(ejecutarSQL "$SQL" "-N")"
       if [ "$FECHA" = "0000-00-00 00:00:00" ] ; then                                        # Contador funcionando hay que pararlo
 
-         log "$FUNCNAME" "Contador funcionando, lo carramos"
+         mensajes "Contador funcionando, lo carramos"
          contador -p
       fi
 
