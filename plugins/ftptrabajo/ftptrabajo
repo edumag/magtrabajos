@@ -878,6 +878,26 @@ function comprobarBloqueoServidor(){
          color destacado
          echo -n '  ' ; cat "${DIR_LOCAL}/$*".LCK
          color
+         echo
+         read -p 'Deseas enviarle un email solicitando que lo libere. (s/n): ' OPCION
+         if [ "$OPCION" = "s" ] ; then
+            local mail_bloqueado=`cat "${DIR_LOCAL}/$*".LCK | cut -d\| -f3`
+            local subject="Archivo $* bloqueado"
+            local body="Necesitaría el archivo $* para trabajar.\n\nGracias"
+            echo
+            echo Mail: $mail_bloqueado
+            echo Subject: $subject
+            echo Body: 
+            echo
+            echo ---
+            echo -e "$body"
+            echo ---
+            echo 
+            read -p "Enviar email. (s/n): " OPCION
+            if [ "$OPCION" = "s" ] ; then
+               echo $body | mail -s "$subject" $mail_bloqueado
+            fi
+         fi
          # Borramos archivo de bloqueo
          rm  "${DIR_LOCAL}/$*".LCK
          return 1
