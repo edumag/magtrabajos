@@ -425,7 +425,7 @@ function git_nueva_subversion_error() { version_actual="`git_get_version`.`git_g
 
 if [ "`git tag | grep '-'`" != "" ] ; then
    for v in `git tag | grep '-'` ; do
-      echo -e "\n- $v"
+      #echo -e "\n- $v"
       version_actual="`echo $v | cut -d- -f2`"
    done
 fi

@@ -7,18 +7,19 @@
 ## 
 ##  Opciones:
 ## 
-##    commit    Hacer commit sobre archivos afectados
-##    todo      Hacer commit sobre todos los archivos
-##    update    Actualizamos
-##    status    Ver estado actual
-##    menu      Presentamos menú
-##    borrar    Borramos archivo, necesitamos archivos como parámetros
-##    mover     Mover archivo, necesitamos archivos como parámetros. [origen] [destino]
-##    nuevos    Añadir archivos recientemente creados a control de versiones
-##    quitar    Eliminar de control de versiones los archivos que han sido borrados localmente
-##    help      Pantalla de ayuda
+##    commit      Hacer commit sobre archivos afectados
+##    todo        Hacer commit sobre todos los archivos
+##    update      Actualizamos
+##    status      Ver estado actual
+##    menu        Presentamos menú
+##    borrar      Borramos archivo, necesitamos archivos como parámetros
+##    mover       Mover archivo, necesitamos archivos como parámetros. [origen] [destino]
+##    nuevos      Añadir archivos recientemente creados a control de versiones
+##    quitar      Eliminar de control de versiones los archivos que han sido borrados localmente
+##    rama_actual Nos imprime el nombre de la rama actual y sale.
+##    help        Pantalla de ayuda
 ## 
-## Dependencias: gawk, subversion
+## Dependencias: gawk, subversion o git
 ##
 ## @todo Comprobar permisos de escritura para ahorrarnos problemas
 ## @todo Al ejecutar subversión permitir editar la descripción
@@ -357,7 +358,6 @@ function _subversion() {
             if [ "$salida" != "" ] ; then
                echo -e "$salida"
             fi
-            echo
             ;;
 
          commit) # commit
@@ -394,6 +394,11 @@ function _subversion() {
             eval "$func"
             ;;
 
+         rama_actual)
+            shift 1
+            echo $rama_actual
+            exit
+            ;;
          editar)
             shift 1
             if [ "$texto" != "" ] ; then
