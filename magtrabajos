@@ -1567,7 +1567,7 @@ function definirProyecto(){
 
       # Comprobar si tenemos contador en marcha
       if [ "$movimientoId" != "" ] ; then
-          SQL="SELECT id FROM tiempos WHERE idMovimiento=$movimientoId AND fechaFinal='0000-00-00 00:00:00'"
+          SQL="SELECT id FROM tiempos WHERE idMovimiento=$movimientoId AND fechaFinal='0000-00-00 00:00:00' LIMIT 1"
           tiempoId="$(ejecutarSQL "$SQL" "-N")"
       fi
 
