@@ -1,0 +1,61 @@
+#!/bin/bash
+
+## @file magraficas
+## @brief Creación de graficas
+##
+## Dependencias: ploticus
+##
+## Uso: echo $datos | magraficas --titulo "Titulo de la grafica" --pie "Pie de la grafica" --plantilla bola
+##
+## Parametros:
+## 
+## --titulo -t     Título de la gráfica
+## --pie -p        Pie a colocar en la gráfica
+## --plantilla -pl Plantilla a utlizar
+## 
+## Los parámetros siguientes serán los datos de la gráfica
+## 
+## Cada plantilla tiene sus propias formas de recibir los datos, leer la 
+## información de la plantilla para conocerlos.
+
+while [[ ! -z $1 ]]; do
+   case $1 in
+      --titulo) titulo="$2" ; shift 2 ;;
+      --pie)    pie="$2"    ; shift 2 ;;
+      --plantilla)   plantilla="$2"   ; shift 2 ;;
+      *)        break ;;
+   esac
+done
+
+datos="$*"
+
+for x in `seq 0 100` ; do
+   archivo_final="/tmp/`date +%s`_${x}__magraficas.png"
+   [[ ! -e "$archivo_final" ]] && continue
+done
+
+archivo_grafica="/tmp/magraficas.ploticus"
+comando='ploticus  -o $archivo_final -png -f $archivo_grafica && firefox $archivo_final '
+archivo_plantilla="`dirname $BASH_SOURCE`/plantillas/${plantilla}.magraficas"
+
+# echo
+# echo "Título:      $titulo"
+# echo "Pie:         $pie"
+# echo "Plantilla:   $plantilla"
+# echo "Datos:"
+# echo $datos
+# echo
+# echo "Archivo final: $archivo_final"
+# echo "Archivo grafica: $archivo_grafica"
+# echo "Archivo plantilla: $archivo_plantilla"
+# echo
+
+if [ ! -f "$archivo_plantilla" ] ; then
+   echo "Error no existe archivo de plantilla: $archivo_plantilla"
+   exit 1
+fi
+
+source $archivo_plantilla
+eval "$comando"
+
+echo $archivo_final
