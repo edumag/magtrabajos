@@ -348,7 +348,7 @@ function menuInformes(){
 
          fich_indice=${TMP}_indice
          fich_cabecera=${TMP}_cabecera
-         nivel_indice='* '
+         nivel_informe=0
 
          [[ -e "$TMP" ]] && rm "$TMP"
          [[ -e "$fich_indice" ]] && rm "$fich_indice"
@@ -359,20 +359,22 @@ function menuInformes(){
          # Encabezado de documento
          if [ "$per_informe_titulo" != "" ] && [ "$per_informe_titulo" != "NO" ] ; then 
             if [ "$per_informe_titulo" != "SI" ] ; then
-               titulo="$per_informe_titulo"
+               local titulo="$per_informe_titulo"
             else
                if [ "$movimientoId" != "" ] ; then
-                  titulo="Informe sobre $movimiento"
+                  local titulo="Informe sobre $movimiento"
                elif [ "$tareaId" != "" ] ; then
-                  titulo="Informe sobre $tarea"
+                  local titulo="Informe sobre $tarea"
                elif [ "$proyectoId" != "" ] ; then
-                  titulo="Informe sobre $proyecto"
+                  informacionProyecto
+                  local titulo="Informe sobre $proyecto"
                else
-                  titulo=""
+                  local titulo="Informe"
                fi
             fi
             if [ "$titulo" != "" ] ; then
-               echo -e "$(echo -e $titulo | awk -v FS='\t' '{ titulo=$1 ; gsub(".","=",$1) ; printf "\n%s\n%s\n%s\n",$1,titulo,$1}')" | tee $fich_cabecera
+               # echo -e "$(echo -e $titulo | awk -v FS='\t' '{ titulo=$1 ; gsub(".","=",$1) ; printf "\n%s\n%s\n%s\n",$1,titulo,$1}')" | tee $fich_cabecera
+               titulo_por_nivel "$titulo" | tee $fich_cabecera
                echo "" | tee -a $fich_cabecera
                echo ":fecha: `date +'%d de %B %Y'`" | tee -a $fich_cabecera
                echo "" | tee -a $fich_cabecera
@@ -380,11 +382,8 @@ function menuInformes(){
 
          fi
 
-         if [ "$per_informe_indice" == "SI" ] ; then
-            echo "Indice" > $fich_indice
-            echo "======" >> $fich_indice
-            echo >> $fich_indice
-         fi
+         # con título o no subimos el nivel
+         let nivel_informe++
 
          [[ -n $DEV ]] && echo "Proyecto: $proyecto"                       # DEV
          [[ -n $DEV ]] && echo "Perfil: $perfil_actual"                    # DEV
@@ -396,20 +395,19 @@ function menuInformes(){
             
             presentarCabeceraMovimiento $per_movimiento_cabecera
 
-            [[ "$per_incluir_readme" == "SI"  ]] && presentarReadme -m
+            [[ "$per_incluir_readme" == "SI"  ]]            && presentarReadme -m
             [[ "$per_tarea_literales_pendientes" == 'SI' ]] &&  presentarLiterales -m
-            [[ "$per_tarea_arch_afectados" == 'SI' ]] && presentarArchivosAfectados -m
-            [[ "$per_tarea_TODOs" == 'SI' ]] && presentarTODOs -m $movimientoId
-            [[ "$per_tarea_contabilidad" == 'SI' ]] && presentarTotalMovimiento
+            [[ "$per_tarea_arch_afectados" == 'SI' ]]       && presentarArchivosAfectados -m
+            [[ "$per_tarea_TODOs" == 'SI' ]]                && presentarTODOs -m $movimientoId
+            [[ "$per_tarea_contabilidad" == 'SI' ]]         && presentarTotalMovimiento
 
          # Estamos en tarea
 
          elif [ "$tareaId" != "" ] ; then
 
-            nivel_indice='* '
             presentarCabeceraTarea $per_tarea_cabecera
 
-            nivel_indice='\t* '
+            let nivel_informe++
 
             [[ "$per_informe_incluir_readme" == "SI"  ]] && presentarReadme -t
 
@@ -422,30 +420,25 @@ function menuInformes(){
 
                if [ "${movimientosIds[*]}" != "" ] ; then
 
-                  nivel_indice='\t* '
-                  echo                                       | tee -a $TMP
-                  echo "Bitácoras de $tarea"                 | tee -a $TMP
-                  echo "Bitácoras de $tarea" | sed 's/./-/g' | tee -a $TMP
-                  echo                                       | tee -a $TMP
-                  if [ "$per_informe_indice" == "SI" ] ; then
-                     echo -e "${nivel_indice}\`Bitácoras de $tarea\`_" >> $fich_indice
-                  fi
+                  titulo_por_nivel "Bitácoras de $tarea"     | tee -a "$TMP"
 
-                  nivel_indice='\t\t+ '
+                  let nivel_informe++
                   for movimientoId in ${movimientosIds[*]} ; do
 
                      presentarCabeceraMovimiento $per_movimiento_cabecera
+                     let nivel_informe++
                      [[ "$per_movimiento_contabilidad" == "SI" ]] && presentarTotalMovimiento
                      movimientoId=""
+                     let nivel_informe--
+
                   done
-                  nivel_indice='\t* '
                fi
                movimientoId=$movimientoAnterior
             fi
-            [[ "$per_tarea_arch_afectados" != "NO" ]] && presentarArchivosAfectados -t
+            [[ "$per_tarea_arch_afectados" != "NO" ]]       && presentarArchivosAfectados -t
             [[ "$per_tarea_literales_pendientes" != "NO" ]] && presentarLiterales -t
-            [[ "$per_tarea_TODOs" != "NO" ]] && presentarTODOs -t $tareaId
-            [[ "$per_tarea_contabilidad" != "NO" ]] && presentarTotalTarea -t
+            [[ "$per_tarea_TODOs" != "NO" ]]                && presentarTODOs -t $tareaId
+            [[ "$per_tarea_contabilidad" != "NO" ]]         && presentarTotalTarea -t
 
          # Tareas varias seleccionadas
 
@@ -453,11 +446,10 @@ function menuInformes(){
 
             for tareaId in ${tareasIds[*]} ; do
 
-               nivel_indice='* '
                informacionTarea
                presentarCabeceraTarea $per_tarea_cabecera
 
-               nivel_indice='\t* '
+               let nivel_informe++
 
                [[ "$per_informe_incluir_readme" == "SI"  ]] && presentarReadme -t
 
@@ -470,31 +462,27 @@ function menuInformes(){
 
                   if [ "${movimientosIds[*]}" != "" ] ; then
 
-                     nivel_indice='\t* '
-                     echo                                       | tee -a $TMP
-                     echo "Bitácoras de $tarea"                 | tee -a $TMP
-                     echo "Bitácoras de $tarea" | sed 's/./-/g' | tee -a $TMP
-                     echo                                       | tee -a $TMP
-                     if [ "$per_informe_indice" == "SI" ] ; then
-                        echo -e "${nivel_indice}\`Bitácoras de $tarea\`_" >> $fich_indice
-                     fi
+                     titulo_por_nivel "Bitácoras de $tarea"     | tee -a "$TMP"
 
-                     nivel_indice='\t\t+ '
                      for movimientoId in ${movimientosIds[*]} ; do
 
                         informacionMovimiento
                         presentarCabeceraMovimiento $per_movimiento_cabecera
+                        let nivel_informe++
                         [[ "$per_movimiento_contabilidad" == "SI" ]] && presentarTotalMovimiento
                         movimientoId=""
+                        let nivel_informe--
+
                      done
-                     nivel_indice='\t* '
                   fi
                   movimientoId=$movimientoAnterior
                fi
-               [[ "$per_tarea_arch_afectados" != "NO" ]] && presentarArchivosAfectados -t
+               [[ "$per_tarea_arch_afectados" != "NO" ]]       && presentarArchivosAfectados -t
                [[ "$per_tarea_literales_pendientes" != "NO" ]] && presentarLiterales -t
-               [[ "$per_tarea_TODOs" != "NO" ]] && presentarTODOs -t $tareaId
-               [[ "$per_tarea_contabilidad" != "NO" ]] && presentarTotalTarea -t
+               [[ "$per_tarea_TODOs" != "NO" ]]                && presentarTODOs -t $tareaId
+               [[ "$per_tarea_contabilidad" != "NO" ]]         && presentarTotalTarea -t
+
+               let nivel_informe--
 
             done
 
@@ -502,16 +490,16 @@ function menuInformes(){
 
          elif [ "$proyectoId" != "" ] ; then
 
-            nivel_indice='\t* '
-
             # Informes sobre proyecto
-            [[ "$per_proyecto_cabecera" != "NO" ]] && presentarProyecto
-            [[ "$per_proyecto_contabilidad" != "NO" ]] && contabilidad_proyecto
-            [[ "$per_proyecto_notas" != "NO" ]] && presentarNotas
+            [[ "$per_proyecto_cabecera" != "NO" ]]          && presentarProyecto
+            let nivel_informe++
+            [[ "$per_proyecto_contabilidad" != "NO" ]]      && contabilidad_proyecto
+            [[ "$per_proyecto_notas" != "NO" ]]             && presentarNotas
             [[ "$per_proyecto_control_versiones" != "NO" ]] && estado_control_versiones
-            [[ "$per_proyecto_pendiente_codigo" != "NO" ]] && pendienteCodigo
+            [[ "$per_proyecto_pendiente_codigo" != "NO" ]]  && pendienteCodigo
             [[ "$per_proyecto_tareas_pendientes" != "NO" ]] && tareas_pendientes
-            [[ "$per_proyecto_TODOs" == "SI" ]] && presentarTODOs
+            [[ "$per_proyecto_TODOs" == "SI" ]]             && presentarTODOs
+            let nivel_informe--
             
 
          # Sin proyecto definido
@@ -536,15 +524,15 @@ function menuInformes(){
             for p in $SALIDA ; do
                proyectoId=$p
                definirProyecto -p $proyectoId
-               nivel_indice='* '
                [[ "$per_proyecto_cabecera" != "NO" ]] && presentarProyecto
-               nivel_indice='\t* '
+               let nivel_informe++
                [[ "$per_proyecto_contabilidad" != "NO" ]] && contabilidad_proyecto
                [[ "$per_proyecto_notas" != "NO" ]] && presentarNotas
                [[ "$per_proyecto_control_versiones" != "NO" ]] && estado_control_versiones
                [[ "$per_proyecto_pendiente_codigo" != "NO" ]] && pendienteCodigo
                [[ "$per_proyecto_tareas_pendientes" != "NO" ]] && tareas_pendientes
                [[ "$per_proyecto_TODOs" == "SI" ]] && presentarTODOs
+               let nivel_informe--
             done
 
          fi
@@ -603,7 +591,7 @@ function menuInformes(){
             WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND p.id=t.idProyecto 
             AND ( ti.fechaInicio >= '$FECHA_INICIO' AND ti.fechaFinal <= '$FECHA_FINAL' )
             "
-         SQL="
+         SQL_BASE="
             SELECT Proyecto, Tarea, Mov, mes, sem, dia, CONCAT(FORMAT((sum(min)/60),0),':' , 
             IF ( (sum(min)%60)<10,0,'' ) , FORMAT((sum(min)%60),0)  ) as tiempo,
             SUM(euros) AS euros
@@ -613,11 +601,37 @@ function menuInformes(){
          if [ -e $TMP ] ; then rm $TMP ; fi
 
          echo "" | tee -a $TMP
+         echo "---------" | tee -a $TMP
+         echo "Proyectos" | tee -a $TMP
+         echo "---------" | tee -a $TMP
+         echo "" | tee -a $TMP
+         SQL="
+            SELECT Proyecto, CONCAT(FORMAT((sum(min)/60),0),':' , 
+            IF ( (sum(min)%60)<10,0,'' ) , FORMAT((sum(min)%60),0)  ) as tiempo,
+            SUM(euros) AS euros
+            FROM ($SUBSELECT) as sMinutos 
+            "
+         GROUP="GROUP BY Proyecto"
+         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL $GROUP" trabajos | tee -a $TMP
+         # gráfica
+         SQL="
+            SELECT CONCAT(Proyecto,'\t', sum(min)/60) FROM ($SUBSELECT) as sMinutos 
+            "
+         datos=`ejecutarSQL  "$SQL $GROUP" "-N"`
+         img=`magraficas --titulo 'Tiempo en Proyectos' --plantilla semanas_horas "$datos"`
+
+         echo                 | tee -a $TMP
+         echo .. image:: $img | tee -a $TMP
+         echo                 | tee -a $TMP
+
+
+         echo "" | tee -a $TMP
          echo "-----------------" | tee -a $TMP
          echo "Todos los tiempos" | tee -a $TMP
          echo "-----------------" | tee -a $TMP
          echo "" | tee -a $TMP
-         ejecutarSQL "$SUBSELECT ORDER BY ti.fechaInicio " "-t" | tee -a $TMP
+         # ejecutarSQL "$SUBSELECT ORDER BY ti.fechaInicio " "-t" | tee -a $TMP
+         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SUBSELECT ORDER BY ti.fechaInicio " trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "------------------------------" | tee -a $TMP
@@ -625,7 +639,8 @@ function menuInformes(){
          echo "------------------------------" | tee -a $TMP
          echo "" | tee -a $TMP
          GROUP="GROUP BY sMinutos.Mov, sMinutos.dia "
-         ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+         # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL_BASE $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "------------------" | tee -a $TMP
@@ -639,7 +654,8 @@ function menuInformes(){
             FROM ($SUBSELECT) as sMinutos 
             "
          GROUP="GROUP BY sMinutos.Tarea "
-         ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+         # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "----------------" | tee -a $TMP
@@ -653,7 +669,8 @@ function menuInformes(){
             FROM ($SUBSELECT) as sMinutos 
             "
          GROUP="GROUP BY sMinutos.dia ORDER BY sMinutos.dia "
-         ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+         #ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "-------------------" | tee -a $TMP
@@ -661,7 +678,21 @@ function menuInformes(){
          echo "-------------------" | tee -a $TMP
          echo "" | tee -a $TMP
          GROUP="GROUP BY sMinutos.sem "
-         ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+         # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL $GROUP" trabajos | tee -a $TMP
+
+         # gráfica
+         SQL="
+            SELECT CONCAT(dia,'\t', sum(min)/60) FROM ($SUBSELECT) as sMinutos 
+            "
+         GROUP="GROUP BY sMinutos.dia ORDER BY sMinutos.dia "
+         datos=`ejecutarSQL  "$SQL $GROUP" "-N"`
+         img=`magraficas --titulo 'Total horas x semanas' --plantilla semanas_horas "$datos"`
+
+         echo                 | tee -a $TMP
+         echo .. image:: $img | tee -a $TMP
+         echo                 | tee -a $TMP
+
 
 
          read -p "(ENTER) SALE"
