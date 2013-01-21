@@ -265,6 +265,18 @@ function comprobar_dependencias() {
 
 # VARIABLES GLOBALES
 
+   ## Nivel de informe nos permite conocer el nivel de sección o subsección
+   ## en el que estamos, para a la hora de poner el título de la sección
+   ## hacerlo de manera correcta que no rompa la lógica de RestructureText.
+   ##
+   ## @see titulo_por_nivel()
+
+   nivel_informe=0
+
+   ## Cadena a añadir antes del item del ínidice según nivel_informe
+
+   nivel_indice='* '
+
    DEV=                                                          # Depuramos
    CONF=${HOME}/.magtrabajos/configuracion/magtrabajos           # Archivo de configuración general
    archivo_log="${DIR_TMP}magtrabajos.log"
@@ -341,7 +353,7 @@ function comprobar_dependencias() {
    SQL_TOTAL_FROM='FROM tareas t LEFT JOIN movimientos m ON m.idTarea=t.id LEFT JOIN tiempos ti ON ti.idMovimiento=m.id '
 
    # Tareas seleccionar
-   SQL_TAR_SELECCIONAR="SELECT t.id, t.nombre, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, t.prioridad
+   SQL_TAR_SELECCIONAR="SELECT t.id, t.nombre, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, t.prioridad, t.idFactura
       ,$SQL_TOTAL
       FROM tareas t 
       LEFT JOIN movimientos m ON m.idTarea=t.id 
@@ -382,6 +394,114 @@ function comprobar_dependencias() {
    recursivo='FALSE'                         # Recursividad para los movimientos
 
 # FUNCIONES GENERALES
+
+## Generamos titulo de informe segun el nivel en que nos encontramos.
+##
+## @param $1 Título
+## @param $2 Nivel a utilizar por defecto $nivel_informe
+
+function titulo_por_nivel() {
+   
+   local titulo="$1"
+   local nivel=${2:-$nivel_informe}
+
+   case $nivel in
+      0) # nivel 0
+         echo $titulo | sed 's/./=/g'
+         echo $titulo
+         echo $titulo | sed 's/./=/g'
+         echo
+         # Nivel 0 es el título del informe, colocamos título
+         # del indice. 
+         if [ "$per_informe_indice" == "SI" ] ; then
+            echo "Indice" | sed 's/./-/g' >> $fich_indice
+            echo "Indice"                 >> $fich_indice
+            echo "Indice" | sed 's/./-/g' >> $fich_indice
+            echo                          >> $fich_indice
+         fi
+         ;;
+      1) # nivel 1
+         echo
+         echo $titulo | sed 's/./-/g'
+         echo $titulo
+         echo $titulo | sed 's/./-/g'
+         echo
+         nivel_indice='* '
+         ;;
+      2) # nivel 2
+         echo
+         echo $titulo
+         echo $titulo | sed 's/./=/g'
+         echo
+         nivel_indice='\t* '
+         ;;
+      3) # nivel 3
+         echo
+         echo $titulo
+         echo $titulo | sed 's/./-/g'
+         echo
+         nivel_indice='\t\t+ '
+         ;;
+      4) # nivel 4
+         echo
+         echo $titulo
+         echo $titulo | sed 's/./\`/g'
+         echo
+         nivel_indice='\t\t\t+ '
+         ;;
+      5) # nivel 5
+         echo
+         echo $titulo
+         echo $titulo | sed "s/./'/g"
+         echo
+         nivel_indice='\t\t\t\t+ '
+         ;;
+      6) # nivel 6
+         echo
+         echo $titulo
+         echo $titulo | sed 's/./\./g'
+         echo
+         nivel_indice='\t\t\t\t\t+ '
+         ;;
+      7) # nivel 7
+         echo
+         echo $titulo
+         echo $titulo | sed 's/./\~/g'
+         echo
+         nivel_indice='\t\t\t\t\t\t+ '
+         ;;
+      8) # nivel 8
+         echo
+         echo $titulo
+         echo $titulo | sed 's/./\*/g'
+         echo
+         nivel_indice='\t\t\t\t\t\t\t+ '
+         ;;
+      9) # nivel 9
+         echo
+         echo $titulo
+         echo $titulo | sed 's/./+/g'
+         echo
+         nivel_indice='\t\t\t\t\t\t\t\t+ '
+         ;;
+      10) # nivel 10
+         echo
+         echo $titulo
+         echo $titulo | sed 's/./\^/g'
+         echo
+         nivel_indice='\t\t\t\t\t\t\t\t\t+ '
+         ;;
+      *) # Sin nivel error
+         echo sin nivel no podemos trabajar
+         exit
+         ;;
+   esac
+
+   if [ "$per_informe_indice" == "SI" ] && [ $nivel -ne 0 ] ; then
+      echo -e "${nivel_indice}\`$titulo\`_" >> $fich_indice
+   fi
+
+   }
 
 ## Configuración de magtrabajos
 ##
@@ -2424,18 +2544,12 @@ function presentarProyecto() {
    log $FUNCNAME "$*"
 
    if [ "$1" == "" ] || [ "$1" == '-nombre' ] ; then
-      echo                              | tee -a "$TMP"
-      echo $proyecto                    | tee -a "$TMP"
-      echo $proyecto | sed 's/./=/g'    | tee -a "$TMP"
-      echo                              | tee -a "$TMP"
+      titulo_por_nivel "$proyecto" | tee -a "$TMP"
    else
-      SQL="$SQL_PRO AND p.id=$proyectoId "
+      titulo_por_nivel "$proyecto" | tee -a "$TMP"
+      SQL="SELECT descripcion FROM proyectos WHERE p.id=$proyectoId "
       SALIDA=$(ejecutarSQL "$SQL" "-N")
-      echo -e "$(echo -e "$SALIDA" | awk -v FS='\t' -v RS='\nnn' '{ titulo=$1 ; gsub(".","=",$1) ; printf "\n%s\n%s\n\n%s\n\n",titulo,$1,$2}')" | tee -a $TMP
-   fi
-
-   if [ "$per_informe_indice" == "SI" ] ; then
-      echo -e "${nivel_indice}\`$proyecto\`_" >> $fich_indice   
+      echo -e "$SALIDA"
    fi
 
 
@@ -2481,14 +2595,13 @@ presentarCabeceraTarea() {
 
          [[ "$SALIDA" = "" ]] && echo -e "ERROR::$SALIDA \nSQL::$SQL"
 
-            echo | tee -a $TMP
-            echo -e $SALIDA | awk -v RS='\nnn' -v FS='\t' '{ titulo=$2 ; gsub(".","=",$2) ; printf "%s\n%s\n\nFechas: *%s* - *%s*\n\nTotal: *%s*    Estado: *%s*\n\n",titulo,$2,$5,$6,$3,$4}' | tee -a $TMP
-            SQL="SELECT descripcion from tareas WHERE id=$tareaId"
-            echo -e "$(ejecutarSQL '$SQL' '-N')" | tee -a $TMP
+         titulo_por_nivel "$tarea"  | tee -a "$TMP" 
 
-         if [ "$per_informe_indice" == "SI" ] ; then
-            echo -e "${nivel_indice}\`$tarea\`_" >> $fich_indice   
-         fi
+         echo -e $SALIDA | awk -v RS='\nnn' -v FS='\t' '{ titulo=$2 ; gsub(".","=",$2) ; printf ":Fechas: %s /%s\n\n:Total: %s\n\n:Estado: %s\n\n",$5,$6,$3,$4}' | tee -a $TMP
+         echo ":id: $tareaId"       | tee -a "$TMP"
+         echo                       | tee -a "$TMP"
+         SQL="SELECT descripcion from tareas WHERE id=$tareaId"
+         echo -e "$(ejecutarSQL '$SQL' '-N')" | tee -a $TMP
 
          ;;
 
@@ -2505,16 +2618,7 @@ presentarCabeceraTarea() {
          cmd="$(ejecutarSQL '$SQL' '-N')"
          log "$FUNCNAME $cmd"
          eval "$cmd"
-         # local titulo=$(ejecutarSQL "$SQL" '-N')
-         local linea=$(echo $titulo | sed 's/./-/g')
-         echo | tee -a $TMP
-         echo | tee -a $TMP
-         echo $linea | tee -a $TMP
-         echo $titulo | tee -a $TMP
-         echo $linea | tee -a $TMP
-         # echo | tee -a $TMP
-         # echo Prioridad: $prioridad | tee -a $TMP
-         echo | tee -a $TMP
+         titulo_por_nivel "$tarea"  | tee -a "$TMP" 
          SQL="SELECT descripcion from tareas WHERE id=$tareaId"
          echo -e "$(ejecutarSQL '$SQL' '-N')" | tee -a $TMP
          ;;
@@ -2536,13 +2640,17 @@ function presentarReadme() {
 
    if [ "$1" == "-t" ] ; then
       accion_sobre=tarea
+      nombre=$tarea
    elif [ "$1" == "-m" ] ; then
       accion_sobre=movimiento
+      nombre=$movimiento
    else
       if [ "$movimientoId" != "" ] ; then
          accion_sobre=movimiento
+         nombre=$movimiento
       elif [ "$tareaId" != "" ] ; then
          accion_sobre=tarea
+         nombre=$tarea
       fi
    fi
 
@@ -2559,23 +2667,16 @@ function presentarReadme() {
       if [ "`basename $file`" == "readme.dox" ] ; then
 
          if [ "$titulo_incluido" = 0 ] ; then
-            echo                         | tee -a $TMP
-            echo 'Documentación interna' | tee -a $TMP
-            echo '---------------------' | tee -a $TMP
-            echo                         | tee -a $TMP
+            titulo_por_nivel "Documentación interna en $nombre" | tee -a $TMP
             titulo_incluido=1
 
-            if [ "$per_informe_indice" == "SI" ] ; then
-               echo -e "${nivel_indice}\`Documentación interna\`_" >> $fich_indice   
-            fi
          fi
 
-         echo | tee -a $TMP 
-         echo $file | tee -a $TMP
-         echo $file | sed "s/./'/g" | tee -a $TMP
-         echo | tee -a $TMP
+         let nivel_informe++
+         titulo_por_nivel "$file" | tee -a "$TMP"
          cat "$file" | grep -v '/\*\*' | grep -v '\*/' | tee -a $TMP
          echo | tee -a $TMP
+         let nivel_informe--
       fi
    done
 
@@ -2657,10 +2758,7 @@ case $ACCION in
       echo "PENDIENTE TOTAL PARA VER" 
       ;;
    *) # Por defecto
-      echo "" | tee -a $TMP
-      echo "Total de tarea $tarea" | tee -a $TMP
-      echo "Total de tarea $tarea" | sed 's/./-/g' | tee -a $TMP
-      echo "" | tee -a $TMP
+      titulo_por_nivel "Total de tarea $tarea" | tee -a "$TMP"
       fila="\n+------------+------------+----------------+-------------+-----------+-----------+---------+----------+----------+" 
       echo -e $fila  | tee -a $TMP
       echo -e -n "| Inici      | Fi         | Estat          | Estimacio   | Presupost | Dedicacio | Compen. | SubTotal |  Total   |"  | tee -a $TMP
@@ -2671,9 +2769,6 @@ case $ACCION in
       echo -e $fila  | tee -a $TMP
       echo "" | tee -a $TMP
 
-      if [ "$per_informe_indice" == "SI" ] ; then
-         echo -e "${nivel_indice}\`Total de tarea $tarea\`_" >> $fich_indice   
-      fi
       ;;
 
 esac
@@ -2745,16 +2840,11 @@ presentarTODOs() {
    local SALIDA=$(eval "$cmd")
 
    if [ "${SALIDA}" = "" ] ; then log "$FUNCNAME" "Sin salida" ; return ; fi
-   echo | tee -a $TMP
-   echo -e "$titulo" | tee -a $TMP
-   echo $linea | tee -a $TMP
-   echo | tee -a $TMP
-   echo -e "${SALIDA}" | tee -a $TMP
-   echo | tee -a $TMP
 
-   if [ "$per_informe_indice" == "SI" ] ; then
-      echo -e "${nivel_indice}\`$titulo\`_" >> $fich_indice   
-   fi
+   titulo_por_nivel "$titulo" | tee -a "$TMP"
+   echo -e "${SALIDA}"        | tee -a $TMP
+   echo                       | tee -a $TMP
+
    }
 
 # SOBRE MOVIMIENTO
@@ -2770,45 +2860,32 @@ presentarCabeceraMovimiento() {
 
       completa)
 
-         sql="SELECT CONCAT('movimiento=\'',nombre,'\'') FROM movimientos WHERE id=$movimientoId"
+         sql="SELECT CONCAT('movimiento=\'',nombre,'\';fecha_inicio=\'',fechaInicio,'\';') FROM movimientos WHERE id=$movimientoId"
          salida="$(ejecutarSQL "$sql" -N)"
+         if [ "$salida" = "" ] ; then
+            echo -e "ERROR::$salida \nSQL::$sql"
+            exit
+         fi
          eval "$salida"
 
          # Con formato presentamos titulo de movimiento como 
          # subsección, y su descripción
 
-         SQL="$SQL_MOV2 AND m.id=$movimientoId " 
-         SALIDA=$(ejecutarSQL "$SQL" "-N")
+         if [ "$movimiento" = 'inicio' ] ; then
+           titulo_por_nivel "inicio de $tarea" | tee -a $TMP
+         else
+           SQL="SELECT descripcion FROM movimientos WHERE id=$movimientoId"
+           descripcion="$(ejecutarSQL "$SQL" "-N")"
 
-         if [ "$SALIDA" = "" ] ; then
-            echo -e "ERROR::$SALIDA \nSQL::$SQL"
-            exit
+           titulo_por_nivel "$movimiento" | tee -a $TMP 
+           echo ":fecha: $fecha_inicio"   | tee -a $TMP
+           echo ":id: $movimientoId"      | tee -a $TMP
+           echo                           | tee -a $TMP      
+           echo -e "$descripcion"         | tee -a $TMP
+           echo                           | tee -a $TMP      
+
          fi
 
-         echo -e "$SALIDA" | \
-         awk -v RS='\nnn' -v FS='\t' -v tarea="$tarea" '{
-         desc=$4 ;
-         if ( $3 == "inicio" )
-            titulo1 = sprintf("%s de %s", $3, tarea)
-         else
-            titulo1 = sprintf("%s", $3)
-
-         titulo = sprintf("%s",titulo1); ;
-         gsub(".","~",titulo) ;
-         if ( desc != "" && desc != "\n" )
-            printf "\n%s\n%s\n%s\n\n%s\n\n",titulo, titulo1, titulo ,$4
-         else
-            printf "\n%s\n%s\n%s\n",titulo, titulo1, titulo
-         }' | tee -a $TMP
-
-         if [ "$per_informe_indice" == "SI" ] ; then
-
-            if [ "$movimiento" == 'inicio' ] ; then
-               echo -e "${nivel_indice}\`inicio de $tarea\`_" >> $fich_indice   
-            else
-               echo -e "${nivel_indice}\`$movimiento\`_" >> $fich_indice   
-            fi
-         fi
          ;;
 
       txt)
@@ -2835,23 +2912,23 @@ presentarCabeceraMovimiento() {
       *) # formato simple por defecto
 
          log "$FUNCNAME" "formato simple"
-         SQL="$SQL_MOV AND m.id=$movimientoId " 
-         SALIDA=$(ejecutarSQL "$SQL" "-N")
 
-         if [ "$SALIDA" = "" ] ; then
-            log "$FUNCNAME" "Sin salida SQL::$SQL"
-            return
-         fi
-
-         ## Si no tenemos detalles de movimineto presentamos solo el titulo
-         echo -e $SALIDA | \
-         awk -v RS='\nnn' -v FS='\t' -v tarea="$tarea" ' 
-         { if ( $2 != "inicio" ) 
-            printf "\n*%s*\n\n",$2
+         if [ "$movimiento" = 'inicio' ] ; then
+           echo                    | tee -a $TMP      
+           echo "Inicio de $tarea" | tee -a $TMP
          else
-            printf "\nInicio de %s\n\n",tarea
-         }'  | tee -a $TMP
+           SQL="SELECT descripcion FROM movimientos WHERE id=$movimientoId"
+           descripcion="$(ejecutarSQL "$SQL" "-N")"
 
+           echo                           | tee -a $TMP      
+           echo "\*${movimiento}\*"       | tee -a $TMP 
+           echo                           | tee -a $TMP  
+           echo "fecha: $fecha_inicio"    | tee -a $TMP
+           echo                           | tee -a $TMP      
+           echo -e "$descripcion"         | tee -a $TMP
+           echo                           | tee -a $TMP      
+
+         fi
          ;;
 
    esac
@@ -2890,10 +2967,7 @@ function presentarTotalMovimiento() {
 
    fi
 
-   echo "" | tee -a $TMP
-   echo "Total de movimiento $tarea / $movimiento" | tee -a $TMP
-   echo "Total de movimiento $tarea / $movimiento" | sed 's/./-/g' | tee -a $TMP
-   echo "" | tee -a $TMP
+   titulo_por_nivel "Total de movimiento $tarea / $movimiento" | tee -a "$TMP"
 
    fila="\n+-----------+----------+" 
    echo -e $fila  | tee -a $TMP
@@ -2903,9 +2977,6 @@ function presentarTotalMovimiento() {
    echo -e $fila  | tee -a $TMP
    echo "" | tee -a $TMP
 
-   if [ "$per_informe_indice" == "SI" ] ; then
-      echo -e "${nivel_indice}\`Total de movimiento $tarea / $movimiento\`_" >> $fich_indice   
-   fi
    }
 
 # SOBRE MOVIMIENTO O TAREA
@@ -2958,16 +3029,10 @@ esac
 local SALIDA=$(ejecutarSQL "$SQL" "-N")
 
 if [ "$SALIDA" != "" ] ; then
-   echo | tee -a $TMP
-   echo -e "$titulo" | tee -a $TMP
-   echo $linea | tee -a $TMP
-   echo | tee -a $TMP
+   titulo_por_nivel "$titulo"            | tee -a "$TMP"
    echo "$SALIDA" | awk '{print "-",$0}' | tee -a $TMP
-   echo | tee -a $TMP
+   echo                                  | tee -a $TMP
 
-   if [ "$per_informe_indice" == "SI" ] ; then
-      echo -e "${nivel_indice}\`$titulo\`_" >> $fich_indice   
-   fi
 fi
 }
 
@@ -3007,16 +3072,9 @@ local SALIDA=$(
 )
 
 [[ "${#SALIDA}" -lt 1 ]] && return
-echo | tee -a $TMP
-echo -e "$titulo" | tee -a $TMP
-echo $linea | tee -a $TMP
-echo | tee -a $TMP
-echo "${SALIDA}" | tee -a $TMP
 
-if [ "$per_informe_indice" == "SI" ] ; then
-   echo -e "${nivel_indice}\`$titulo\`_" >> $fich_indice   
-fi
-
+titulo_por_nivel "$titulo" | tee -a "$TMP"
+echo "${SALIDA}"           | tee -a $TMP
 
 }
 
@@ -3031,16 +3089,9 @@ function presentarNotas() {
    [[ "$salida" == "" ]] && return
 
    # Archivo de notas
-   echo                                                 | tee -a $TMP
-   echo                                                 | tee -a $TMP
-   echo "Archivo de Notas de $proyecto"                 | tee -a $TMP
-   echo "Archivo de Notas de $proyecto" | sed 's/./-/g' | tee -a $TMP
-   echo                                                 | tee -a $TMP
+   titulo_por_nivel "Archivo de Notas de $proyecto" | tee -a $TMP 
    cat $FICH_PENDIENTE | tee -a $TMP 
 
-   if [ "$per_informe_indice" == "SI" ] ; then
-      echo -e "${nivel_indice}\`Archivo de Notas de $proyecto\`_" >> $fich_indice   
-   fi
    }
 
 function pendienteCodigo() {
@@ -3050,17 +3101,9 @@ function pendienteCodigo() {
    # Código pendiente
    SALIDA="$(buscar_codigo formato enlaces proyecto $proyecto)"
    if [ "$SALIDA" != "" ] ; then
-      echo | tee -a $TMP
-      echo "Código pendiente de $proyecto" | tee -a $TMP
-      echo "Código pendiente de $proyecto" | sed 's/./-/g' | tee -a $TMP
-      echo | tee -a $TMP
+      titulo_por_nivel "Código pendiente de $proyecto" | tee -a $TMP
       echo -e "$SALIDA" | tee -a $TMP 
       echo | tee -a $TMP
-
-      if [ "$per_informe_indice" == "SI" ] ; then
-         echo -e "${nivel_indice}\`Código pendiente de $proyecto\`_" >> $fich_indice   
-      fi
-
    fi
 
    }
@@ -3090,15 +3133,10 @@ function estado_control_versiones() {
       SALIDA="$(magcontrolversion status)"
       if [ $? == 0 ] && [ "$SALIDA" != "" ] ; then 
 
-         echo                                                       | tee -a $TMP
-         echo "subversion en $proyecto"                             | tee -a $TMP
-         echo "subversion en $proyecto" | sed 's/./-/g'             | tee -a $TMP
+         titulo_por_nivel "subversion en $proyecto" | tee -a $TMP
          echo -e "$SALIDA" | awk -v FS='\t' '{printf "\n- %s", $1}' | tee -a $TMP
          echo                                                       | tee -a $TMP
 
-         if [ "$per_informe_indice" == "SI" ] ; then
-            echo -e "${nivel_indice}\`subversion en $proyecto\`_" >> $fich_indice   
-         fi
       fi
 
    elif [ -e "$DIR_PROYECTOS/.git" ] ; then
@@ -3107,16 +3145,10 @@ function estado_control_versiones() {
       SALIDA="$(git status)"
       if [ $? == 0 ] && [ "$SALIDA" != "" ] ; then 
 
-         echo                                       | tee -a $TMP
-         echo "git en $proyecto"                    | tee -a $TMP
-         echo "git en $proyecto" | sed -e 's/./-/g' | tee -a $TMP
-         echo                                       | tee -a $TMP
+         titulo_por_nivel "git en $proyecto" | tee -a $TMP
          echo -e "$SALIDA" | awk -v FS='@@@' '{printf "\n| %s", $1}' | tee -a $TMP
          echo                                       | tee -a $TMP
 
-         if [ "$per_informe_indice" == "SI" ] ; then
-            echo -e "${nivel_indice}\`git en $proyecto\`_" >> $fich_indice   
-         fi
       fi
 
    fi
@@ -3145,18 +3177,16 @@ function tareas_pendientes() {
       return
    else
 
-   if [ "$per_informe_enlaces" != "SI" ] ; then
-      local l="==== ========================================================================= ============== ===="
-      local t="id   Tarea                                                              Estado  Pr."
-   else
-      local l="==== ======================================================================================================= ============== ===="
-      local t="id   Tarea                                                                                            Estado  Pr."
-   fi
+      if [ "$per_informe_enlaces" != "SI" ] ; then
+         local l="==== ========================================================================= ============== ===="
+         local t="id   Tarea                                                              Estado  Pr."
+      else
+         local l="==== ======================================================================================================= ============== ===="
+         local t="id   Tarea                                                                                            Estado  Pr."
+      fi
 
-      echo                                                                        | tee -a $TMP
-      echo "Tareas pendientes, empezadas o posibles en $proyecto"                 | tee -a $TMP
-      echo "Tareas pendientes, empezadas o posibles en $proyecto" | sed 's/./-/g' | tee -a $TMP
-      echo                                                                        | tee -a $TMP
+      titulo_por_nivel "Tareas pendientes, empezadas o posibles en $proyecto" | tee -a $TMP
+
       echo "$l" | tee -a $TMP
       echo "$t" | tee -a $TMP
       echo "$l" | tee -a $TMP
@@ -3179,9 +3209,6 @@ function tareas_pendientes() {
 
       echo -e "\n$l" | tee -a $TMP
 
-      if [ "$per_informe_indice" == "SI" ] ; then
-         echo -e "${nivel_indice}\`Tareas pendientes, empezadas o posibles en $proyecto\`_" >> $fich_indice   
-      fi
    fi
 
    }
@@ -3201,18 +3228,13 @@ function contabilidad_proyecto() {
    
    if [ "$salida" != "" ] ; then
 
-      echo                                                | tee -a $TMP
-      echo "Tareas acabadas en $proyecto"                 | tee -a $TMP
-      echo "Tareas acabadas en $proyecto" | sed 's/./-/g' | tee -a $TMP
-      echo                                                | tee -a $TMP
+      titulo_por_nivel "Tareas acabadas en $proyecto"     | tee -a $TMP
       echo -e "$salida"                                   | tee -a $TMP
-   
+      echo                                                | tee -a $TMP
+
       # Total de tareas acabadas
       presentarTotalTareasGeneral "and t.idEstado=3"
 
-      if [ "$per_informe_indice" == "SI" ] ; then
-         echo -e "${nivel_indice}\`Tareas acabadas en $proyecto\`_" >> $fich_indice   
-      fi
    fi
 
    # Tiempo en proyecto
@@ -3610,7 +3632,6 @@ function pieInforme(){
 
          if [ "$per_pie_codigo_magtrabajos" = "SI" ] ; then
             echo -e "\n\n:mt: $proyectoId.$tareaId.$movimientoId" | tee -a $TMP
-            # @todo Añadir estado de git o subversión
          fi
          ;;
    esac
@@ -4022,12 +4043,12 @@ function menuTareas(){
       p|P) ACCION='prioridad' ; comenzar ;;
       i|I) menuInformes ;;
       b|B) borrar ; tareaId='' ;;
-      m|M) ACCION='modificar' ; comenzar ; $ACCION='' ;;
+      m|M) ACCION='modificar' ; comenzar ; ACCION='' ;;
       n|N) editarTarea -n ; movimientoId_anterior= ;;  # Nueva tarea
       u|U) anyadirTareaEmail ;;
       s|S)
          seleccionarTareas -menu
-         echo -e "\nFormato:\n\nNombre\tEstado\tFecha de inicio\tFecha final\tPrioridad\tTotal\n" 
+         echo -e "\nFormato:\n\nNombre\tEstado\tFecha de inicio\tFecha final\tPrioridad\tFactura\tTotal\n" 
          sql="$SQL_TAR_SELECCIONAR $CONDICION $SQL_TAR_GROUP ORDER BY t.fechaInicio"
          ejecutarSQL "$sql" "-N -B --raw" > ${DIR_TMP}listado
          pedirTarea
