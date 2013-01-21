@@ -252,15 +252,6 @@ function deshacer_cambios() {
    echo "$BASH_SOURCE $FUNCNAME [Pendiente]"
    }
 
-## Sanear cadena de caracteres conflictivos
-
-function sanear() {
-
-   local cadena="$*"
-   cadena=`echo $1 | tr ' ' '_'`
-   echo $cadena
-   }
-
 ## Creamos una rama sobre develop con la tarea a realizar
 ##
 ## @param $1 Nombre de la tarea a crear
@@ -287,7 +278,7 @@ function git_crear_rama_tarea() {
 ## @param $2 Nuevo nombre
 
 function git_magcontrolversion_renombrar_rama() {
-   git branch -m "$1" "$2"
+   ejecutarComando "git branch -m '$1' '$2'"
    }
 
 ## Se cierra tarea, hacemos merge de tarea a develop, se borra rama de tarea

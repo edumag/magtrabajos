@@ -996,6 +996,14 @@ function editarTarea(){
       tarEstadoId=$(ejecutarSQL "SELECT idEstado from tareas where id=$tareaId" "-N")
       tarea=$(ejecutarSQL "SELECT nombre from tareas where id=$tareaId" "-N")
       read -p "Nombre de tarea: ($tarea)" nTarea
+      if [ "$nTarea" != "$tarea" ] ; then
+         evento 'pre_cambio_nombre_tarea'
+         if [ "$interrunpir_evento" = "true" ] ; then
+            mensajes "Cambio de nombre cancelado"
+            return
+         fi
+      fi
+
       if [ "$nTarea" != "" ] ; then tarea=$nTarea ; fi
 
    fi
@@ -1983,7 +1991,7 @@ function anyadirArchivosDB(){
 
 }
 
-## Modificar la propiedad de una tarea
+## Modificar la prioridad de una tarea
 
 function prioridad() {
 
