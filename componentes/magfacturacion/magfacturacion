@@ -381,7 +381,7 @@ function nueva_factura() {
 
     # comprobar que las tareas seleccionadas no tienen ya una factura asignada
 
-    SQL="SELECT id FROM tareas WHERE id in (`echo ${tareasIds[*]} | tr ' ' ,`) AND ( idFactura IS NOT NULL OR idFactura != 0 )"
+    SQL="SELECT id FROM tareas WHERE id in (`echo ${tareasIds[*]} | tr ' ' ,`) AND ( idFactura IS NOT NULL AND idFactura != 0 )"
 
     local tareas_asignadas=($(ejecutarSQL "$SQL" "-N"))
 
@@ -761,11 +761,7 @@ function pendiente_facturas(){
 
    [[ "$salida" == "" ]] && return
 
-   echo  
-   echo  
-   echo "Facturas pendientes en $proyecto"
-   echo "Facturas pendientes en $proyecto" | sed 's/./-/g'
-   echo 
+   titulo_por_nivel "Facturas pendientes en $proyecto" 
    echo ":fecha: $HOY"
    echo 
 
@@ -773,13 +769,10 @@ function pendiente_facturas(){
 
    echo -e "$salida" | awk '{ printf "**Factura:%s**\n\n| Fecha factura: %s\n| Total: %s\n| Pagado: %s\n| Pendiente: %s\n\n\n",$1,$2,$4,$5,$6, $7 }'
 
-   SALIDA="Total pendiente: `ejecutarSQL \"$SQL_TOTAL\" '-N'`"
+   SALIDA="*Total pendiente:* `ejecutarSQL \"$SQL_TOTAL\" '-N'`"
    echo $SALIDA
    echo
 
-   if [ "$per_informe_indice" == "SI" ] ; then
-      echo -e "${nivel_indice}\`Facturas pendientes en $proyecto\`_" >> $fich_indice   
-   fi
    }
 
 ## Listar tareas, se necesita pasar el id de las tareas como parámetros
