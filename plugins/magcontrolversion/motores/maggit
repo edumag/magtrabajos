@@ -281,6 +281,15 @@ function git_crear_rama_tarea() {
    
    }
 
+## Renombrar rama
+##
+## @param $1 Rama a renombrar
+## @param $2 Nuevo nombre
+
+function git_magcontrolversion_renombrar_rama() {
+   git branch -m "$1" "$2"
+   }
+
 ## Se cierra tarea, hacemos merge de tarea a develop, se borra rama de tarea
 ## ya que quedara constancia de ella en develop.
 ##

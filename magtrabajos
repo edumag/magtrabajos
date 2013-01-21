@@ -3179,10 +3179,10 @@ function tareas_pendientes() {
 
       if [ "$per_informe_enlaces" != "SI" ] ; then
          local l="==== ========================================================================= ============== ===="
-         local t="id   Tarea                                                              Estado  Pr."
+         local t="id   Tarea                                                                             Estado  Pr."
       else
          local l="==== ======================================================================================================= ============== ===="
-         local t="id   Tarea                                                                                            Estado  Pr."
+         local t="id   Tarea                                                                                                           Estado  Pr."
       fi
 
       titulo_por_nivel "Tareas pendientes, empezadas o posibles en $proyecto" | tee -a $TMP
