@@ -1,0 +1,9 @@
+## Sanear cadena de caracteres conflictivos
+
+function sanear() {
+
+   local cadena="$*"
+   cadena=`echo $1 | tr ' ' '_'`
+   echo $cadena
+   }
+
