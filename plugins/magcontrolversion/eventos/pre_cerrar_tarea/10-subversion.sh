@@ -1,3 +1,7 @@
+## @file 10-subversion.sh
+## @brief Al cerrar tarea hacemos commit
+
+source "`dirname "$BASH_SOURCE"`/../../magcontrolversion_funcs"
 # Si se utiliza control de versiones en este proyecto hacemos un commit sobre los archivos afectados de la tarea
 
 if [ -e ".svn" ] ; then

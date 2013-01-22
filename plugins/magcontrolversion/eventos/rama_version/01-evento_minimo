@@ -1,4 +1,5 @@
-#!/bin/bash
+## @file 01-evento_minimo
+## @brief Avisamos de la posibilidad de hacer algún cambio antes de crear la release
 
 echo 'Evento generado desde magcontrolversion.
 
