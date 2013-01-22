@@ -1588,6 +1588,13 @@ function tecla(){
 ## Comprobar proyecto
 
 function comprobar_proyecto() {
+   
+   # Si no se pasa un proyecto determinado buscamos si la carpeta actual coincide
+   # con una configuración.
+
+   if [ -z $proyecto ] ; then
+      proyecto="`basename "$(pwd)"`"
+   fi
 
    [[ -z $proyecto ]] && seleccionar_proyecto || leer_proyecto
 
