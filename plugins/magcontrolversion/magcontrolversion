@@ -82,21 +82,13 @@ else
 fi
 
 fichero_de_motor="`dirname $BASH_SOURCE`/motores/mag$motor"
+fichero_de_funciones="`dirname $BASH_SOURCE`/magcontrolversion_funcs"
 
 [[ "$DEBUG" = "SI" ]] && echo $fichero_de_motor
 source "$fichero_de_motor"
+source "$fichero_de_funciones"
 
 rama_actual="$(${motor}_magcontrolversion_rama_actual)"
-
-## Sanear cadena de caracteres conflictivos
-
-function sanear() {
-
-   local cadena="$*"
-   cadena=`echo $1 | tr ' ' '_'`
-   echo $cadena
-   }
-
 
 function _subversion() {
 

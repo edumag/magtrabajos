@@ -1,2 +1,6 @@
+## @file git_crear_rama_tarea
+## @brief Creamos rama con el nombre de la tarea nueva
+
+source "`dirname "$BASH_SOURCE"`/../../magcontrolversion_funcs"
 source "`dirname "$BASH_SOURCE"`/../../motores/maggit"
 git_crear_rama_tarea "$tarea"

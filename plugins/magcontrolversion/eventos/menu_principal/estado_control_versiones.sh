@@ -1,4 +1,4 @@
-## @file estado_control_versiones
+## @file estado_control_versiones.sh
 ## @brief Presentar estado de control de versiones
 
 # Si tenim fitxes bloquejats els presentem
