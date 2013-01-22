@@ -5209,11 +5209,23 @@ case $1 in
 esac
 done
 
+# sino tenemos un proyecto definido, probar si tenemos uno con el nombre del directorio actual
+if [ -z $proyecto ] ; then
+   carpeta_actual="`basename "$(pwd)"`"
+   sql="SELECT id FROM proyectos WHERE nombre = '$carpeta_actual'";
+   id=`ejecutarSQL "$sql" "-N"`
+   mensajes "ID de proyecto: $id"
+   if [ ! -z $id ] ; then
+      definirProyecto -p $id
+      mensajes "proyecto: $proyecto"
+   fi
+fi
+
 if [ "$ACCION" = "menu" ] ; then
 
    # Si no traemos tareas seleccionadas
    if [ ${#tareasIds[*]} -eq 0 ] ; then
-      seleccionarTareas -todo
+      # seleccionarTareas -todo # Demasiadas tareas carga al programa
       menu
    else
       menu
