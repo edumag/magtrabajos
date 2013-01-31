@@ -2882,17 +2882,17 @@ presentarCabeceraMovimiento() {
          if [ "$movimiento" = 'inicio' ] ; then
            titulo_por_nivel "inicio de $tarea" | tee -a $TMP
          else
-           SQL="SELECT descripcion FROM movimientos WHERE id=$movimientoId"
-           descripcion="$(ejecutarSQL "$SQL" "-N")"
-
            titulo_por_nivel "$movimiento" | tee -a $TMP 
-           echo ":fecha: $fecha_inicio"   | tee -a $TMP
-           echo ":id: $movimientoId"      | tee -a $TMP
-           echo                           | tee -a $TMP      
-           echo -e "$descripcion"         | tee -a $TMP
-           echo                           | tee -a $TMP      
-
          fi
+
+         SQL="SELECT descripcion FROM movimientos WHERE id=$movimientoId"
+         descripcion="$(ejecutarSQL "$SQL" "-N")"
+
+         echo ":fecha: $fecha_inicio"   | tee -a $TMP
+         echo ":id: $movimientoId"      | tee -a $TMP
+         echo                           | tee -a $TMP      
+         echo -e "$descripcion"         | tee -a $TMP
+         echo                           | tee -a $TMP      
 
          ;;
 
