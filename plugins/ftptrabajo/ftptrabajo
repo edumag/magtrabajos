@@ -688,10 +688,19 @@ function trabajarArchivo(){
             echo
             echo "Hay diferencias entre el archivo del servidor"
             echo "y el local."
+            echo 
+            echo ¿Que deseas hacer?
             echo
-            echo -e "¿Quieres editar las diferencias: (s/n) \c "
+            echo 1 - Mantener el archivo local y desechar las diferencias
+            echo '2 - Chafar el archivo local con el del servidor, (por defecto)'
+            echo 3 - Editar las diferencias con $var_com_diff
+            echo
+            echo -e "Opción: \c "
             read OPCION
-            if [ "$OPCION" = 's' ] ; then
+
+            if [ "$OPCION" = '1' ] ; then
+               mv "$fich_ft" "$x"
+            elif [ "$OPCION" = '3' ] ; then
                CMD="$var_com_diff '$x' '$fich_ft'"
                eval "$CMD"
             fi
@@ -701,8 +710,8 @@ function trabajarArchivo(){
          # echo -e "\nEliminar fichero local: (s/n) \c "
          # read OPCION
          # [[ "$OPCION" = "s" ]] && rm -f "$fich_ft"
-         # Borramos archivo temporal de ftptrabajo
-         rm -f "$fich_ft"
+         # Movvemos el archivo local a carpeta tmp para evitar perdidas por despiste
+         mv "$fich_ft" "/tmp/`basename "$x"``date +-%H.%M`"
 
       fi
 
