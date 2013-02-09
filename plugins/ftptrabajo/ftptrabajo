@@ -1197,17 +1197,22 @@ function borrarArchivosServidor() {
                # borramos el local si lo hay
                if [ -e "${DIR_LOCAL}/${x}.LCK" ] ; then
                   rm "${DIR_LOCAL}/${x}.LCK"
+                  echo " Bloqueo local eliminado"
                fi
                # Eliminamos archivo de la lista
                grep -v "$x" $LISTA_BLOQUEOS  > ${DIR_TMP}ftpTotbisbal_lista.tmp
                mv ${DIR_TMP}ftpTotbisbal_lista.tmp $LISTA_BLOQUEOS
+               echo " Quitamos archivo de la lista de bloqueados"
             else
                echo "ko"
                echo -e "${c_error}  No se pudo eliminar bloqueo$fc"
-               echo "  Manteemos bloqueo"
+               echo "  Mantenemos bloqueo"
             fi
          fi
       else
+         echo
+         echo " No se pudo eliminar archivo"
+         echo
          read -p ' Continuar (s/n): ' OPCION
          [[ "$OPCION" != "s" ]] && exit
       fi
