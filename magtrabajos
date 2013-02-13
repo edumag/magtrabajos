@@ -4748,8 +4748,9 @@ function menuArchivos(){
 
          for f in $ARCHIVOSe ; do
             if [ -e "$f" ] ; then
-               echo -e "\nBorrando de local $f "
-               rm "$f"
+               echo
+               read "Borrando de local de $f (s/n): " OPCION
+               [[ "$OPCION" ]] && rm "$f"
             fi
             echo "Borrado: $f"
          done
