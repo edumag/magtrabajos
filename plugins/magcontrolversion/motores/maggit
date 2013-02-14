@@ -175,7 +175,7 @@ function git_magcontrolversion_commit() {
 
 function git_magcontrolversion_del() {
 
-   git rm $@
+   git rm $*
    while [ $? != 0 ] ; do
       echo 'Parece que el archivo a sido modificado'
       echo '¿Que quieres hacer?'
@@ -311,8 +311,11 @@ function git_cerrar_tarea() {
    else
 
       ejecutarComando "git checkout develop"
+      [[ $? != 0 ]] && return
       ejecutarComando "git merge --no-ff $tarea"
+      [[ $? != 0 ]] && return
       ejecutarComando "git branch -d $tarea"
+      [[ $? != 0 ]] && return
 
    fi
 
