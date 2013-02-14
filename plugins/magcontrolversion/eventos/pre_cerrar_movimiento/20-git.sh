@@ -1,4 +1,8 @@
-# Si se utiliza control de versiones en este proyecto hacemos un commit sobre los archivos del movimiento afectados
+## @file 20-git.sh
+## @brief Si se utiliza control de versiones en este proyecto hacemos un commit
+##        sobre los archivos del movimiento afectados
+
+source "`dirname "$BASH_SOURCE"`/../../magcontrolversion_funcs"
 
 if [ -e '.git' ] && [ "$cerrando_tarea" != "SI" ] ; then
 

@@ -66,6 +66,7 @@ function mysql2rst() {
    local conta=0
    local CMD="mysql -t $encabezado -e \"$SQL\" $parametros"
 
+   #echo CMD: $CMD # DEBUG
    echo
 
    DIFS="$IFS" # separador fin de linea para que salga linea por linea

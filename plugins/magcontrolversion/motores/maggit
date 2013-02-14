@@ -175,7 +175,7 @@ function git_magcontrolversion_commit() {
 
 function git_magcontrolversion_del() {
 
-   git rm $@
+   git rm $*
    while [ $? != 0 ] ; do
       echo 'Parece que el archivo a sido modificado'
       echo '¿Que quieres hacer?'
@@ -252,15 +252,6 @@ function deshacer_cambios() {
    echo "$BASH_SOURCE $FUNCNAME [Pendiente]"
    }
 
-## Sanear cadena de caracteres conflictivos
-
-function sanear() {
-
-   local cadena="$*"
-   cadena=`echo $1 | tr ' ' '_'`
-   echo $cadena
-   }
-
 ## Creamos una rama sobre develop con la tarea a realizar
 ##
 ## @param $1 Nombre de la tarea a crear
@@ -279,6 +270,15 @@ function git_crear_rama_tarea() {
    fi
    ejecutarComando "git checkout -b $tarea develop"
    
+   }
+
+## Renombrar rama
+##
+## @param $1 Rama a renombrar
+## @param $2 Nuevo nombre
+
+function git_magcontrolversion_renombrar_rama() {
+   ejecutarComando "git branch -m '$1' '$2'"
    }
 
 ## Se cierra tarea, hacemos merge de tarea a develop, se borra rama de tarea
@@ -311,8 +311,11 @@ function git_cerrar_tarea() {
    else
 
       ejecutarComando "git checkout develop"
+      [[ $? != 0 ]] && return
       ejecutarComando "git merge --no-ff $tarea"
+      [[ $? != 0 ]] && return
       ejecutarComando "git branch -d $tarea"
+      [[ $? != 0 ]] && return
 
    fi
 
@@ -425,7 +428,7 @@ function git_nueva_subversion_error() { version_actual="`git_get_version`.`git_g
 
 if [ "`git tag | grep '-'`" != "" ] ; then
    for v in `git tag | grep '-'` ; do
-      echo -e "\n- $v"
+      #echo -e "\n- $v"
       version_actual="`echo $v | cut -d- -f2`"
    done
 fi

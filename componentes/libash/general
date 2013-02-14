@@ -267,22 +267,29 @@ function comandoExterno(){
 ## Ejecutar comando nos permite ver el comando que estamos ejecutando, 
 ## si da error en la salida, nos permite hacer una pausa para verla, 
 ## etc...
+##
+## @param $1 Comando a ejecutar
+## @param $2 Mostrar comando por pantalla 1/0
 
 function ejecutarComando() {
 
    cmd="$1"
+   [[ -z "$2" ]] && mostrar=1 || mostrar=0
 
-   echo
-   caja "$cmd"
-   echo
+   if [ $mostrar -eq 1 ] ; then
+      echo
+      caja "$cmd"
+      echo
+   fi
 
    eval "$cmd"
 
    if [ $? != 0 ] ; then
       echo
-      echo -e "`color colError`Error al lanzar comando"
+      echo -e "`color colError`Error al lanzar comando`color`"
       echo
       tecla
+      return 1
    fi
    }
 

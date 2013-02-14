@@ -1,4 +1,6 @@
-# Si estamos en git al cerrar tarea hacemos merge de la tarea sobre develop
+## @file git_tarea_a_develop
+## @brief Si estamos en git al cerrar tarea hacemos merge de la tarea sobre develop
 
+source "`dirname "$BASH_SOURCE"`/../../magcontrolversion_funcs"
 source "`dirname "$BASH_SOURCE"`/../../motores/maggit"
 git_cerrar_tarea "$tarea"

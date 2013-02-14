@@ -7,18 +7,22 @@
 ## 
 ##  Opciones:
 ## 
-##    commit    Hacer commit sobre archivos afectados
-##    todo      Hacer commit sobre todos los archivos
-##    update    Actualizamos
-##    status    Ver estado actual
-##    menu      Presentamos menú
-##    borrar    Borramos archivo, necesitamos archivos como parámetros
-##    mover     Mover archivo, necesitamos archivos como parámetros. [origen] [destino]
-##    nuevos    Añadir archivos recientemente creados a control de versiones
-##    quitar    Eliminar de control de versiones los archivos que han sido borrados localmente
-##    help      Pantalla de ayuda
+##    commit                    Hacer commit sobre archivos afectados
+##    todo                      Hacer commit sobre todos los archivos
+##    update                    Actualizamos
+##    status                    Ver estado actual
+##    menu                      Presentamos menú
+##    borrar                    Borramos archivo, necesitamos archivos como parámetros
+##    mover                     Mover archivo, necesitamos archivos como parámetros. [origen] [destino]
+##    nuevos                    Añadir archivos recientemente creados a control de versiones
+##    quitar                    Eliminar de control de versiones los archivos que han sido borrados localmente
+##    rama_actual               Nos imprime el nombre de la rama actual y sale.
+##    cambiar_rama [rama]       Cambiar de rama, necesita nombre de rama a cambiar
+##    renombrar_rama            Renombrar rama
+##    sanear [cadena]           Nos devuelve la cadena pasada saneada
+##    help                      Pantalla de ayuda
 ## 
-## Dependencias: gawk, subversion
+## Dependencias: gawk, subversion o git
 ##
 ## @todo Comprobar permisos de escritura para ahorrarnos problemas
 ## @todo Al ejecutar subversión permitir editar la descripción
@@ -78,9 +82,11 @@ else
 fi
 
 fichero_de_motor="`dirname $BASH_SOURCE`/motores/mag$motor"
+fichero_de_funciones="`dirname $BASH_SOURCE`/magcontrolversion_funcs"
 
 [[ "$DEBUG" = "SI" ]] && echo $fichero_de_motor
 source "$fichero_de_motor"
+source "$fichero_de_funciones"
 
 rama_actual="$(${motor}_magcontrolversion_rama_actual)"
 
@@ -152,6 +158,7 @@ function _subversion() {
             echo ' [F]usionar una rama con la actual '
             echo ' [N]ueva                           '
             echo ' [B]orrar                          '
+            echo ' [R]enombrar                       '
             echo
             read -n 1 -s -p ' ' OPCION
 
@@ -211,6 +218,7 @@ function _subversion() {
                   IFS="$DIFS"
                   tecla
                   ;;
+               r|R) _subversion renombrar_rama ;;
                *) return ;;
 
             esac
@@ -357,7 +365,6 @@ function _subversion() {
             if [ "$salida" != "" ] ; then
                echo -e "$salida"
             fi
-            echo
             ;;
 
          commit) # commit
@@ -392,6 +399,45 @@ function _subversion() {
                func="${motor}_magcontrolversion_commit todo $texto"
             fi
             eval "$func"
+            ;;
+
+         cambiar_rama)
+            ${motor}_magcontrolversion_cambia_rama "`sanear "$2"`"
+            if [ $? -ne 0 ] ; then
+               echo
+               read -p "Volver a intentarlo (s/n): " OPCION
+               if [ "$OPCION" = "s" ] ; then
+                  ${motor}_magcontrolversion_cambia_rama "`sanear "$2"`"
+               else
+                  return 1
+               fi
+            fi
+            shift 2
+            ;;
+
+         rama_actual)
+            shift 1
+            echo $rama_actual
+            exit
+            ;;
+
+         sanear)
+            shift 1
+            echo `sanear "$*"`
+            exit
+            ;;
+
+         renombrar_rama) 
+            shift 1
+            echo
+            echo 'Renombrar rama'
+            echo '--------------'
+            echo
+            read -p 'Nombre de la rama a renombrar: ' rama_a_renombrar
+            if [ "$rama_a_renombrar" = "" ] ; then return ; fi
+            read -p 'Nuevo nombre:                  ' nuevo_nombre
+            if [ "$nuevo_nombre" = "" ] ; then return ; fi
+            func="${motor}_magcontrolversion_renombrar_rama" ; eval "$func '$rama_a_renombrar' '`sanear "$nuevo_nombre"`'"
             ;;
 
          editar)

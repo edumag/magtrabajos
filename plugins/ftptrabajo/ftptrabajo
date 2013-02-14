@@ -688,10 +688,19 @@ function trabajarArchivo(){
             echo
             echo "Hay diferencias entre el archivo del servidor"
             echo "y el local."
+            echo 
+            echo ¿Que deseas hacer?
             echo
-            echo -e "¿Quieres editar las diferencias: (s/n) \c "
+            echo 1 - Mantener el archivo local y desechar las diferencias
+            echo '2 - Chafar el archivo local con el del servidor, (por defecto)'
+            echo 3 - Editar las diferencias con $var_com_diff
+            echo
+            echo -e "Opción: \c "
             read OPCION
-            if [ "$OPCION" = 's' ] ; then
+
+            if [ "$OPCION" = '1' ] ; then
+               mv "$fich_ft" "$x"
+            elif [ "$OPCION" = '3' ] ; then
                CMD="$var_com_diff '$x' '$fich_ft'"
                eval "$CMD"
             fi
@@ -701,8 +710,8 @@ function trabajarArchivo(){
          # echo -e "\nEliminar fichero local: (s/n) \c "
          # read OPCION
          # [[ "$OPCION" = "s" ]] && rm -f "$fich_ft"
-         # Borramos archivo temporal de ftptrabajo
-         rm -f "$fich_ft"
+         # Movvemos el archivo local a carpeta tmp para evitar perdidas por despiste
+         mv "$fich_ft" "/tmp/`basename "$x"``date +-%H.%M`"
 
       fi
 
@@ -878,6 +887,26 @@ function comprobarBloqueoServidor(){
          color destacado
          echo -n '  ' ; cat "${DIR_LOCAL}/$*".LCK
          color
+         echo
+         read -p 'Deseas enviarle un email solicitando que lo libere. (s/n): ' OPCION
+         if [ "$OPCION" = "s" ] ; then
+            local mail_bloqueado=`cat "${DIR_LOCAL}/$*".LCK | cut -d\| -f3`
+            local subject="Archivo $* bloqueado"
+            local body="Necesitaría el archivo $* para trabajar.\n\nGracias"
+            echo
+            echo Mail: $mail_bloqueado
+            echo Subject: $subject
+            echo Body: 
+            echo
+            echo ---
+            echo -e "$body"
+            echo ---
+            echo 
+            read -p "Enviar email. (s/n): " OPCION
+            if [ "$OPCION" = "s" ] ; then
+               echo $body | mail -s "$subject" $mail_bloqueado
+            fi
+         fi
          # Borramos archivo de bloqueo
          rm  "${DIR_LOCAL}/$*".LCK
          return 1
@@ -1568,6 +1597,13 @@ function tecla(){
 ## Comprobar proyecto
 
 function comprobar_proyecto() {
+   
+   # Si no se pasa un proyecto determinado buscamos si la carpeta actual coincide
+   # con una configuración.
+
+   if [ -z $proyecto ] ; then
+      proyecto="`basename "$(pwd)"`"
+   fi
 
    [[ -z $proyecto ]] && seleccionar_proyecto || leer_proyecto
 

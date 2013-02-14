@@ -1,3 +1,7 @@
+## @file 20-subversion.sh
+## @brief Hacer commit sobre movimientos afectados en movimiento
+
+source "`dirname "$BASH_SOURCE"`/../../magcontrolversion_funcs"
 # Si se utiliza control de versiones en este proyecto hacemos un commit sobre los archivos del movimiento afectados
 
 if [ -e '.svn' ] && [ "$cerrando_tarea" != "SI" ] ; then

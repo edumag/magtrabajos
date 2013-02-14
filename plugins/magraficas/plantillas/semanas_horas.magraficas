@@ -1,0 +1,58 @@
+## @file semanas_horas.magraficas
+## @brief Plantilla para mostrar las horas trabajadas por semanas
+##
+## Formato de los datos:
+## 
+## "semana\thoras\nsemana\thoras..."
+
+
+eval "`echo -e "$datos" | awk -v FS='\t' '
+BEGIN { minima=0; maxima=0 } 
+{ if ( $2 < minima || minima == 0 ) { minima=$2 } ; if ( $2 > maxima ) { maxima=$2 } } 
+END { printf (\"promedio=%s;maxima=%s;minima=%s;filas=%s\n\",maxima/NR,maxima,minima,NR) }
+'`"
+
+
+text=$(echo -e "$datos" | awk -v FS='\t' '{printf "    %s\n",$1 }')
+data=$(echo -e "$datos" | awk -v FS='\t' '{printf " %s",$2 }')
+
+# echo
+# echo "text: $text"
+# echo "data: $data"
+# echo
+# echo Filas: $filas
+# echo Maxima: $maxima
+# echo Minima: $minima
+# echo Promedio: $promedio
+
+
+echo "
+#proc areadef
+  autowidth
+  autoheight
+  xrange: 0 $filas
+  yrange: 0 $maxima
+  yaxis.stubs: incremental 2
+  xaxis.stubvert yes
+  xaxis.stubs: text
+$text
+
+#proc getdata
+  data:$data
+
+#proc processdata
+  action: rotate
+ 
+#proc bars
+  lenfield: 1
+  color: rgb(.8,1,.7)
+  longwayslabel: yes
+  labeldetails: align=R adjust=0,1
+  labelword:   @@N
+
+#proc annotate
+  location: 4 5.08
+  textdetails: color=green size=12
+  text: $titulo
+
+" > $archivo_grafica
