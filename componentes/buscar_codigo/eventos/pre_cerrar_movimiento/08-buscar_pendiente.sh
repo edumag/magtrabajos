@@ -12,7 +12,7 @@
 echo 'Buscando Errores o pendiente en archivos afectados...'
 echo
 
-cmd="buscar_codigo servidor_vim $proyecto"
+cmd="buscar_codigo buscar '@todo|@bug' servidor_vim $proyecto"
 
 if [ "$mt_codificacion_codigo" != "" ] ; then
    cmd="$cmd encoding_entrada $mt_codificacion_codigo"
@@ -23,7 +23,7 @@ ARCHIVOS="$(ejecutarSQL "$SQL" "-N")"
 
 if [ "$ARCHIVOS" != "" ] ; then
 
-   lista=$(buscar_codigo $ARCHIVOS)
+   lista=$(buscar_codigo buscar '@todo|@bug' $ARCHIVOS)
 
    if [ "$lista" != "" ] ; then
       

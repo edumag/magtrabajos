@@ -2833,7 +2833,7 @@ presentarTODOs() {
 
    [[ -z $sql ]] && ARCHIVOS='' || local ARCHIVOS=$(ejecutarSQL "$SQL" "-N")
 
-   cmd="buscar_codigo"
+   cmd="buscar_codigo buscar '@todo|@bug' "
    if [ "$mt_codificacion_codigo" != "" ] ; then
       cmd="$cmd encoding_entrada $mt_codificacion_codigo"
    fi
@@ -3107,7 +3107,7 @@ function pendienteCodigo() {
    ## Presentar pendiente en código
 
    # Código pendiente
-   SALIDA="$(buscar_codigo formato enlaces proyecto $proyecto)"
+   SALIDA="$(buscar_codigo buscar '@todo|@bug' formato enlaces proyecto $proyecto)"
    if [ "$SALIDA" != "" ] ; then
       titulo_por_nivel "Código pendiente de $proyecto" | tee -a $TMP
       echo -e "$SALIDA" | tee -a $TMP 
