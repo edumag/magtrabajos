@@ -2406,7 +2406,7 @@ function modificar(){
 
    log $FUNCNAME "$*"
 
-   ## modificar segun tengamos movimiento, tarea o proyecto
+   ## modificar según tengamos movimiento, tarea o proyecto
 
    if [ "$movimientoId" = '' ] && [ "$tareaId" = '' ] && [ "$proyectoId" != '' ] || [ "$1" = "-p" ] ; then     # Proyecto seleccionado
       log "$FUNCNAME" "Proyecto: $proyectoId"
@@ -2419,7 +2419,7 @@ function modificar(){
       SALIDA="$(ejecutarSQL '$SQL' '-N')"
 
       nombre="$(echo $SALIDA | awk -v FS="$separador" '{print $1 }')"
-      descripcion="$(echo $SALIDA | awk -v FS="$separador" '{print $2 }')"
+      descripcion="$(echo -e $SALIDA | awk -v FS="$separador" '{print $2 }')"
       dirLocal="$(echo $SALIDA | awk -v FS="$separador" '{print $3 }')"
 
       echo "Los valores pueden definirse como NULL"
@@ -2845,7 +2845,7 @@ presentarTODOs() {
    cmd="`echo $cmd $ARCHIVOS`"
    log "$FUNCNAME" "Comando: $cmd"
 
-   local SALIDA=$(eval "$cmd")
+   local SALIDA="`eval $cmd`"
 
    if [ "${SALIDA}" = "" ] ; then log "$FUNCNAME" "Sin salida" ; return ; fi
 
