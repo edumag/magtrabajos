@@ -50,7 +50,11 @@ function log() {
 
    [[ -e "$archivo_log" ]] || touch "$archivo_log"
 
-   echo "` date +'%Y-%m-%d %H:%M'` $1 :: $2" >> $archivo_log
+   if [ -z "$2" ] ; then
+      echo "` date +'%Y-%m-%d %H:%M'` $1" >> $archivo_log
+   else
+      echo "` date +'%Y-%m-%d %H:%M'` $1 :: $*" >> $archivo_log
+   fi
 
    }
 
@@ -81,7 +85,7 @@ fi
 ##
 ## @todo Detectar si la terminal actual permite colores
 
-color() { 
+function color() { 
 
    if [ "$1" = "lista" ] ; then
       echo

@@ -66,6 +66,8 @@
 ## This source code is released for free distribution under the terms of the
 ## GNU General Public License as published by the Free Software Foundation.
 
+libash_listado_incluida=1 ##< Para saber si ya la tenemos incluida
+
 resultado_listado=''          ##< Contenido del resultado
 
 function listado_ayuda() {
@@ -193,6 +195,8 @@ function generar_listado() {
 
 ## A diferencia de generar_listado este método recoge el listado del archivo
 ## ${DIR_TMP}listado en vez de recibirlo como parámetro
+##
+## @todo Evitar que sean interpretadas la variables en el contenido que recibimos
 
 function generar_listado_fichero() {
 
@@ -263,7 +267,7 @@ function generar_listado_fichero() {
          [[ "$columna" = '' ]] && break ;
 
          conta_columna=$conta_columna+1
-         cmd="lista_${conta_lista}[$conta_columna]=\"$(echo $columna | sed s/\"/\\\"/g)\""
+         cmd="lista_${conta_lista}[$conta_columna]='$(echo $columna | sed s/\"/\\\"/g)'"
          [[ ${#columna} -gt ${lonMax[$conta_columna]} ]] && lonMax[$conta_columna]=${#columna}
          [[ $conta_columna = 1 ]] && elementos[${#elementos[*]}]="$(echo $columna | sed s/\"/\\\"/g)"
          #echo $cmd
