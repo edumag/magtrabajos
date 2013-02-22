@@ -53,6 +53,7 @@
 ## --editar | -e               Editar archivos
 ## --estado-subversion         Presentar estado de subversion de proyecto
 ## --archivos                  imprimir lista de archivos para poder ser procesada con otro comando, ejemplo: 
+## --borrar_archivo_lista_afectados Borrar archivos afectados de un movimiento, sino se especifican archivos nos permite seleccionar
 ##                             magtrabajos -m 1343 --archivos | xargs ls -l
 ## --nueva-tarea-email         Crear tarea nueva desde un archivo de email pasado como argumento.
 ## --lanzar                    Nos presenta listados para permitirnos seleccionar por diferentes 
@@ -1792,6 +1793,61 @@ function ejecutarMysql2rst() {
    fi
 }
 
+## Borrar archivos de la lista de afectados
+
+function borrar_archivo_lista_afectados() {
+
+   if [ "$1" != "" ] ; then
+      bd_borrar_archivos_afectados $*
+   else
+
+       echo "Borrando archivos"
+       if [ "$movimientoId" = "" ] ; then
+          mensajes " No hay movimientos seleccionado"
+       else
+          # Listar archivos para seleccionar con opcion de todos incluida
+          SQL="$SQL_ARC AND idMovimiento=$movimientoId"
+          SALIDA=$(ejecutarSQL "$SQL" "-N")
+
+          if [ "$SALIDA" != "" ] ; then
+             echo -e "\nArchivos afectados" 
+             echo -e   "------------------\n" 
+             select ARCHIVOSe in salir todos `echo "$SALIDA"` ; do
+               echo "archivo: "
+               break
+             done
+             if [ "$ARCHIVOSe" != "salir" ] ; then
+                bd_borrar_archivos_afectados $ARCHIVOSe
+             fi
+
+          fi
+       fi
+
+   fi
+
+   
+   }
+
+## borrar archivos afectados de la base de datos
+##
+## @param $* Lista de archivos
+
+function bd_borrar_archivos_afectados() {
+
+   if [ "$1" = "" ] ; then
+      error "No se especifica archivo a borrar"
+   fi
+
+    if [ "$1" = "todos" ] ; then 
+       SQL="DELETE FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId"
+    else
+       SQL="DELETE FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId AND nombre='$1'"
+    fi
+    ejecutarSQL "$SQL"
+    mensajes " $1 borrado de la lista de afectados"
+
+   }
+
 ## Añadimos archivos afectados al movimiento
 
 function anyadirArchvios(){
@@ -1893,7 +1949,7 @@ function prioridad() {
    SQL="UPDATE tareas SET prioridad=$PRIO WHERE id=$tareaId"
    echo -n 'Cambiando prioridad...'
    ejecutarSQL "$SQL"
-   if [ "$?" = "0" ] ; then echo '[ok]' ; else mensajes 'ERROR::cambiando prioridad' ; fi
+   if [ "$?" = "0" ] ; then echo '[ok]' ; else mensaje 'ERROR::cambiando prioridad' ; fi
 
    }
 
@@ -3017,7 +3073,7 @@ function pendienteCodigo() {
    ## Presentar pendiente en código
 
    # Código pendiente
-   SALIDA="$(buscar_codigo buscar '@todo|@bug' formato enlaces proyecto $proyecto)"
+   SALIDA="$(buscar_codigo formato enlaces proyecto $proyecto)"
    if [ "$SALIDA" != "" ] ; then
       titulo_por_nivel "Código pendiente de $proyecto" | tee -a $TMP
       echo -e "$SALIDA" | tee -a $TMP 
@@ -4454,10 +4510,10 @@ function menuArchivos(){
          ejecutarSQL "$SQL"
 
          ## Ejecutamos primero subversion
-         if [ -e '.svn' ] ; then
+         if [ "`plugin_activado magcontrolversion`" != "" ] ; then 
             echo
-            echo subversion
-            echo ----------
+            echo control de versiones
+            echo --------------------
             echo
             # comprobar estado del archivo, si se ha modificado no nos permitirá borrarlo
             magcontrolversion mover ${e_archivos_seleccionados[*]} "$nuevo"
@@ -4535,9 +4591,9 @@ function menuArchivos(){
             fi
          fi
 
-         if [ "$SVN" != "NO" ] && [ -e '.svn' ] ; then
+         if [ "`plugin_activado magcontrolversion`" != "" ] ; then 
             echo
-            read -n 1 -s -p 'Eliminar directorio de subversion (s/n):' opcion
+            read -n 1 -s -p 'Eliminar directorio de control de versiones (s/n):' opcion
             if [ "$opcion" = "s" ] ; then
                echo
                # comprobar estado del archivo, si se ha modificado no nos permitirá borrarlo
@@ -4582,9 +4638,9 @@ function menuArchivos(){
             fi
          fi
 
-         if [ -e ".svn" ] ; then
+         if [ "`plugin_activado magcontrolversion`" != "" ] ; then 
             echo
-            read -n 1 -s -p 'Eliminar archivo de subversion (s/n):' opcion
+            read -n 1 -s -p 'Eliminar archivo de control de versiones (s/n):' opcion
             echo
             if [ "$opcion" = "s" ] ; then
                # comprobar estado del archivo, si se ha modificado no nos permitirá borrarlo
@@ -4594,44 +4650,19 @@ function menuArchivos(){
 
          for f in $ARCHIVOSe ; do
             if [ -e "$f" ] ; then
-               echo -e "\nBorrando de local $f "
-               rm "$f"
+               echo
+               read "Borrando de local de $f (s/n): " OPCION
+               [[ "$OPCION" ]] && rm "$f"
             fi
             echo "Borrado: $f"
          done
 
          ## Borrar de la lista de afectados
-         ## @todo PENDIENTE
+         bd_borrar_archivos_afectados "$f"
          ;;
+
       b|B)
-         # Borrar archivos afectados de la lista
-          echo "Borrando archivos"
-          if [ "$movimientoId" = "" ] ; then
-             mensajes " No hay movimientos seleccionado"
-          else
-             # Listar archivos para seleccionar con opcion de todos incluida
-             SQL="$SQL_ARC AND idMovimiento=$movimientoId"
-             SALIDA=$(ejecutarSQL "$SQL" "-N")
-
-             if [ "$SALIDA" != "" ] ; then
-                echo -e "\nArchivos afectados" 
-                echo -e   "------------------\n" 
-                select ARCHIVOSe in salir todos `echo "$SALIDA"` ; do
-                  echo "archivo: "
-                  break
-                done
-                if [ "$ARCHIVOSe" != "salir" ] ; then
-                   if [ "$ARCHIVOSe" = "todos" ] ; then 
-                      SQL="DELETE FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId"
-                   else
-                      SQL="DELETE FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId AND nombre='$ARCHIVOSe'"
-                   fi
-                   ejecutarSQL "$SQL"
-                   mensajes " Archivo(s) borrado(s)"
-                fi
-
-             fi
-          fi
+         borrar_archivo_lista_afectados
          ;;
       s|S) # Añadir archivos afectados en movimiento
           anyadirArchvios
@@ -5082,6 +5113,7 @@ while [ -n "$1" ]; do
            exportar "$2" "$TMP"
            shift 2 
          fi
+         mensajes "Perfil $perfil_actual abierto"
          ;;
       --editar|-e) shift 1 ; lanzar_editor $@ ; exit ;;
 
