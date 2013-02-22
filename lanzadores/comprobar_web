@@ -1,0 +1,20 @@
+#!/bin/bash
+
+## @file comprobar_web
+## @brief Hacer una comprobación para ver si la pagina esta funcionando
+##
+## Referencia:
+## http://www.linuxhispano.net/2013/02/19/monitorizar-servidor-web-para-ver-si-esta-caido-o-no-de-forma-automatica/
+
+url="$1"
+response=$(curl -s -I -L $url | grep HTTP); 
+
+status=${response#* };
+status=${status:0:3};
+
+if [ "$status" != "200" ] 
+then
+   # acciones a efectuar
+   echo "ERROR: ($status) $url"
+   exit $status
+fi
