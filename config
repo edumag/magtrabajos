@@ -1,25 +1,40 @@
+#!/bin/bash
+
 ## @file config
 ## @brief Configuración básica para cualquier script que estemos utilizando
+##
+## @defgroup configuracion Configuración 
 ##
 ## Añadir con source a cualquier script que se utilice, nos automatiza:
 ##
 ## - Tener disponible las variables:
 ##   
+##   + DIR_CONF_USUARIO: Directorio conlas configuraciones del usuario
+##   
 ##   + DIR_MAGTRABAJOS: Directorio de magtrabajos
+##   
 ##   + DIR_TMP: Directorio temporal
+##   
 ##   + parte_dir: Contenido de la dirección que debemos sustituir por localhost
 ##                si queremos tener la url local.
+##   
 ##   + DIR_PROGRAMA: Directorio del script actual
-##   + PROGRAMA: Nombre del acript actual.
+##   
+##   + PROGRAMA: Nombre del script actual.
 ##
 ## - Añadir librerías de libash
-##   Por defecto nos añade la general, pero podemos antes de llamarlo indicar más 
-##   librerias a incluir mediante LIBS="pantalla configuracion" por ejemplo.
+##   Por defecto nos añade la general y configuracion, pero podemos antes de llamarlo indicar más 
+##   librerías a incluir mediante LIBS="pantalla" por ejemplo.
 ##
 ## - Si estamos en un componente o pluging buscara su configuración por defecto en
-##   su directorio y la del usuarios si la hay.
+##   su directorio con nombre config.default y la del usuarios si la hay.
 ##
 ## @todo Aplicar este sistema a todos los sripts de magtrabajos
+##
+## @{
+
+## Directorio donde se guardan las configuraciones del usuario
+DIR_CONF_USUARIO="$HOME/.magtrabajos/"
 
 # Creamos directorio temporal
 [[ -d '/tmp/magtrabajos' ]] && cambiar_permisos=0 || cambiar_permisos=1
@@ -45,21 +60,13 @@ else
 fi
 
 # Añadimos configuración por defecto
+# @todo coger el $HOME/.magtrabajos/configuracion/libash
 
 [[ -e ~/.libashrc ]] && source ~/.libashrc         # Buscamos configuración personal sobre libash
 
-source $HOME/.magtrabajos/configuracion/magtrabajos
-
-confxdefecto="${0}.conf"
-[[ -e "$confxdefecto" ]] && source "$confxdefecto"
-
-# Configuración usuario
-CONF=$HOME/.magtranajos/configuracion/$PROGRAMA
-[[ -e "$CONF" ]] && source "$CONF"
-
 # Añadimos librerías necesarias
 
-LIBS="general $LIBS"  # Librerías a cargar
+LIBS="general configuracion $LIBS"  # Librerías a cargar
 DIR_LIB="${DIR_MAGTRABAJOS}/componentes/libash/"
 
 for LIB in $LIBS ; do
@@ -77,4 +84,45 @@ for LIB in $LIBS ; do
    log "INICIO" "Librería insertada: $LIBRERIA"
 done
 
+# Recogemos configuración por defecto de magtrabajos 
 
+configuracion_por_defecto_magtrabajos="${DIR_MAGTRABAJOS}/config.default"
+configuracion_leer "${DIR_CONF_USUARIO}configuracion/magtrabajos" "$configuracion_por_defecto_magtrabajos" 'mt_' 
+
+# Si no se pasa un proyecto probamos con nombre de carpeta actual
+
+if [ -z $proyecto ] ; then
+   proyecto="`basename "$(pwd)"`"
+fi
+
+# Recogemos configuración del proyecto
+
+configuracion_de_proyecto="${DIR_CONF_USUARIO}proyectos/$proyecto/configuracion/magtrabajos"
+[[ -e "$configuracion_de_proyecto" ]] && configuracion_leer "$configuracion_de_proyecto" "$configuracion_por_defecto_magtrabajos" 'mt_' 
+
+## Mostrar variables globales
+
+function mostrar_variables_globales() {
+
+   echo
+   echo Variables globales que se definen en config
+   echo
+   echo "DIR_CONF_USUARIO .......$DIR_CONF_USUARIO"
+   echo "DIR_TMP ................$DIR_TMP"
+   echo "parte_dir ...............$parte_dir"
+   echo "DIR_MAGTRABAJOS ........$DIR_MAGTRABAJOS"
+   echo "DIR_PROGRAMA ...........$DIR_PROGRAMA"
+   echo "PROGRAMA ...............$PROGRAMA"
+   echo "LIBS ...................$LIBS"
+   echo "DIR_LIB ................$DIR_LIB"
+   echo
+   }
+
+# Si encontramos --depurar dentro de los parametros recibidos activamos
+# depuración.
+
+[[ "`echo $* | grep -e '--depurar'`" != "" ]] && DEV=1
+
+[[ $DEV ]] && mostrar_variables_globales 
+
+## @} 

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+## @file ftptrabajo/config.default
+## @brief Configuración por defecto para ftptrabajo
+##
+## @defgroup configuracion_ftptrabajo Configuración para ftptrabajo
+## @ingroup configuracion
+## @{
+
+
+   ## @var default_ftptrabajo_server
+   ## Servidor ftp
+
+   default_ftptrabajo_server="$mt_ftp"
+
+   ## @var default_ftptrabajo_dir_remoto
+   ## Directorio remoto
+
+   default_ftptrabajo_dir_remoto="$mt_ftp_directorio"
+
+   ## @var default_ftptrabajo_dir_local
+   ## Directorio local
+
+   default_ftptrabajo_dir_local="${mt_dir_local:-`pwd`/}"
+
+   ## @var default_ftptrabajo_bloqueo_activado
+   ## Sistema de bloque de ficheros compatible con dreamweaver
+
+   default_ftptrabajo_bloqueo_activado="no"
+
+   ## @var default_ftptrabajo_editor
+   ## Editor
+   default_ftptrabajo_editor=gvim
+
+   ## @var default_ftptrabajo_com_diff
+   ## Comando para editar diferencias
+   default_ftptrabajo_com_diff=${mt_comando_diff:-vimdiff}
+
+   ## @var default_ftptrabajo_terminal
+   ## Terminal a utilizar
+   default_ftptrabajo_terminal="${mt_terminal:-xterm}"
+
+## @}
+

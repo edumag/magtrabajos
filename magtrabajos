@@ -26,6 +26,7 @@
 ## Opciones:    
 ## <pre> 
 ## --menu                      Presentar menú
+## --configurar                Configurar proyecto
 ## --adjuntar                  Adjuntar documento externo
 ## --dependencias              Comprobar dependencias.
 ## --proyecto|-p               Proyecto.
@@ -52,6 +53,7 @@
 ## --editar | -e               Editar archivos
 ## --estado-subversion         Presentar estado de subversion de proyecto
 ## --archivos                  imprimir lista de archivos para poder ser procesada con otro comando, ejemplo: 
+## --borrar_archivo_lista_afectados Borrar archivos afectados de un movimiento, sino se especifican archivos nos permite seleccionar
 ##                             magtrabajos -m 1343 --archivos | xargs ls -l
 ## --nueva-tarea-email         Crear tarea nueva desde un archivo de email pasado como argumento.
 ## --lanzar                    Nos presenta listados para permitirnos seleccionar por diferentes 
@@ -95,22 +97,15 @@
 ## This source code is released for free distribution under the terms of the
 ## GNU General Public License as published by the Free Software Foundation.
 
-# Si es un enlace hay que buscar el directorio de programas sobre al que apunta
-if [ -L "$0" ] ; then
-   DIR_PROGRAMAS=$(dirname "`readlink $0`")
-else
-   DIR_PROGRAMAS=$(dirname "$0")
-fi
-
-# Añadimos componentes a PATH #
-PATH=$PATH:${DIR_PROGRAMAS}
-for x in ${DIR_PROGRAMAS}/componentes/* ; do if [ -d $x ] ; then PATH="$PATH:$x" ; fi ; done
-for x in ${DIR_PROGRAMAS}/plugins/* ; do if [ -d $x ] ; then PATH="$PATH:$x" ; fi ; done
-PATH="$PATH:${DIR_PROGRAMAS}/lanzadores/"
-export PATH
-
 ## Recoger configuración de magtrabajos
 source "`dirname "$BASH_SOURCE"`/config"
+
+# Añadimos componentes a PATH #
+PATH=$PATH:${DIR_MAGTRABAJOS}
+for x in ${DIR_MAGTRABAJOS}/componentes/* ; do if [ -d $x ] ; then PATH="$PATH:$x" ; fi ; done
+for x in ${DIR_MAGTRABAJOS}/plugins/* ; do if [ -d $x ] ; then PATH="$PATH:$x" ; fi ; done
+PATH="$PATH:${DIR_MAGTRABAJOS}/lanzadores/"
+export PATH
 
 ## Comprobar dependencias
 
@@ -822,7 +817,7 @@ function nuevoMovimiento(){
          EMAIL="$1"
       fi
 
-      ${DIR_PROGRAMAS}/componentes/mail2rst/mail2rst "$EMAIL" > "$TMP_DES"
+      ${DIR_MAGTRABAJOS}/componentes/mail2rst/mail2rst "$EMAIL" > "$TMP_DES"
 
       if [ $? != 0 ] ; then mensajes " Error al ejecutar comando" ; exit ; fi
 
@@ -877,7 +872,7 @@ function anyadirTareaEmail () {
 
    if [ "$EMAIL" = "" ] ; then mensajes " Email a tarea cancelado" ; return ; fi
 
-   ${DIR_PROGRAMAS}/componentes/mail2rst/mail2rst "$EMAIL" > "$TMP_DES"
+   ${DIR_MAGTRABAJOS}/componentes/mail2rst/mail2rst "$EMAIL" > "$TMP_DES"
 
    if [ $? != 0 ] ; then mensajes " Error al ejecutar comando" ; exit ; fi
 
@@ -2115,12 +2110,12 @@ function evento() {
    local evento_fallido=''       ##< En caso de ser true preguntamos si se desea seguir con el  evento
    local lista=''
 
-   for fevento in ${DIR_PROGRAMAS}/componentes/*/eventos/$evento/* ; do
+   for fevento in ${DIR_MAGTRABAJOS}/componentes/*/eventos/$evento/* ; do
       [[ -e "$fevento" ]] && lista="$lista \n`basename $fevento`\t$fevento" 
    done
 
    for componente in $mt_plugins_activados ; do
-      for fevento in ${DIR_PROGRAMAS}/plugins/$componente/eventos/$evento/* ; do
+      for fevento in ${DIR_MAGTRABAJOS}/plugins/$componente/eventos/$evento/* ; do
          [[ -e "$fevento" ]] && lista="$lista \n`basename $fevento`\t$fevento" 
       done
    done
@@ -3834,12 +3829,12 @@ function menuComponentes() {
    [[ -e ${DIR_TMP}listado ]] && rm ${DIR_TMP}listado
 
    conta=0
-   for componente in ${DIR_PROGRAMAS}/componentes/*/menu.sh ; do
+   for componente in ${DIR_MAGTRABAJOS}/componentes/*/menu.sh ; do
       [[ -e "$componente" ]] || break
       echo -e "$(basename `dirname "$componente"`)\t`doxygen2help "$componente" -tag brief`" >> ${DIR_TMP}listado
       
    done
-   for componente in ${DIR_PROGRAMAS}/plugins/*/menu.sh ; do
+   for componente in ${DIR_MAGTRABAJOS}/plugins/*/menu.sh ; do
       [[ -e "$componente" ]] || break
       echo -e "$(basename `dirname "$componente"`)\t`doxygen2help "$componente" -tag brief`" >> ${DIR_TMP}listado
       
@@ -3849,10 +3844,10 @@ function menuComponentes() {
 
    if [ "$resultado_listado" != "" ] ; then
 
-      if [ -e "${DIR_PROGRAMAS}/componentes/${resultado_listado}/menu.sh" ] ; then
-         . "${DIR_PROGRAMAS}/componentes/${resultado_listado}/menu.sh"
-      elif [ -e "${DIR_PROGRAMAS}/plugins/${resultado_listado}/menu.sh" ] ; then
-         . "${DIR_PROGRAMAS}/plugins/${resultado_listado}/menu.sh"
+      if [ -e "${DIR_MAGTRABAJOS}/componentes/${resultado_listado}/menu.sh" ] ; then
+         . "${DIR_MAGTRABAJOS}/componentes/${resultado_listado}/menu.sh"
+      elif [ -e "${DIR_MAGTRABAJOS}/plugins/${resultado_listado}/menu.sh" ] ; then
+         . "${DIR_MAGTRABAJOS}/plugins/${resultado_listado}/menu.sh"
       fi
    else
       mensajes "Cancelado selección de componente"
@@ -4147,8 +4142,8 @@ function menuComandos(){
 
    local -a dir_comandos
    
-   dir_comandos[0]="$DIR_PROGRAMAS/extensiones/"
-   dir_comandos[1]="$DIR_PROGRAMAS/lanzadores/"
+   dir_comandos[0]="$DIR_MAGTRABAJOS/extensiones/"
+   dir_comandos[1]="$DIR_MAGTRABAJOS/lanzadores/"
    [[ -e "${HOME}/.`basename "$0"`/proyectos/${proyecto}/lanzadores/" ]] && \
       dir_comandos[2]="${HOME}/.`basename "$0"`/proyectos/${proyecto}/lanzadores/"
    [ -e "${HOME}/.`basename "$0"`/proyectos/${proyecto}/extensiones/" ] && \
@@ -4836,7 +4831,7 @@ function listar_plugins() {
    echo 'Listado de plugins'
    echo '------------------'
    echo
-   for componente in ${DIR_PROGRAMAS}/plugins/* ; do
+   for componente in ${DIR_MAGTRABAJOS}/plugins/* ; do
       [[ -e "$componente" ]] || break
       local bs=$(basename $componente)
       if [ "$bs" != "readme.dox" ] ; then
@@ -5025,7 +5020,7 @@ fi
 LIBS='general elegirArchivo configuracion listado mysql2rst doxygen2help'  # Librerías a cargar
 
 for LIB in $LIBS ; do
-   DIR_LIB="${DIR_PROGRAMAS}/componentes/libash/"
+   DIR_LIB="${DIR_MAGTRABAJOS}/componentes/libash/"
    LIBRERIA="${DIR_LIB}$LIB"
    if [ -e "$LIBRERIA" ] ; then
       source "$LIBRERIA"
@@ -5056,12 +5051,12 @@ fi
 
 # INCLUIMOS EXTENSIONES #
 
-for extension in ${DIR_PROGRAMAS}/componentes/*/extension.sh ; do
+for extension in ${DIR_MAGTRABAJOS}/componentes/*/extension.sh ; do
    log INICIO "Incluimos extension de componente ${extension}"
    source "$extension"
 done
 
-for extension in ${DIR_PROGRAMAS}/plugins/*/extension.sh ; do
+for extension in ${DIR_MAGTRABAJOS}/plugins/*/extension.sh ; do
    log INICIO "Incluimos extension de componente ${extension}"
    source "$extension"
 done
