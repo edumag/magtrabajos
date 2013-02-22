@@ -1141,14 +1141,9 @@ function borrarArchivosServidor() {
                echo "[ok]"
                #echo "Bloqueo eliminado del servidor"
                # borramos el local si lo hay
-<<<<<<< HEAD
-               if [ -e "${DIR_LOCAL}/${x}.LCK" ] ; then
-                  rm "${DIR_LOCAL}/${x}.LCK"
-                  echo " Bloqueo local eliminado"
-=======
+
                if [ -e "${ftptrabajo_dir_local}/${x}.LCK" ] ; then
                   rm "${ftptrabajo_dir_local}/${x}.LCK"
->>>>>>> Centralizar_configuración
                fi
                # Eliminamos archivo de la lista
                grep -v "$x" $LISTA_BLOQUEOS  > ${DIR_TMP}ftpTotbisbal_lista.tmp
