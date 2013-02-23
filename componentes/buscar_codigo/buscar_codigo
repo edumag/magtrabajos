@@ -153,6 +153,22 @@ function escanear_codigo() {
 
    local salida=$resultado
 
+   if [ "$debug" = "true" ] ; then
+      echo proyecto: $proyecto
+      echo comando: $comando
+      echo buscar_codigo_formato_enlaces: $buscar_codigo_formato_enlaces
+      echo buscar_codigo_paginador: $buscar_codigo_paginador
+      echo buscar_codigo_exclude_dir: $buscar_codigo_exclude_dir
+      echo buscar_codigo_exclude: $buscar_codigo_exclude
+      echo buscar: $buscar
+      echo archivos_afectados: $archivos_afectados
+      echo formato: $formato
+      echo encoding_entrada: $encoding_entrada
+      echo encoding_salida: $encoding_salida
+      echo servidor_vim: $servidor_vim
+
+   fi
+
    [[ "$debug" = "true" ]] && echo "Escanear: [$buscar] en ${archivos_afectados:-`pwd`}"
 
    case "$formato" in
@@ -170,16 +186,27 @@ function escanear_codigo() {
                      }
                      printf "\n* %s : %s ", $3, $6;
                   }
-               }' 
+               }' \
+            > "${salida}"
+
          ;;
 
       enlaces)
-         ejecutar_comando "$comando"  | sed 's/^\.\///' | \
-            awk -v FS=':' "{ printf \"- \`%s:%s %s <${buscar_codigo_formato_enlaces}>\`_\n\",\$1,\$2,\$3,\$1,\$2 }" | \
-            sed "s/$buscar//g" 
+         ejecutar_comando "$comando" 
+         cat $salida \
+            | sed 's/^\.\///' \
+            | sed "s/$buscar//g" \
+            | sed "s/\/\*\*//g" \
+            | sed "s/\*\///g" \
+            | sed "s/\*//g" \
+            | awk -v FS=':' "{ printf \"- \`%s:%s %s <${buscar_codigo_formato_enlaces}>\`_\n\",\$1,\$2,\$3,\$1,\$2 }" \
+            > "${salida}"
          ;;
       *)
-         ejecutar_comando "$comando"  | sed 's/^\.\///'
+         ejecutar_comando "$comando"  \
+            | sed 's/^\.\///' \
+            > "${salida}"
+
          ;;
 
    esac
@@ -195,7 +222,8 @@ function escanear_codigo() {
 
    fi
 
-   cat $salida
+   cat "$salida"
+   [[ -e "${salida}_2" ]] && rm "${salida}_2"
 
    }
 

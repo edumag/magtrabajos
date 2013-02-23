@@ -1,6 +1,16 @@
 ## @file cambio_nombre_rama.sh
 ## @brief Al cambiarse el nombre de una tarea se debe cambiar el nombre de su rama
 ##        correspondiente.
+##
+## Evento cancelado.
+
+echo
+echo Cancelamos automatización de llevar tarea a develop,
+echo ya que nos ha dado unos cuantos problemas con los conflictos
+echo
+
+exit
+
 
 rama_saneada="`magcontrolversion sanear "$tarea"`"
 nombre_nuevo_saneado="`magcontrolversion sanear "$nTarea"`"

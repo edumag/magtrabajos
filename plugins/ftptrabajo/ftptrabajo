@@ -19,7 +19,8 @@
 ## Parámetros:
 ##
 ## <pre>
-##  --proyecto|-p [proyecto]                Definir proyecto a usar.
+##  --configurar                            Configurar proyecto de la carpeta actual
+##  --comando | -c [comando]                Lanzar comando 
 ##  -a                                      Añadir archivo a la lista de bloqueados, pendientes de subir.
 ##  --subir, -s                             Sube un archivo al servidor quitando el bloqueo que
 ##                                          hayamos puesto anteriormente.
@@ -52,11 +53,14 @@
 ## 
 ##  --menu                                  Menú de aplicación.
 ## 
-##  --debug                                 Mostramos mensajes de depuración
+##  --depurar                                 Mostramos mensajes de depuración
 ##  --help, -h                              Imprime esta ayuda.
 ##  -info                                   Información extendida.
 ##
 ## </pre>
+##
+## Dependencias: cut, ftp, lftp, diff
+##
 ## @author   Eduardo Magrané
 ##
 ## @todo Con sftp no borra los ficheros de bloqueo ya que no entiende delete y ftp no entiende rm
@@ -75,41 +79,32 @@
 ## This source code is released for free distribution under the terms of the
 ## GNU General Public License as published by the Free Software Foundation.
 
-## Recoger configuración de magtrabajos
-source "`dirname "$BASH_SOURCE"`/../../config"
+# Recoger configuración de magtrabajos
+source `dirname "$BASH_SOURCE"`/../../config
+
+# Configuración por defecto de ftptrabajo 
+configuracion_leer "${DIR_CONF_USUARIO}configuracion/ftptrabajo" "`dirname "$BASH_SOURCE"`/config.default" 'ftptrabajo' 
 
 # Si no tenemos consola volvemos a lanzarlo desde una.
 [[ `tty` ]] || ( ( exec ${TERM:-xterm} -e "$0 $* ; read" & ) ;  exit )
 
-prog=`basename $0`
-
-# Comandos necesarios
-dependencias="cut ftp lftp diff"
-
-# colores fondo oscuro
-
-normal="\033[0m"
-ok="\033[1;32m"
-ko="\033[1;31m"
-aviso="\033[1;33m"
-comentario="\033[47m\033[1;30m"
-destacado="\033[1;37m"
-
-## Añadimos color
-## 
-## Uso: color [Color a añadir]
-
-color() { if [ "$var_color" = 'si' ] ; then local c=${1:-normal} ; echo -en "${!c}" ; fi }
-
-ok() { color ok ; echo '[ok]' ; color ; }
-ko() { color ko ; echo '[ko]' ; color ; }
-
 # Variables globales
 
+prog=`basename $0`
+
+## Activación de depuración (Cualquier valor la activa)
+DEV=${DEV:-}
+
+## Bloqueo
 BLOQUEO_PROPIO=''
-DEV=
+## Proyecto
 proyecto=''
-conf_proyecto=''
+## Archivo de configuración del proyecto
+CONFIGURACION_FTPTRABAJO_PROYECTO=''
+## Carpeta ftptrabajo de proyecto individual, aquí pondremos los ficheros
+## de bloqueo del proyecto, lista de archivos bloqueados y lo que se necesite crear.
+DIR_FTPTRABAJO_PROYECTO=''
+
 declare -a archivos   ##< Array de archivos
 declare -i na=0       ##< Nuemro de archivos
 
@@ -124,41 +119,6 @@ COMANDO_FTP="ftp -p -i -v "
 LOCALES="LANG=en_GB.utf8"
 
 SALIDA=""
-
-## @defgroup configuracion Configuración
-## @{
-## @defgroup configuracion_ftptrabajo Configuración para ftptrabajo
-## @{
-
-## @var var_fich_conf 
-## Archivo de configuración
-var_fich_conf="$HOME/.magtrabajos/configuracion/${prog}"
-
-## @var var_color
-## Utilizar colores (si/no)
-var_color="si"
-
-## @var var_editor
-## Editor
-var_editor=gvim
-
-## @var var_com_diff
-## Comando para editar diferencias
-var_com_diff=${mt_comando_diff:-vimdiff}
-
-## @var var_terminal
-## Terminal a utilizar
-var_terminal="${TERM:-xterm}"
-
-## @var var_bloquear
-## Utilizar bloqueo de archivos
-var_bloquear="si"
-
-## @}
-## @}
-
-# Si tenemos fichero de configuración recogemos lo insertamos
-[[ -e "$var_fich_conf" ]] && source $var_fich_conf
 
 ## Pantalla de información
 
@@ -263,9 +223,9 @@ function verError(){
 ## @return 06/15/2010 11:49:06 GMT
 
 function ftp_fecha_archivo() {
-$COMANDO_FTP $SERVER > $LOG 2>&1<<FIN
-lcd $DIR_LOCAL
-cd $DIR_REMOTO
+$COMANDO_FTP $ftptrabajo_server > $LOG 2>&1<<FIN
+lcd $ftptrabajo_dir_local
+cd $ftptrabajo_dir_remoto
 modtime "$1"
 quit
 FIN
@@ -276,9 +236,9 @@ grep "$1" $LOG | cut -f2
 ## comprobar si existe
 
 function ftp_size_archivo() {
-$COMANDO_FTP $SERVER > $LOG 2>&1<<FIN
-lcd $DIR_LOCAL
-cd $DIR_REMOTO
+$COMANDO_FTP $ftptrabajo_server > $LOG 2>&1<<FIN
+lcd $ftptrabajo_dir_local
+cd $ftptrabajo_dir_remoto
 size "$1"
 quit
 FIN
@@ -289,10 +249,9 @@ grep "^213" $LOG | cut -d' ' -f2
 
 function ftp_existe_en_servidor() {
 echo "  Comprobar existencia de archivo o directorio [$1]..." > $LOG
-lftp  $SERVER >> $LOG 2>&1<<FIN
-debug
-lcd $DIR_LOCAL
-cd $DIR_REMOTO
+lftp  $ftptrabajo_server >> $LOG 2>&1<<FIN
+lcd $ftptrabajo_dir_local
+cd $ftptrabajo_dir_remoto
 cls "$1"
 quit
 FIN
@@ -302,9 +261,9 @@ comprobarEstado
 ## Bajamos archivo del servidor
 
 function ftp_bajar_archivo(){
-$COMANDO_FTP $SERVER > $LOG 2>&1<<FIN
-lcd $DIR_LOCAL
-cd $DIR_REMOTO
+$COMANDO_FTP $ftptrabajo_server > $LOG 2>&1<<FIN
+lcd $ftptrabajo_dir_local
+cd $ftptrabajo_dir_remoto
 get "$1" "$1"
 quit
 FIN
@@ -314,12 +273,12 @@ comprobarEstado
 ## Subimos archivo del servidor
 
 function ftp_subir_archivo(){
-echo "Comando: $COMANDO_FTP $SERVER " > $LOG
-$COMANDO_FTP $SERVER >> $LOG 2>&1<<FIN
+echo "Comando: $COMANDO_FTP $ftptrabajo_server " > $LOG
+$COMANDO_FTP $ftptrabajo_server >> $LOG 2>&1<<FIN
 hash
 tick
-lcd $DIR_LOCAL
-cd $DIR_REMOTO
+lcd $ftptrabajo_dir_local
+cd $ftptrabajo_dir_remoto
 mput "$1" "$1"
 quit
 FIN
@@ -329,9 +288,9 @@ comprobarEstado
 ## crear directorio en el servidor
 
 function ftp_crear_dir(){
-$COMANDO_FTP $SERVER > $LOG 2>&1<<FIN
-lcd $DIR_LOCAL
-cd $DIR_REMOTO
+$COMANDO_FTP $ftptrabajo_server > $LOG 2>&1<<FIN
+lcd $ftptrabajo_dir_local
+cd $ftptrabajo_dir_remoto
 mkdir "$1"
 quit
 FIN
@@ -341,9 +300,9 @@ comprobarEstado
 ## cambiar nombre de archivo en el servidor
 
 function ftp_renombrar(){
-$COMANDO_FTP $SERVER > $LOG 2>&1<<FIN
-lcd $DIR_LOCAL
-cd $DIR_REMOTO
+$COMANDO_FTP $ftptrabajo_server > $LOG 2>&1<<FIN
+lcd $ftptrabajo_dir_local
+cd $ftptrabajo_dir_remoto
 rename "${1}" "$2"
 quit
 FIN
@@ -353,9 +312,9 @@ comprobarEstado
 ## Eliminamos archivo del servidor
 
 function ftp_eliminar_archivo(){
-$COMANDO_FTP $SERVER > $LOG 2>&1<<FIN
-lcd $DIR_LOCAL
-cd $DIR_REMOTO
+$COMANDO_FTP $ftptrabajo_server > $LOG 2>&1<<FIN
+lcd $ftptrabajo_dir_local
+cd $ftptrabajo_dir_remoto
 delete "${1}"
 quit
 FIN
@@ -365,9 +324,9 @@ comprobarEstado
 ## Eliminamos archivo del servidor
 
 function ftp_borrar_directorio(){
-$COMANDO_FTP $SERVER > $LOG 2>&1<<FIN
-lcd $DIR_LOCAL
-cd $DIR_REMOTO
+$COMANDO_FTP $ftptrabajo_server > $LOG 2>&1<<FIN
+lcd $ftptrabajo_dir_local
+cd $ftptrabajo_dir_remoto
 rmdir "${1}"
 quit
 FIN
@@ -378,14 +337,14 @@ comprobarEstado
 
 function ftp_listar(){
 if [ "${archivos[*]}" == "" ] ; then
-   archivos[0]="$DIR_REMOTO"
+   archivos[0]="$ftptrabajo_dir_remoto"
 fi
 for n in `seq 0 $((${#archivos[*]}-1))` ; do
 dir_remoto=${archivos[$n]}
 echo
 echo "listado de $dir_remoto"
 if [ -e "$LS_REMOTO" ] ; then rm $LS_REMOTO ; fi
-$COMANDO_FTP $SERVER > $LOG 2>&1<<FIN
+$COMANDO_FTP $ftptrabajo_server > $LOG 2>&1<<FIN
 cd $dir_remoto
 mls . $LS_REMOTO
 quit
@@ -398,9 +357,11 @@ done
 ##
 ## Se tiene en cuenta la lista de directorios descartados, para no ser bajados
 ## 
-## @param servidor Se sincroniza en dirección opuesta de local a servidor
-## @param borrar Se borran los archivos no encontrados en servidor que están en local
-## @param dir Directorio a sincronizar sino existe todo
+## Parámetros:
+##
+## - servidor   Se sincroniza en dirección opuesta de local a servidor
+## - borrar     Se borran los archivos no encontrados en servidor que están en local
+## - dir        Directorio a sincronizar sino existe todo
 
 function ftp_sincronizar() {
 
@@ -418,11 +379,11 @@ else
 fi
 
 if [ "$1" != "" ] ; then
-   local dir_local="${DIR_LOCAL}/$1"
-   local dir_remoto="${DIR_REMOTO}/$1"
+   local dir_local="${ftptrabajo_dir_local}/$1"
+   local dir_remoto="${ftptrabajo_dir_remoto}/$1"
 else
-   local dir_local="${DIR_LOCAL}"
-   local dir_remoto="${DIR_REMOTO}"
+   local dir_local="${ftptrabajo_dir_local}"
+   local dir_remoto="${ftptrabajo_dir_remoto}"
 fi
 
 ## Bajamos directorios recursivamente
@@ -457,10 +418,10 @@ fi
 echo "  Actualizando local [$dir]"
 ## Sincronizar local con l servidor
 #ftp no baja el directorio completo
-#ftp -p -i -v $SERVER > $LOG 2>&1<<FIN
-#yafc -w 120 -v $SERVER > $LOG 2>&1<<FIN
-#lftp $SERVER  > $LOG 2>&1<<FIN
-lftp $SERVER  <<FIN | tee -a "$REG"
+#ftp -p -i -v $ftptrabajo_server > $LOG 2>&1<<FIN
+#yafc -w 120 -v $ftptrabajo_server > $LOG 2>&1<<FIN
+#lftp $ftptrabajo_server  > $LOG 2>&1<<FIN
+lftp $ftptrabajo_server  <<FIN | tee -a "$REG"
 lcd $dir_local
 cd $dir_remoto
 $comando
@@ -489,9 +450,9 @@ if [ ! -e "$BLOQUEO" ] ; then
    echo "No tenemos archivo de bloqueo" | tee $LOG
    return
 fi
-$COMANDO_FTP $SERVER > $LOG 2>&1<<FIN
-lcd $DIR_LOCAL
-cd $DIR_REMOTO
+$COMANDO_FTP $ftptrabajo_server > $LOG 2>&1<<FIN
+lcd $ftptrabajo_dir_local
+cd $ftptrabajo_dir_remoto
 put $BLOQUEO "${1}.LCK"
 quit
 FIN
@@ -501,7 +462,7 @@ comprobarEstado
 ## Eliminamos archivo de bloque del servidor
 
 function ftp_desbloquear(){
-[[ "$var_bloquear" == "no" ]] && return 0
+[[ "$ftptrabajo_bloqueo_activado" == "no" ]] && return 0
 ftp_eliminar_archivo "${1}.LCK" > /dev/null
 comprobarEstado
 }
@@ -511,73 +472,42 @@ comprobarEstado
 
 function leer_proyecto() {
 
-   conf_proyecto=$HOME/.ftptrabajo/$proyecto/config
-
-   if [ -e "$conf_proyecto" ] ; then
+   if [ -e "$CONFIGURACION_FTPTRABAJO_PROYECTO" ] ; then
 
       LOG="${DIR_TMP}ftptrabajo-${proyecto}.log"
-      BLOQUEO="$HOME/.ftptrabajo/${proyecto}/bloqueo.LCK"
-      REG="$HOME/.ftptrabajo/${proyecto}/registro.log"
+      BLOQUEO="${DIR_FTPTRABAJO_PROYECTO}bloqueo.LCK"
+      REG="${DIR_FTPTRABAJO_PROYECTO}registro.log"
       USUARIO="Eduardo" # Nombre coincidente del autor de los bloqueos
-      LISTA_BLOQUEOS="$HOME/.ftptrabajo/${proyecto}/listaBloqueados"
-      LISTA_DIR_DESCARTADOS="$HOME/.ftptrabajo/${proyecto}/dirDescartados"
-      LS_REMOTO="$HOME/.ftptrabajo/${proyecto}/lsRemoto"
-      conf_proyecto="$HOME/.ftptrabajo/$proyecto/config"
+      LISTA_BLOQUEOS="${DIR_FTPTRABAJO_PROYECTO}listaBloqueados"
+      LISTA_DIR_DESCARTADOS="${DIR_FTPTRABAJO_PROYECTO}dirDescartados"
+      LS_REMOTO="${DIR_FTPTRABAJO_PROYECTO}lsRemoto"
+
+      if [ $DEV ] ; then
+
+         echo
+         echo "DIR_FTPTRABAJO_PROYECTO.....$DIR_FTPTRABAJO_PROYECTO"             
+         echo "BLOQUEO.....................$BLOQUEO               "
+         echo "REG.........................$REG                   "
+         echo "USUARIO.....................$USUARIO               "
+         echo "LISTA_BLOQUEOS..............$LISTA_BLOQUEOS        "
+         echo "LISTA_DIR_DESCARTADOS.......$LISTA_DIR_DESCARTADOS "
+         echo "LS_REMOTO...................$LS_REMOTO             "
+         echo "LOG.........................$LOG                   "      
+         echo "CONTENIDO BLOQUEO...........`cat $BLOQUEO`"
+         echo
+
+      fi
+
+      # Comprobaciones
+      if [ ! -e "$BLOQUEO" ] ; then echo 'Sin archivo de bloqueo, salimos' ; exit 2 ; fi
 
    else
 
-      [[ "$proyecto" != "" ]] && configurar_proyecto || seleccionar_proyecto
+      echo
+      echo Sin archivo de configuración salimos
+      exit 1
 
    fi
-
-}
-
-## Seleccionar proyecto
-
-function seleccionar_proyecto() {
-
-   echo
-   echo Es necesario seleccionar proyecto o crear uno nuevo
-   echo
-
-   cd "$HOME/.$prog"
-
-   select OPCION in Nuevo Cancelar * ; do
-      case $OPCION in
-
-         Cancelar) exit ;;
-         Nuevo) crear_proyecto ; break ; return ;;
-         *) proyecto="$OPCION" ; leer_proyecto ; break ; return;;
-
-      esac
-
-   done
-}
-
-# Crear nuevo proyecto
-
-function crear_proyecto() {
-
-   echo "Proyecto nuevo"
-
-   # Si no tenemos nombre de proyecto preguntamos
-   [[ "$proyecto" = "" ]] && read -p "Nombre del proyecto: " proyecto
-
-   # Si tenemos un directorio ya de este proyecto salimos
-   if [ -d $HOME/.ftptrabajo/$proyecto ] ; then
-      echo "Directorio ya existe"
-      exit
-   fi
-
-   echo "Creamos directorio para $proyecto"
-   mkdir $HOME/.ftptrabajo/$proyecto
-
-   configurar_proyecto
-
-   # crear archivos del proyecto
-   [[ -e "$LISTA_BLOQUEOS" ]] || touch $LISTA_BLOQUEOS
-   [[ -e "$LISTA_DIR_DESCARTADOS" ]] || touch $LISTA_DIR_DESCARTADOS
-   [[ -e "$LS_REMOTO" ]] || touch $LS_REMOTO
 
 }
 
@@ -585,25 +515,41 @@ function crear_proyecto() {
 
 function configurar_proyecto() {
 
+   echo
+   echo ftptrabajo
+   echo ----------
+   echo
    echo "Configuración para $proyecto"
-   conf_proyecto="$HOME/.ftptrabajo/$proyecto/config"
-   if [ -e "$conf_proyecto"  ] ; then
-      source $conf_proyecto
-   else
+   echo
 
-      if [ ! -d "$HOME/.ftptrabajo/$proyecto" ] ; then
-         crear_proyecto
+   echo
+   echo Proyecto: $proyecto
+   echo
+   [[ $DEV ]] && echo -e "\n$CONFIGURACION_FTPTRABAJO_PROYECTO \n\n"
+   read -p 'Configurar ftptrabajo (s/n): ' OPCION
+
+   if [ "$OPCION" = "s" ] ; then
+      # Crear carpetas para contener el nuevo proyecto
+      if [ ! -d "${DIR_FTPTRABAJO_PROYECTO}" ] ; then
+         mkdir "${DIR_FTPTRABAJO_PROYECTO}"
+         if [ $? != 0 ] ; then
+            echo
+            echo "No se pudo crear carpeta de proyecto [$DIR_FTPTRABAJO_PROYECTO]"
+            echo
+            echo salimos
+            exit 4
+         fi
       fi
+      echo "mt_ftp_directorio: $mt_ftp_directorio / mt_ftp: $mt_ftp"
+      # configurar
+      configuracion_menu  'ftptrabajo' "${CONFIGURACION_FTPTRABAJO_PROYECTO}" "`dirname "$BASH_SOURCE"`/config.default"
+      leer_proyecto
+      # crear archivo de bloqueo
+      [[ ! -e "$BLOQUEO" ]] && echo "$USER ($proyecto)||$USER@$proyecto.com" > $BLOQUEO
+
+   else
+      exit
    fi
-   read -p "Servidor($SERVER):" SERVER_N
-   read -p "Directorio en el servidor($DIR_REMOTO):" DIR_REMOTO_N
-   read -p "Directorio en local($DIR_LOCAL):" DIR_LOCAL_N
-
-   echo "SERVER=${SERVER_N:-SERVER}" > $conf_proyecto
-   echo "DIR_REMOTO=${DIR_REMOTO_N:-DIR_REMOTO}" >> $conf_proyecto
-   echo "DIR_LOCAL=${DIR_LOCAL_N:-DIR_LOCAL}" >> $conf_proyecto
-
-   leer_proyecto
 
 }
 
@@ -693,7 +639,7 @@ function trabajarArchivo(){
             echo
             echo 1 - Mantener el archivo local y desechar las diferencias
             echo '2 - Chafar el archivo local con el del servidor, (por defecto)'
-            echo 3 - Editar las diferencias con $var_com_diff
+            echo 3 - Editar las diferencias con $ftptrabajo_com_diff
             echo
             echo -e "Opción: \c "
             read OPCION
@@ -701,7 +647,7 @@ function trabajarArchivo(){
             if [ "$OPCION" = '1' ] ; then
                mv "$fich_ft" "$x"
             elif [ "$OPCION" = '3' ] ; then
-               CMD="$var_com_diff '$x' '$fich_ft'"
+               CMD="$ftptrabajo_com_diff '$x' '$fich_ft'"
                eval "$CMD"
             fi
 
@@ -735,7 +681,7 @@ function eliminarBloqueoLista(){
 
 function bloquearEnServidor(){
 
-   if [ "$var_bloquear" == "no" ] ; then
+   if [ "$ftptrabajo_bloqueo_activado" == "no" ] ; then
       echo "$1" >> $LISTA_BLOQUEOS
       return 0
    fi
@@ -851,8 +797,8 @@ function devolverArchivo(){
          if [ $? = 0 ] ; then
             #echo "Bloqueo eliminado del servidor"
             # borramos el local si lo hay
-            if [ -e "${DIR_LOCAL}/${x}.LCK" ] ; then
-               rm "${DIR_LOCAL}/${x}.LCK"
+            if [ -e "${ftptrabajo_dir_local}/${x}.LCK" ] ; then
+               rm "${ftptrabajo_dir_local}/${x}.LCK"
             fi
             eliminarBloqueoLista "$x"
             quitarPermisosEscritura "$x"
@@ -872,25 +818,25 @@ function devolverArchivo(){
 
 function comprobarBloqueoServidor(){
 
-   [[ "$var_bloquear" == "no" ]] && return 0
+   [[ "$ftptrabajo_bloqueo_activado" == "no" ]] && return 0
 
    echo -ne "  Comprobando bloqueo en servidor..."
    ftp_bajar_archivo "$*".LCK > /dev/null
    if [ $? = 0  ] ; then
       # archivo bloqueado
       # Bajamos archivo para ver si el bloqueo es nuestro
-      if [ ! "`egrep -i \"$USUARIO\" \"${DIR_LOCAL}/${*}.LCK\"`" ] ; then
+      if [ ! "`egrep -i \"$USUARIO\" \"${ftptrabajo_dir_local}/${*}.LCK\"`" ] ; then
          # El bloqueo no es nuestro lo mostramos y salimos
          ko
          color aviso
          echo -e "  No se puede subir archivo bloqueado por:"
          color destacado
-         echo -n '  ' ; cat "${DIR_LOCAL}/$*".LCK
+         echo -n '  ' ; cat "${ftptrabajo_dir_local}/$*".LCK
          color
          echo
          read -p 'Deseas enviarle un email solicitando que lo libere. (s/n): ' OPCION
          if [ "$OPCION" = "s" ] ; then
-            local mail_bloqueado=`cat "${DIR_LOCAL}/$*".LCK | cut -d\| -f3`
+            local mail_bloqueado=`cat "${ftptrabajo_dir_local}/$*".LCK | cut -d\| -f3`
             local subject="Archivo $* bloqueado"
             local body="Necesitaría el archivo $* para trabajar.\n\nGracias"
             echo
@@ -908,13 +854,13 @@ function comprobarBloqueoServidor(){
             fi
          fi
          # Borramos archivo de bloqueo
-         rm  "${DIR_LOCAL}/$*".LCK
+         rm  "${ftptrabajo_dir_local}/$*".LCK
          return 1
       else
          ok
          BLOQUEO_PROPIO="SI"				
          # Borramos archivo de bloqueo
-         rm  "${DIR_LOCAL}/$*".LCK
+         rm  "${ftptrabajo_dir_local}/$*".LCK
          return 0
       fi
 
@@ -1169,11 +1115,11 @@ function borrarArchivosServidor() {
          # Bajamos archivo para ver si el bloqueo es nuestro
          echo "ko"
          echo -en "  Identificación de bloqueo ..."
-         if [ ! "`egrep -i \"$USUARIO\" ${DIR_LOCAL}/${x}.LCK`" ] ; then
+         if [ ! "`egrep -i \"$USUARIO\" ${ftptrabajo_dir_local}/${x}.LCK`" ] ; then
             # El bloqueo no es nuestro lo mostramos y salimos
             echo "ko"
             echo -e "${c_error}  No se puede eliminar archivo bloqueado por: $fc"
-            cat "${DIR_LOCAL}/$x".LCK
+            cat "${ftptrabajo_dir_local}/$x".LCK
             exit
          else
             echo "[ok]"
@@ -1195,19 +1141,24 @@ function borrarArchivosServidor() {
                echo "[ok]"
                #echo "Bloqueo eliminado del servidor"
                # borramos el local si lo hay
-               if [ -e "${DIR_LOCAL}/${x}.LCK" ] ; then
-                  rm "${DIR_LOCAL}/${x}.LCK"
+
+               if [ -e "${ftptrabajo_dir_local}/${x}.LCK" ] ; then
+                  rm "${ftptrabajo_dir_local}/${x}.LCK"
                fi
                # Eliminamos archivo de la lista
                grep -v "$x" $LISTA_BLOQUEOS  > ${DIR_TMP}ftpTotbisbal_lista.tmp
                mv ${DIR_TMP}ftpTotbisbal_lista.tmp $LISTA_BLOQUEOS
+               echo " Quitamos archivo de la lista de bloqueados"
             else
                echo "ko"
                echo -e "${c_error}  No se pudo eliminar bloqueo$fc"
-               echo "  Manteemos bloqueo"
+               echo "  Mantenemos bloqueo"
             fi
          fi
       else
+         echo
+         echo " No se pudo eliminar archivo"
+         echo
          read -p ' Continuar (s/n): ' OPCION
          [[ "$OPCION" != "s" ]] && exit
       fi
@@ -1316,10 +1267,10 @@ function generar_lista_dir_bajar(){
 function bajarBloqueos(){
 echo "Bajar bloqueos: "
 cat $LS_REMOTO
-lftp $SERVER > $LOG 2>&1<<FIN
+lftp $ftptrabajo_server > $LOG 2>&1<<FIN
 glob
-lcd $DIR_LOCAL
-cd $DIR_REMOTO
+lcd $ftptrabajo_dir_local
+cd $ftptrabajo_dir_remoto
 mget *.LCK
 quit
 FIN
@@ -1484,18 +1435,18 @@ function sincronizar() {
 
    else
 
-      cd $DIR_LOCAL
+      cd $ftptrabajo_dir_local
 
       if [ "$?" != 0 ] ; then
          echo
          color ko
-         echo No se pudo entrar en directorio local $DIR_LOCAL
+         echo No se pudo entrar en directorio local $ftptrabajo_dir_local
          color
          exit
       fi
 
       echo `date` >> "$REG"
-      #$var_terminal -e "tail -f $LOG -f $REG" &
+      #$ftptrabajo_terminal -e "tail -f $LOG -f $REG" &
 
       [[ "$servidor" == "" ]] && darPermisosEscritura "$dir_sync"
       # generar_lista_dir_bajar "$dir_sync"
@@ -1521,13 +1472,13 @@ function bajar_bloqueos(){
    [[ -e "$LOG" ]] && rm "$LOG"
    echo `date` >> "$REG"
    echo `date` >> "$LOG"
-   $var_terminal -e "tail -f $LOG -f $REG" &
-   darPermisosEscritura "$DIR_LOCAL"
+   $ftptrabajo_terminal -e "tail -f $LOG -f $REG" &
+   darPermisosEscritura "$ftptrabajo_dir_local"
    borrarBloqueos
    # Bajamos bloqueos
    generar_lista_dir_bajar --bloqueos
    ftp_sincronizar
-   quitarPermisosEscritura "$DIR_LOCAL"
+   quitarPermisosEscritura "$ftptrabajo_dir_local"
 
 }
 
@@ -1605,10 +1556,18 @@ function comprobar_proyecto() {
       proyecto="`basename "$(pwd)"`"
    fi
 
-   [[ -z $proyecto ]] && seleccionar_proyecto || leer_proyecto
+   CONFIGURACION_FTPTRABAJO_PROYECTO="${DIR_CONF_USUARIO}proyectos/$proyecto/configuracion/ftptrabajo"
+   DIR_FTPTRABAJO_PROYECTO="${DIR_CONF_USUARIO}proyectos/$proyecto/ftptrabajo/"
 
-   # Archivo de configuración de proyecto actual.
-   [[ -e "$conf_proyecto" ]] && source $conf_proyecto || configurar_proyecto
+   [[ "$accion" == "configurar" ]] && configurar_proyecto
+
+   if [ ! -e "$CONFIGURACION_FTPTRABAJO_PROYECTO" ] ; then
+      [[ $DEV ]] && echo -e "\n\nNo existe un proyecto para esta carpeta"
+      configurar_proyecto
+   else
+      source $CONFIGURACION_FTPTRABAJO_PROYECTO
+      leer_proyecto
+   fi
 
    # Comprobar que tenemos configurado el bloqueo.
    if [ ! -e "$BLOQUEO" ] ; then
@@ -1627,12 +1586,12 @@ function comprobar_proyecto() {
       echo LOG: $LOG
       echo BLOQUEO: $BLOQUEO
       echo USUARIO: $USUARIO
-      echo DIR_LOCAL: $DIR_LOCAL
-      echo DIR_REMOTO: $DIR_REMOTO
+      echo ftptrabajo_dir_local: $ftptrabajo_dir_local
+      echo ftptrabajo_dir_remoto: $ftptrabajo_dir_remoto
       echo LISTA_BLOQUEOS: $LISTA_BLOQUEOS
       echo LISTA_DIR_DESCARTADOS: $LISTA_DIR_DESCARTADOS
       echo LS_REMOTO: $LS_REMOTO
-      echo conf_proyecto: $conf_proyecto
+      echo CONFIGURACION_FTPTRABAJO_PROYECTO: $CONFIGURACION_FTPTRABAJO_PROYECTO
       echo Contenido bloqueo: `cat "$BLOQUEO"`
       echo 
    fi
@@ -1643,8 +1602,16 @@ function comprobar_proyecto() {
 
 function estructuta_servidor() {
 
-   lftp -e "cd $DIR_REMOTO ; find ; quit" $SERVER | grep /$
+   lftp -e "cd $ftptrabajo_dir_remoto ; find ; quit" $ftptrabajo_server | grep /$
 }
+
+## Lanzar un comando recibido por el usuario
+
+function lanzar_comando() {
+
+   lftp -e "cd $ftptrabajo_dir_remoto ; $ftpcomando ; quit" $ftptrabajo_server
+
+   }
 
 ## Menú
 
@@ -1706,10 +1673,11 @@ while [ -n "$1" ]; do
 
    case $1 in
 
-      --proyecto|-p) proyecto="$2" ; shift 2 ;;
       -info) shift 1 ; info ; exit ;;
       -h|-help|--help) shift 1 ; help ; exit ;;
+      --configurar) shift 1 ; accion=configurar;; 
       -a) shift 1 ; accion=anyadirLista ;;
+      --comando|-c) shift 1 ; accion=lanzar_comando ; ftpcomando="$*" ; shift ;;
       --cambiar-nombre) shift 1 ; accion=cambiarNombre ;;
       --subir|-s) shift 1 ; accion=devolverArchivo ;;
       --subir-bloqueados|-sb) accion=subirLista ; shift 1 ;;
@@ -1717,12 +1685,12 @@ while [ -n "$1" ]; do
       --borrar-dir) shift 1 ; accion=borrarDirectorioRecursivamente ;;
       --borrar) shift 1 ; accion=borrarArchivosServidor ;;
       --bajar|-b) shift 1 ; accion=trabajarArchivo ;;
-      --log-ftp) shift 1  ; comprobar_proyecto ; ($var_terminal -e "tail -f $LOG" &) ; exit ;;
-      --log) shift 1 ; comprobar_proyecto ; ($var_terminal -e "tail -f $REG" &) ; exit ;;
+      --log-ftp) shift 1  ; comprobar_proyecto ; ($ftptrabajo_terminal -e "tail -f $LOG" &) ; exit ;;
+      --log) shift 1 ; comprobar_proyecto ; ($ftptrabajo_terminal -e "tail -f $REG" &) ; exit ;;
       --sincronizar) shift 1 ; accion=sincronizar ;;
       --sincronizar-servidor) shift 1 ; accion=sincronizar_servidor ;;
-      -edd) shift 1 ; comprobar_proyecto ; $var_editor "$LISTA_DIR_DESCARTADOS" ; exit ;;
-      -elb) shift 1 ; comprobar_proyecto ; $var_editor "$LISTA_BLOQUEOS" ; exit ;;
+      -edd) shift 1 ; comprobar_proyecto ; $ftptrabajo_editor "$LISTA_DIR_DESCARTADOS" ; exit ;;
+      -elb) shift 1 ; comprobar_proyecto ; $ftptrabajo_editor "$LISTA_BLOQUEOS" ; exit ;;
       --bajar-bloqueos) shift 1 ; accion=bajar_bloqueos ;;
       --ver-bloqueados|-vb) shift 1 ; accion=lista_archivos_bloqueados ;;
       --total-bloqueados|-tb) shift 1 ; accion=total_archivos_bloqueados ;;
@@ -1732,25 +1700,33 @@ while [ -n "$1" ]; do
       --forzar-bajar|-fb) shift 1 ; accion=obtener ;;
       --listar) shift 1 ; accion=ftp_listar ;;
       --menu) shift 1 ; accion=menu ;;
-      --debug) shift 1 ; DEV=1 ;;
+      --depurar) shift 1 ; DEV=1 ; echo depurar activado ;;
       --listar-estructura) shift 1 ; accion=estructuta_servidor ;;
-      --lftp) shift 1 ; comprobar_proyecto ; da="`pwd`" ; cd "$DIR_LOCAL" ; lftp $SERVER ; cd "$da" ; exit ;;
-      --mc) shift 1 ; comprobar_proyecto ; mc "$DIR_LOCAL" /#ftp:$SERVER ; exit ;;
+      --lftp) shift 1 ; comprobar_proyecto ; da="`pwd`" ; cd "$ftptrabajo_dir_local" ; lftp $ftptrabajo_server ; cd "$da" ; exit ;;
+      --mc) shift 1 ; comprobar_proyecto ; mc "$ftptrabajo_dir_local" /#ftp:$ftptrabajo_server ; exit ;;
       --lista-externa) shift 1 ; archivos=(`cat "$1"`) ; shift 1 ;;
       *) archivos[$na]="$1" ; shift 1 ; let na++ ;;
 
    esac
 done
 
+# depurar
+if [ $DEV ] ; then
+   configuracion_lista 'ftptrabajo' "`dirname "$BASH_SOURCE"`/config.default"
+   echo
+fi
+
+
 if [ -n "$accion" ] ; then
    comprobar_proyecto
    echo "`date +"%A %d de %B del %Y"` $accion: $*" >> $REG
    cmd="$accion $@"
+   [[ $DEV ]] && echo proyecto: $proyecto
    [[ $DEV ]] && echo CMD: $cmd
    eval "$cmd"
 else
    echo
-   echo Parametro no reconocido $*
+   echo "Parametro no reconocido [$*]"
    echo
    help
 fi

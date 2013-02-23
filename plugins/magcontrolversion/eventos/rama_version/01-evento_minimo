@@ -3,4 +3,8 @@
 
 echo 'Evento generado desde magcontrolversion.
 
-Es el momento de regenerar la documentación, ya que estamos creando una nueva release'
+Es el momento de regenerar la documentación, ya que estamos creando una nueva release
+
+@todo Automatizar la generación de documentación
+
+'

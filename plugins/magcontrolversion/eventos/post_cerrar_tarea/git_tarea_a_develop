@@ -1,5 +1,14 @@
 ## @file git_tarea_a_develop
 ## @brief Si estamos en git al cerrar tarea hacemos merge de la tarea sobre develop
+##
+## Evento cancelado.
+
+echo
+echo Cancelamos automatización de llevar tarea a develop,
+echo ya que nos ha dado unos cuantos problemas con los conflictos
+echo
+
+exit
 
 source "`dirname "$BASH_SOURCE"`/../../magcontrolversion_funcs"
 source "`dirname "$BASH_SOURCE"`/../../motores/maggit"

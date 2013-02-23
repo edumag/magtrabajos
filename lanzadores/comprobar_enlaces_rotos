@@ -1,0 +1,9 @@
+#!/bin/bash 
+
+## @file comprobar_enlaces_rotos
+## @brief Comprobación de los enlaces de un dominio web
+
+url="$1"
+file_tmp="/tmp/comprobar_enlaces_rotos"
+
+wget --spider -r -l2 -nv "$url" | tee -a "$file_tmp"

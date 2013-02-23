@@ -25,46 +25,48 @@
 ## 
 ## Opciones:    
 ## <pre> 
-## --menu                      Presentar menú
-## --adjuntar                  Adjuntar documento externo
-## --dependencias              Comprobar dependencias.
-## --proyecto|-p               Proyecto.
-## --tarea|-t                  Tarea.
-## --movimiento|-m             Movimiento.
-## --añadir-archivo|-a         Añadir archivos afectados a un movimiento
-## --nuevo|-n                  Nuevo proyecto, tarea o movimiento.
-## --movimientos-abiertos|-ma  Ver movimientos que estan abiertos.
-## --tiempos-abiertos|-ta      Buscar tiempos abiertos
-## --accion [Accion]           Seleccionamos una acción a realizar 
-## --listar-acciones           Presentar lista de posibles acciones
-## --factura [Nun Factura]     Seleccionaremos tareas por la factura
-## --seleccionar-factura       Listar facturas para seleccionar
-## --consulta                  Indicamos que solo queremos hacer una comprobación, esto hará que nos 
-##                             salga la información por pantalla.
-## --editar-archivos           Editar archivos afectados de movimiento, necesita el movimiento 
-## --seleccionar-tareas '[criterio] [parametro]' Seleccionar tareas por diferentes criterios
-## --informe                   Tipo de informe
-## --listar-informes           Listar los posibles informes
-## --exportar [Formato] [Archivo rst]   Si no se indica formato muestra menú, formatos posibles:
-##                             [H]tml,[E]mail,Email h[t]ml,[P]df,[l]ess,[I]mprimir,[c]sv
-##                             Si no se indica archivo rst se recoge el temporal con el último 
-##                             informe realizado
-## --editar | -e               Editar archivos
-## --estado-subversion         Presentar estado de subversion de proyecto
-## --archivos                  imprimir lista de archivos para poder ser procesada con otro comando, ejemplo: 
-##                             magtrabajos -m 1343 --archivos | xargs ls -l
-## --nueva-tarea-email         Crear tarea nueva desde un archivo de email pasado como argumento.
-## --lanzar                    Nos presenta listados para permitirnos seleccionar por diferentes 
-##                             criterios, últimos movimientos, etc...
+## --menu                                         Presentar menú
+## --configurar                                   Configurar proyecto
+## --adjuntar                                     Adjuntar documento externo
+## --dependencias                                 Comprobar dependencias.
+## --proyecto|-p                                  Proyecto.
+## --tarea|-t                                     Tarea.
+## --movimiento|-m                                Movimiento.
+## --añadir-archivo|-a                            Añadir archivos afectados a un movimiento
+## --nuevo|-n                                     Nuevo proyecto, tarea o movimiento.
+## --movimientos-abiertos|-ma                     Ver movimientos que estan abiertos.
+## --tiempos-abiertos|-ta                         Buscar tiempos abiertos
+## --accion [Accion]                              Seleccionamos una acción a realizar 
+## --listar-acciones                              Presentar lista de posibles acciones
+## --factura [Nun Factura]                        Seleccionaremos tareas por la factura
+## --seleccionar-factura                          Listar facturas para seleccionar
+## --consulta                                     Indicamos que solo queremos hacer una comprobación, esto hará que nos 
+##                                                salga la información por pantalla.
+## --editar-archivos                              Editar archivos afectados de movimiento, necesita el movimiento 
+## --seleccionar-tareas '[criterio] [parametro]'  Seleccionar tareas por diferentes criterios
+## --informe                                      Tipo de informe
+## --listar-informes                              Listar los posibles informes
+## --exportar [Formato] [Archivo rst]             Si no se indica formato muestra menú, formatos posibles:
+##                                                [H]tml,[E]mail,Email h[t]ml,[P]df,[l]ess,[I]mprimir,[c]sv
+##                                                Si no se indica archivo rst se recoge el temporal con el último 
+##                                                informe realizado
+## --editar | -e                                  Editar archivos
+## --estado-subversion                            Presentar estado de subversion de proyecto
+## --archivos                                     imprimir lista de archivos para poder ser procesada con otro comando, ejemplo: 
+## --borrar_archivo_lista_afectados               Borrar archivos afectados de un movimiento, sino se especifican archivos nos permite seleccionar
+##                                                magtrabajos -m 1343 --archivos | xargs ls -l
+## --nueva-tarea-email                            Crear tarea nueva desde un archivo de email pasado como argumento.
+## --lanzar                                       Nos presenta listados para permitirnos seleccionar por diferentes 
+##                                                criterios, últimos movimientos, etc...
 ##
-## --terminal                  Lanza una terminal con magtrabajos y los parametros a continuación de --terminal
-## --sesiones_abiertas|-sa     Comprobar si tenemos sesiones abiertas, magtrabajos -sa ; echo $? devolverá 0 en caso de no haya o 1 si hay
-## --listar-plugins            Lista de puglins instalados
-## --log                       Ver registro del programa
-## --help|-h                   Esta misma ayuda
-## --help-configuracion        Presentar configuración
-## --help-seleccionar-tareas   Presentar ayuda para la selección de tareas
-## --depurar                   Muestra por pantalla mucha información sobre el programa, por defecto no
+## --terminal                                     Lanza una terminal con magtrabajos y los parametros a continuación de --terminal
+## --sesiones_abiertas|-sa                        Comprobar si tenemos sesiones abiertas, magtrabajos -sa ; echo $? devolverá 0 en caso de no haya o 1 si hay
+## --listar-plugins                               Lista de puglins instalados
+## --log                                          Ver registro del programa
+## --help|-h                                      Esta misma ayuda
+## --help-configuracion                           Presentar configuración
+## --help-seleccionar-tareas                      Presentar ayuda para la selección de tareas
+## --depurar                                      Muestra por pantalla mucha información sobre el programa, por defecto no
 ## </pre>
 ##
 ## @todo Eliminar variables de configuración mt_archivo_html, mt_archivo_pdf, mt_archivo_cvs y dejarlo en un directorio
@@ -72,13 +74,8 @@
 ## @todo Menú de notas Editar, exportar 
 ## @todo Una tarea en estado posible debe tener la prioridad a 0, una tarea con estado empezado debe tener la prioridad a 9
 ## @todo Crear un evento que compruebe buffers de vim abiertos antes de cerrar movimiento
-## @todo Evento borrar archivo, y subversión lo borre
 ## @todo Acciones de plugins o complementos fuera de magtrabajos, pasarlo a eventos
-## @todo Sistema de colores con temas, como en ftptrabajo
-## @todo Evento ftptrabajo no sube archivos de movimiento
-## @todo Las funciones que utilizan los componentes y que requieren tener en caso de ser lanzados
-##       independientemente deberían estar en un fichero de libash para no tener que estar repitiendo
-##       código
+## @todo Sistema de colores en la libreria general de libash para todos
 ## 
 ## @author   Eduardo Magrané
 ## @internal
@@ -95,22 +92,15 @@
 ## This source code is released for free distribution under the terms of the
 ## GNU General Public License as published by the Free Software Foundation.
 
-# Si es un enlace hay que buscar el directorio de programas sobre al que apunta
-if [ -L "$0" ] ; then
-   DIR_PROGRAMAS=$(dirname "`readlink $0`")
-else
-   DIR_PROGRAMAS=$(dirname "$0")
-fi
-
-# Añadimos componentes a PATH #
-PATH=$PATH:${DIR_PROGRAMAS}
-for x in ${DIR_PROGRAMAS}/componentes/* ; do if [ -d $x ] ; then PATH="$PATH:$x" ; fi ; done
-for x in ${DIR_PROGRAMAS}/plugins/* ; do if [ -d $x ] ; then PATH="$PATH:$x" ; fi ; done
-PATH="$PATH:${DIR_PROGRAMAS}/lanzadores/"
-export PATH
-
 ## Recoger configuración de magtrabajos
 source "`dirname "$BASH_SOURCE"`/config"
+
+# Añadimos componentes a PATH #
+PATH=$PATH:${DIR_MAGTRABAJOS}
+for x in ${DIR_MAGTRABAJOS}/componentes/* ; do if [ -d $x ] ; then PATH="$PATH:$x" ; fi ; done
+for x in ${DIR_MAGTRABAJOS}/plugins/* ; do if [ -d $x ] ; then PATH="$PATH:$x" ; fi ; done
+PATH="$PATH:${DIR_MAGTRABAJOS}/lanzadores/"
+export PATH
 
 ## Comprobar dependencias
 
@@ -139,129 +129,6 @@ function comprobar_dependencias() {
       exit 1
    fi
 }
-
-## @defgroup configuracion Configuración 
-##
-## Colocamos prefijo 'mt_' ha las variables para ser reconocibles
-##
-## @{
-
-   ## @var mt_paginador
-   ## Programa con el que paginar la salida
-
-   mt_paginador="less"
-
-   ## @var mt_rst2html
-   ## Comando para convertir de rst a html, por defecto: 
-   ## @code
-   ## rst2html --no-xml-declaration --language=es  --stylesheet-path=/home/eduardo/.magtrabajos/magtrabajos.css
-   ## @endcode
-
-   # mt_rst2html="rst2html --report=5 --warnings=${DIR_TMP}rst2html.err --no-xml-declaration --language=es  --stylesheet-path=/home/eduardo/.magtrabajos/magtrabajos.css " 
-   mt_rst2html="rst2html --no-xml-declaration --language=es  --stylesheet-path=/home/eduardo/.magtrabajos/magtrabajos.css " 
-
-   ## @var mt_rst2pdf
-   ## @code
-   ## Comando para convertir de rst a text, por defecto: rst2newlatex --output-encoding-error-handler=replace
-   ## @endcode
-
-   mt_rst2pdf="rst2newlatex --output-encoding-error-handler=replace "
-
-   ## @var mt_pdflatex
-   ## Comando para convertir de text a pdf, por defecto: pdflatex
-
-   mt_pdflatex="pdflatex "
-
-   ## @var mt_editor
-   ## Editor para las descripciones y cosas parecidas, por defecto: vim
-
-   mt_editor="vim"
-
-   ## @var mt_editor_dev
-   ## Editor para programar, por defecto: gvim
-
-   mt_editor_dev='/usr/bin/gvim -geometry 500x50 --servername $proyecto --remote-silent '
-
-   ## @var mt_navegador
-   ## Navegador, por defecto: firefox -new-window
-
-   mt_navegador="firefox -new-window"
-
-   ## @var mt_archivo_html
-   ## Archivo donde guardar la salida en html, por defecto: $HOME/trabajos.html
-
-   mt_archivo_html="$HOME/trabajos.html"
-
-   ## @var mt_archivo_pdf
-   ## Archivo donde guardar la salida pdf, por defecto: $HOME/trabajos.pdf
-
-   mt_archivo_pdf="$HOME/trabajos.pdf"
-
-   ## @var mt_archivo_cvs
-   ## Archivo donde guardar la salida cvs, por defecto: $HOME/trabajos.csv
-
-   mt_archivo_cvs="$HOME/trabajos.csv"
-
-   ## @var mt_terminal
-   ## Programa terminal de trabajo, ejemplos:
-   ## @code
-   ## gnome-terminal --geometry 200x100 -e 
-   ## mt_terminal="terminator -m -x
-   ## @endcode
-
-   mt_terminal="gnome-terminal --geometry 100x40 -x "
-
-   ## @var mt_miniterminal
-   ## Pequeña terminal para cosas como lanzar comandos externos y cosas así
-
-   mt_miniterminal='xterm -bg black -fg white' 
-
-   ## @var mt_comando_diff
-   ## Comando para trabajar los conflictos entre versiones, por defecto gvimdiff
-
-   mt_comando_diff="gvimdiff"
-
-   ## @var mt_ocultar_ficheros
-   ## Listado de patrones que nos servirá para ocultar ficheros cuando tengamos que seleccionar alguno
-
-   mt_ocultar_ficheros='cscope.files|cscope.out|GPATH|GRTAGS|GSYMS|GTAGS|Session.vim|tags'
-
-   ## @var mt_codificacion_emails
-   ## Codificación de los emails (Si es en utf8 dejar en blanco)
-
-   mt_codificacion_emails='' # mt_codificacion_emails='iso-8859-1'
-
-   ## @var mt_codificacion_codigo
-   ## Codificación de los archivos de código fuente (Si es en utf8 dejar en blanco)
-
-   mt_codificacion_codigo='' # mt_codificacion_codigo='iso-8859-1'
-
-   ## @var mt_euroshora_defecto
-   ## Euros por hora por defecto
-
-   mt_euroshora_defecto=''
-
-   ## @var mt_web_local
-   ## URL de pagina de proyecto
-
-   mt_web_local='http://localhost/'
-
-   ## @var mt_plugins_activados
-   ## Lista de plugins activados para proyecto
-
-   mt_plugins_activados='magcscope'
-
-   ## @var mt_usuario_mysql
-   ## Usuario para mysql
-
-   mt_usuario_mysql="root"
-
-   ## @var mt_comando_mysql
-   ## Comando para ejecutar mysql
-
-   mt_comando_mysql='mysql --default-character-set=utf8 -u$mt_usuario_mysql -p`contrasenya mysql` trabajos -N -e '
-
-## @}
 
 # VARIABLES GLOBALES
 
@@ -395,10 +262,12 @@ function comprobar_dependencias() {
 
 # FUNCIONES GENERALES
 
-## Generamos titulo de informe segun el nivel en que nos encontramos.
+## Generamos titulo de informe según el nivel en que nos encontramos.
 ##
-## @param $1 Título
-## @param $2 Nivel a utilizar por defecto $nivel_informe
+## Parámetros:
+##
+## - $1 Título
+## - $2 Nivel a utilizar por defecto $nivel_informe
 
 function titulo_por_nivel() {
    
@@ -511,10 +380,17 @@ function configurar_magtrabajos() {
 
    log $FUNCNAME "$*"
 
+   if [ "$proyecto" == "" ] ; then
+      echo 'Sin proyecto definido salimos'
+      exit 100
+   fi
+
    echo
    echo '+---------------+'
    echo '| Configuración |'
    echo '+---------------+'
+   echo 
+   echo Proyecto: $proyecto
    echo
    echo ' [C]onfigurar magtrabajos globalmente' 
    echo
@@ -523,14 +399,12 @@ function configurar_magtrabajos() {
    read -n 1 -s -p 'Opcion: ' OPCION
    if [ "$OPCION" = "c" ] ; then
       fich_configuracion="$HOME/.magtrabajos/configuracion/magtrabajos"
-      configuracion_menu mt_ "$fich_configuracion" "$BASH_SOURCE"
+      configuracion_menu mt_ "$fich_configuracion" "${DIR_MAGTRABAJOS}/config.default" "${DIR_MAGTRABAJOS}/config.default"
    elif [ "$OPCION" = "p" ] ; then
       fich_configuracion="$HOME/.magtrabajos/proyectos/$proyecto/configuracion/magtrabajos"
-      configuracion_menu mt_ "$fich_configuracion" "$BASH_SOURCE"
-   elif [ "$OPCION" = "g" ] ; then
-      configurar_componentes
+      configuracion_menu mt_ "$fich_configuracion" "${DIR_MAGTRABAJOS}/config.default" "${DIR_MAGTRABAJOS}/config.default"
    else
-      mensaje "Configuración cancelada"
+      mensajes "Configuración cancelada"
    fi
    return
    }
@@ -822,7 +696,7 @@ function nuevoMovimiento(){
          EMAIL="$1"
       fi
 
-      ${DIR_PROGRAMAS}/componentes/mail2rst/mail2rst "$EMAIL" > "$TMP_DES"
+      ${DIR_MAGTRABAJOS}/componentes/mail2rst/mail2rst "$EMAIL" > "$TMP_DES"
 
       if [ $? != 0 ] ; then mensajes " Error al ejecutar comando" ; exit ; fi
 
@@ -877,7 +751,7 @@ function anyadirTareaEmail () {
 
    if [ "$EMAIL" = "" ] ; then mensajes " Email a tarea cancelado" ; return ; fi
 
-   ${DIR_PROGRAMAS}/componentes/mail2rst/mail2rst "$EMAIL" > "$TMP_DES"
+   ${DIR_MAGTRABAJOS}/componentes/mail2rst/mail2rst "$EMAIL" > "$TMP_DES"
 
    if [ $? != 0 ] ; then mensajes " Error al ejecutar comando" ; exit ; fi
 
@@ -1116,7 +990,7 @@ function modificarFecha(){
 ##  -todo
 ##  -buscar
 ##  -fecha pagado
-##  -Pendiente, empezado o posible
+##  -Pendiente ( pendiente, empezado o posible )
 ##
 ## -p Preguntamos criterio
 
@@ -1138,6 +1012,7 @@ function seleccionarTareas(){
          echo '  -help|--help|-h                                Pantalla de ayuda'
          echo '  -menu                                          Menú             '
          echo '  -estado [id de estados separados por espacio]  Seleccionar por estado'
+         echo '  -pendiente                                     Seleccionar posible, pendiente o empezada'
          echo '  -lista-estados                                 Listar id de estados'
          echo '  -todo                                          Todas las tareas'
          echo '  -buscar [palabra]                              Buscar en título o descripción de tarea'
@@ -1151,7 +1026,7 @@ function seleccionarTareas(){
 
          shift 1
 
-         caja '[T]odo | [F]echa | [E]stado | [B]uscar | fecha [P]agado | Pe[n]diente y Empezado' 'Seleccionar tareas'
+         caja '[T]odo | [F]echa | [E]stado | [B]uscar | fecha [P]agado | Pe[n]diente ( Estado = pendiente, empezado o posible )' 'Seleccionar tareas'
 
          read -n 1 -s -s OPCION
 
@@ -1162,7 +1037,8 @@ function seleccionarTareas(){
             e|E) seleccionarTareas -estado ;;
             b|B) seleccionarTareas -buscar ;;
             p|P) seleccionarTareas -fechaPagado ;;
-            *) # Seleccionamos sobre lasa que ya tenemos
+            n|N) seleccionarTareas -pendiente ;;
+            *) # Seleccionamos sobre las que ya tenemos
                return
                ;;
 
@@ -1253,7 +1129,7 @@ function seleccionarTareas(){
          CONDICION="$CONDICION $CON ) "
 
          ;;
-      'pendiente y empezado') 
+      -pendiente) 
          # Seleccionar las tareas empezadas o pendientes
          mensajes 'Pendientes o empezadas'
          CONDICION=" AND (t.idEstado=1 OR t.idEstado=2 OR t.idEstado=6 ) AND t.idProyecto=$proyectoId"
@@ -1502,14 +1378,21 @@ function informacionProyecto() {
    [[ -d "$DIR_PROYECTOS" ]] && cd $DIR_PROYECTOS
 
    # Incluimos ficheros de configuración de proyecto
-   if [ -e "$HOME/.magtrabajos/proyectos/$proyecto/configuracion/" ] ; then
-      for conf in $HOME/.magtrabajos/proyectos/$proyecto/configuracion/* ; do
-         if [ -f "$conf" ] ; then
-            log $FUNCNAME "Incluimos fichero de configuración del proyecto: $conf"
-            source $conf
-         fi
-      done
-   fi
+   # if [ -e "$HOME/.magtrabajos/proyectos/$proyecto/configuracion/" ] ; then
+   #    for conf in $HOME/.magtrabajos/proyectos/$proyecto/configuracion/* ; do
+   #       if [ -f "$conf" ] ; then
+   #          log $FUNCNAME "Incluimos fichero de configuración del proyecto: $conf"
+   #          source $conf
+   #       fi
+   #    done
+   # fi
+
+   # Configuración del proyecto
+   configuracion_leer \
+      "$HOME/.magtrabajos/proyectos/$proyecto/configuracion/magtrabajos" \
+      "${DIR_MAGTRABAJOS}/config.default" \
+      "mt_"
+
 
    archivo_log="${DIR_TMP}${proyecto}.log"
 
@@ -1905,6 +1788,61 @@ function ejecutarMysql2rst() {
    fi
 }
 
+## Borrar archivos de la lista de afectados
+
+function borrar_archivo_lista_afectados() {
+
+   if [ "$1" != "" ] ; then
+      bd_borrar_archivos_afectados $*
+   else
+
+       echo "Borrando archivos"
+       if [ "$movimientoId" = "" ] ; then
+          mensajes " No hay movimientos seleccionado"
+       else
+          # Listar archivos para seleccionar con opcion de todos incluida
+          SQL="$SQL_ARC AND idMovimiento=$movimientoId"
+          SALIDA=$(ejecutarSQL "$SQL" "-N")
+
+          if [ "$SALIDA" != "" ] ; then
+             echo -e "\nArchivos afectados" 
+             echo -e   "------------------\n" 
+             select ARCHIVOSe in salir todos `echo "$SALIDA"` ; do
+               echo "archivo: "
+               break
+             done
+             if [ "$ARCHIVOSe" != "salir" ] ; then
+                bd_borrar_archivos_afectados $ARCHIVOSe
+             fi
+
+          fi
+       fi
+
+   fi
+
+   
+   }
+
+## borrar archivos afectados de la base de datos
+##
+## @param $* Lista de archivos
+
+function bd_borrar_archivos_afectados() {
+
+   if [ "$1" = "" ] ; then
+      error "No se especifica archivo a borrar"
+   fi
+
+    if [ "$1" = "todos" ] ; then 
+       SQL="DELETE FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId"
+    else
+       SQL="DELETE FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId AND nombre='$1'"
+    fi
+    ejecutarSQL "$SQL"
+    mensajes " $1 borrado de la lista de afectados"
+
+   }
+
 ## Añadimos archivos afectados al movimiento
 
 function anyadirArchvios(){
@@ -2054,6 +1992,27 @@ function seleccionarArchivoAfectado() {
 
 # FUNCIONES POR COLOCAR
 
+## Mostrar variables para depuración
+
+function mostrar_variables_magtrabajos() {
+
+   mostrar_variables_globales
+   echo Variables de magtrabajos
+   echo
+   echo "Condición para sql:.....$CONDICION"
+   echo "Archivo de informe:.....$TMP"
+   echo "proyectoId:.............$proyectoId"
+   echo "tareaId:................$tareaId"
+   echo "tareasIds:..............${tareasIds[*]}"
+   echo "movimientoId:...........$movimientoId"
+   echo "archivo_log:....... ....$archivo_log"
+   echo
+   echo Configuración
+   configuracion_lista "mt_" "${DIR_MAGTRABAJOS}/config.default"
+   echo
+   echo
+   }
+
 ## Pedir el id de la tarea que se desea seleccionar
 
 function pedirTarea() {
@@ -2115,15 +2074,17 @@ function evento() {
    local evento_fallido=''       ##< En caso de ser true preguntamos si se desea seguir con el  evento
    local lista=''
 
-   for fevento in ${DIR_PROGRAMAS}/componentes/*/eventos/$evento/* ; do
+   for fevento in ${DIR_MAGTRABAJOS}/componentes/*/eventos/$evento/* ; do
       [[ -e "$fevento" ]] && lista="$lista \n`basename $fevento`\t$fevento" 
    done
 
    for componente in $mt_plugins_activados ; do
-      for fevento in ${DIR_PROGRAMAS}/plugins/$componente/eventos/$evento/* ; do
+      for fevento in ${DIR_MAGTRABAJOS}/plugins/$componente/eventos/$evento/* ; do
          [[ -e "$fevento" ]] && lista="$lista \n`basename $fevento`\t$fevento" 
       done
    done
+
+   [[ "$lista" == "" ]] && ( log "$FUNCNAME"  "Eventos: Sin ganchos para $eventos" ; return )
 
    for fevento in $(echo -e "$lista" | sort | cut -f2) ; do
       [[ -e "$fevento" ]] || break
@@ -2243,6 +2204,8 @@ function cerrar(){
    elif [ "$movimientoId" != '' ] ; then                                                    # Movimiento seleccionado
 
       evento pre_cerrar_movimiento
+
+      log "$FUNCNAME" "Salimos de evento pre_cerrar_movimiento"
 
       # Se coge la ultima fecha de los tiempos
       SQL="SELECT fechaFinal FROM tiempos WHERE idMovimiento=$movimientoId ORDER BY id DESC LIMIT 1"
@@ -2406,7 +2369,7 @@ function modificar(){
 
    log $FUNCNAME "$*"
 
-   ## modificar segun tengamos movimiento, tarea o proyecto
+   ## modificar según tengamos movimiento, tarea o proyecto
 
    if [ "$movimientoId" = '' ] && [ "$tareaId" = '' ] && [ "$proyectoId" != '' ] || [ "$1" = "-p" ] ; then     # Proyecto seleccionado
       log "$FUNCNAME" "Proyecto: $proyectoId"
@@ -2419,7 +2382,7 @@ function modificar(){
       SALIDA="$(ejecutarSQL '$SQL' '-N')"
 
       nombre="$(echo $SALIDA | awk -v FS="$separador" '{print $1 }')"
-      descripcion="$(echo $SALIDA | awk -v FS="$separador" '{print $2 }')"
+      descripcion="$(echo -e $SALIDA | awk -v FS="$separador" '{print $2 }')"
       dirLocal="$(echo $SALIDA | awk -v FS="$separador" '{print $3 }')"
 
       echo "Los valores pueden definirse como NULL"
@@ -2639,7 +2602,9 @@ presentarCabeceraTarea() {
 
 ## Presentar contenido de los archivos readme.dox afectados
 ## 
-## @param $1 -t sobre tarea, -m sobre movimiento
+## Parámetros:
+##
+## - $1 -t sobre tarea, -m sobre movimiento
 
 function presentarReadme() {
 
@@ -2845,7 +2810,7 @@ presentarTODOs() {
    cmd="`echo $cmd $ARCHIVOS`"
    log "$FUNCNAME" "Comando: $cmd"
 
-   local SALIDA=$(eval "$cmd")
+   local SALIDA="`eval $cmd`"
 
    if [ "${SALIDA}" = "" ] ; then log "$FUNCNAME" "Sin salida" ; return ; fi
 
@@ -3107,7 +3072,7 @@ function pendienteCodigo() {
    ## Presentar pendiente en código
 
    # Código pendiente
-   SALIDA="$(buscar_codigo buscar '@todo|@bug' formato enlaces proyecto $proyecto)"
+   SALIDA="$(buscar_codigo formato enlaces proyecto $proyecto)"
    if [ "$SALIDA" != "" ] ; then
       titulo_por_nivel "Código pendiente de $proyecto" | tee -a $TMP
       echo -e "$SALIDA" | tee -a $TMP 
@@ -3834,12 +3799,12 @@ function menuComponentes() {
    [[ -e ${DIR_TMP}listado ]] && rm ${DIR_TMP}listado
 
    conta=0
-   for componente in ${DIR_PROGRAMAS}/componentes/*/menu.sh ; do
+   for componente in ${DIR_MAGTRABAJOS}/componentes/*/menu.sh ; do
       [[ -e "$componente" ]] || break
       echo -e "$(basename `dirname "$componente"`)\t`doxygen2help "$componente" -tag brief`" >> ${DIR_TMP}listado
       
    done
-   for componente in ${DIR_PROGRAMAS}/plugins/*/menu.sh ; do
+   for componente in ${DIR_MAGTRABAJOS}/plugins/*/menu.sh ; do
       [[ -e "$componente" ]] || break
       echo -e "$(basename `dirname "$componente"`)\t`doxygen2help "$componente" -tag brief`" >> ${DIR_TMP}listado
       
@@ -3849,10 +3814,10 @@ function menuComponentes() {
 
    if [ "$resultado_listado" != "" ] ; then
 
-      if [ -e "${DIR_PROGRAMAS}/componentes/${resultado_listado}/menu.sh" ] ; then
-         . "${DIR_PROGRAMAS}/componentes/${resultado_listado}/menu.sh"
-      elif [ -e "${DIR_PROGRAMAS}/plugins/${resultado_listado}/menu.sh" ] ; then
-         . "${DIR_PROGRAMAS}/plugins/${resultado_listado}/menu.sh"
+      if [ -e "${DIR_MAGTRABAJOS}/componentes/${resultado_listado}/menu.sh" ] ; then
+         . "${DIR_MAGTRABAJOS}/componentes/${resultado_listado}/menu.sh"
+      elif [ -e "${DIR_MAGTRABAJOS}/plugins/${resultado_listado}/menu.sh" ] ; then
+         . "${DIR_MAGTRABAJOS}/plugins/${resultado_listado}/menu.sh"
       fi
    else
       mensajes "Cancelado selección de componente"
@@ -3893,15 +3858,7 @@ function menuHerramientas(){
          echo "$cmd" ; eval "$cmd" &
          ;;
       a|A) # Variables actuales de magtrabajos
-         echo "Condición para sql:.....$CONDICION"
-         echo "Archivo de informe:.....$TMP"
-         echo "proyectoId:.............$proyectoId"
-         echo "tareaId:................$tareaId"
-         echo "tareasIds:..............${tareasIds[*]}"
-         echo "movimientoId:...........$movimientoId"
-         echo "archivo_log:....... ....$archivo_log"
-         echo "archivo configuración:..$conf"
-         configuracion_lista "mt_" "$conf"
+         mostrar_variables_magtrabajos
          tecla
          ;;
       e|E) # enviar un email
@@ -4147,8 +4104,8 @@ function menuComandos(){
 
    local -a dir_comandos
    
-   dir_comandos[0]="$DIR_PROGRAMAS/extensiones/"
-   dir_comandos[1]="$DIR_PROGRAMAS/lanzadores/"
+   dir_comandos[0]="$DIR_MAGTRABAJOS/extensiones/"
+   dir_comandos[1]="$DIR_MAGTRABAJOS/lanzadores/"
    [[ -e "${HOME}/.`basename "$0"`/proyectos/${proyecto}/lanzadores/" ]] && \
       dir_comandos[2]="${HOME}/.`basename "$0"`/proyectos/${proyecto}/lanzadores/"
    [ -e "${HOME}/.`basename "$0"`/proyectos/${proyecto}/extensiones/" ] && \
@@ -4552,10 +4509,10 @@ function menuArchivos(){
          ejecutarSQL "$SQL"
 
          ## Ejecutamos primero subversion
-         if [ -e '.svn' ] ; then
+         if [ "`plugin_activado magcontrolversion`" != "" ] ; then 
             echo
-            echo subversion
-            echo ----------
+            echo control de versiones
+            echo --------------------
             echo
             # comprobar estado del archivo, si se ha modificado no nos permitirá borrarlo
             magcontrolversion mover ${e_archivos_seleccionados[*]} "$nuevo"
@@ -4633,9 +4590,9 @@ function menuArchivos(){
             fi
          fi
 
-         if [ "$SVN" != "NO" ] && [ -e '.svn' ] ; then
+         if [ "`plugin_activado magcontrolversion`" != "" ] ; then 
             echo
-            read -n 1 -s -p 'Eliminar directorio de subversion (s/n):' opcion
+            read -n 1 -s -p 'Eliminar directorio de control de versiones (s/n):' opcion
             if [ "$opcion" = "s" ] ; then
                echo
                # comprobar estado del archivo, si se ha modificado no nos permitirá borrarlo
@@ -4680,9 +4637,9 @@ function menuArchivos(){
             fi
          fi
 
-         if [ -e ".svn" ] ; then
+         if [ "`plugin_activado magcontrolversion`" != "" ] ; then 
             echo
-            read -n 1 -s -p 'Eliminar archivo de subversion (s/n):' opcion
+            read -n 1 -s -p 'Eliminar archivo de control de versiones (s/n):' opcion
             echo
             if [ "$opcion" = "s" ] ; then
                # comprobar estado del archivo, si se ha modificado no nos permitirá borrarlo
@@ -4692,44 +4649,19 @@ function menuArchivos(){
 
          for f in $ARCHIVOSe ; do
             if [ -e "$f" ] ; then
-               echo -e "\nBorrando de local $f "
-               rm "$f"
+               echo
+               read "Borrando de local de $f (s/n): " OPCION
+               [[ "$OPCION" ]] && rm "$f"
             fi
             echo "Borrado: $f"
          done
 
          ## Borrar de la lista de afectados
-         ## @todo PENDIENTE
+         bd_borrar_archivos_afectados "$f"
          ;;
+
       b|B)
-         # Borrar archivos afectados de la lista
-          echo "Borrando archivos"
-          if [ "$movimientoId" = "" ] ; then
-             mensajes " No hay movimientos seleccionado"
-          else
-             # Listar archivos para seleccionar con opcion de todos incluida
-             SQL="$SQL_ARC AND idMovimiento=$movimientoId"
-             SALIDA=$(ejecutarSQL "$SQL" "-N")
-
-             if [ "$SALIDA" != "" ] ; then
-                echo -e "\nArchivos afectados" 
-                echo -e   "------------------\n" 
-                select ARCHIVOSe in salir todos `echo "$SALIDA"` ; do
-                  echo "archivo: "
-                  break
-                done
-                if [ "$ARCHIVOSe" != "salir" ] ; then
-                   if [ "$ARCHIVOSe" = "todos" ] ; then 
-                      SQL="DELETE FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId"
-                   else
-                      SQL="DELETE FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId AND nombre='$ARCHIVOSe'"
-                   fi
-                   ejecutarSQL "$SQL"
-                   mensajes " Archivo(s) borrado(s)"
-                fi
-
-             fi
-          fi
+         borrar_archivo_lista_afectados
          ;;
       s|S) # Añadir archivos afectados en movimiento
           anyadirArchvios
@@ -4836,7 +4768,7 @@ function listar_plugins() {
    echo 'Listado de plugins'
    echo '------------------'
    echo
-   for componente in ${DIR_PROGRAMAS}/plugins/* ; do
+   for componente in ${DIR_MAGTRABAJOS}/plugins/* ; do
       [[ -e "$componente" ]] || break
       local bs=$(basename $componente)
       if [ "$bs" != "readme.dox" ] ; then
@@ -5025,7 +4957,7 @@ fi
 LIBS='general elegirArchivo configuracion listado mysql2rst doxygen2help'  # Librerías a cargar
 
 for LIB in $LIBS ; do
-   DIR_LIB="${DIR_PROGRAMAS}/componentes/libash/"
+   DIR_LIB="${DIR_MAGTRABAJOS}/componentes/libash/"
    LIBRERIA="${DIR_LIB}$LIB"
    if [ -e "$LIBRERIA" ] ; then
       source "$LIBRERIA"
@@ -5056,12 +4988,12 @@ fi
 
 # INCLUIMOS EXTENSIONES #
 
-for extension in ${DIR_PROGRAMAS}/componentes/*/extension.sh ; do
+for extension in ${DIR_MAGTRABAJOS}/componentes/*/extension.sh ; do
    log INICIO "Incluimos extension de componente ${extension}"
    source "$extension"
 done
 
-for extension in ${DIR_PROGRAMAS}/plugins/*/extension.sh ; do
+for extension in ${DIR_MAGTRABAJOS}/plugins/*/extension.sh ; do
    log INICIO "Incluimos extension de componente ${extension}"
    source "$extension"
 done
@@ -5080,137 +5012,143 @@ if [ "`echo $1 | grep 'magtrabajos://' 2>/dev/null`" != "" ] ; then
 fi
 
 while [ -n "$1" ]; do
-case $1 in
 
+   case $1 in
 
-   --terminal) shift 1 ; $mt_terminal $0 $@ ; exit ;; # lanzar terminal
-    --depurar) shift 1 ; DEV=SI ; echo 'Depuración activada' ;;
-    --menu)  shift 1 ; ACCION="menu" ;;
-    --adjuntar) shift 1 
-      if [ "$movimientoId" = "" ] ; then 
-         tiemposAbiertos
-         if [ "$movimientoId" = "" ] ; then
-            echo Se necesita tener un movimiento seleccionado o un contador en marcha para adjuntar documentos
-            break
-         fi
-      fi
-      mDocumentos -p $proyecto -i $@
-      exit
-       ;;
-    --dependencias) shift 1 ; comprobar_dependencias ; exit ;;
-    --proyecto|-p) definirProyecto -p $2 ;  shift 2 ;;
-    --tarea|-t) tareasIds=($2) ; definirProyecto -t $2 ; CONDICION="AND t.id=$2" ; shift 2 ;;
-    --movimiento|-m) definirProyecto -m $2 ; shift 2 ;;
-    --nuevo|-n) shift 1 ; ACCION="nuevo" ;;
-    --añadir-archivo|-a)
-      shift 1
-      if [ "$movimientoId" = "" ] ; then 
-         mensajes " No hay movimiento seleccionado"
-         # Buscamos si hay alguno abierto
-         #movimientosAbiertos
-         tiemposAbiertos
-         if [ "$movimientoId" = "" ] ; then
-            echo Se necesita tener un movimiento seleccionado o un contador en marcha para añadir archivos
-            break
-         fi
-      fi
+      --configurar) shift 1 ; ACCION=configurar_magtrabajos ;;
+      --terminal) shift 1 ; $mt_terminal $0 $@ ; exit ;; # lanzar terminal
+      --depurar) shift 1 ; DEV=SI ; echo 'Depuración activada' ;;
+      --menu)  shift 1 ; ACCION="menu" ;;
+      --adjuntar) shift 1 
+        if [ "$movimientoId" = "" ] ; then 
+           tiemposAbiertos
+           if [ "$movimientoId" = "" ] ; then
+              echo Se necesita tener un movimiento seleccionado o un contador en marcha para adjuntar documentos
+              break
+           fi
+        fi
+        mDocumentos -p $proyecto -i $@
+        exit
+         ;;
+      --dependencias) shift 1 ; comprobar_dependencias ; exit ;;
+      --proyecto|-p) definirProyecto -p $2 ;  shift 2 ;;
+      --tarea|-t) tareasIds=($2) ; definirProyecto -t $2 ; CONDICION="AND t.id=$2" ; shift 2 ;;
+      --movimiento|-m) definirProyecto -m $2 ; shift 2 ;;
+      --nuevo|-n) shift 1 ; ACCION="nuevo" ;;
+      --añadir-archivo|-a)
+        shift 1
+        if [ "$movimientoId" = "" ] ; then 
+           mensajes " No hay movimiento seleccionado"
+           # Buscamos si hay alguno abierto
+           #movimientosAbiertos
+           tiemposAbiertos
+           if [ "$movimientoId" = "" ] ; then
+              echo Se necesita tener un movimiento seleccionado o un contador en marcha para añadir archivos
+              break
+           fi
+        fi
 
-      #e_archivos_seleccionados=("$@")
-      declare -a e_archivos_seleccionados=()
-      c=0
-      while [ -n "$1" ]; do
-         if [ -d "$1" ] ; then
-            for f in `find "$1" -type f ! -wholename '*\.svn*' ! -wholename '*\.git*' ! -wholename '*\.swp' ` ; do
-               echo - "$c) $f"
-               e_archivos_seleccionados[$c]="$f"
-               let c=c+1
-            done
-         elif [ -e "$1" ] ; then
-            echo - "$c) $1"
-            e_archivos_seleccionados[$c]="$1"
-            let c=c+1
+        #e_archivos_seleccionados=("$@")
+        declare -a e_archivos_seleccionados=()
+        c=0
+        while [ -n "$1" ]; do
+           if [ -d "$1" ] ; then
+              for f in `find "$1" -type f ! -wholename '*\.svn*' ! -wholename '*\.git*' ! -wholename '*\.swp' ` ; do
+                 echo - "$c) $f"
+                 e_archivos_seleccionados[$c]="$f"
+                 let c=c+1
+              done
+           elif [ -e "$1" ] ; then
+              echo - "$c) $1"
+              e_archivos_seleccionados[$c]="$1"
+              let c=c+1
+           else
+              errores="$errores\n$1 no existe, no se incluye"
+           fi
+           shift 1
+        done
+
+        echo -e "`color colError`$errores`color`"
+
+        anyadirArchivosDB
+        exit
+        ;;
+      --movimientos-abiertos|-ma) shift 1 ; movimientosAbiertos ;;
+      --tiempos-abiertos|-ta) shift 1 ; tiemposAbiertos ;;
+      --accion) ACCION="$2" ; shift 2 ;;
+      --listar-acciones) shift 1 ; echo -e "\n\nAcciones\n--------" ; for accion in ${acciones[*]} ; do echo - $accion ; done ;; 
+      --factura) seleccionarFactura "$2" ; shift 2 ;;
+      --seleccionar-factura) shift 1 ; seleccionarFactura ;;
+      --consulta) shift 1 ; consulta=1 ;;
+      --editar-archivos) shift 1 ; editarArchivos ;;
+      --seleccionar-tareas) shift 1 ; seleccionarTareas $1 ; shift 1 ;;
+      --informe|-i)
+           shift 1
+           ACCION="informe"
+           # comprobamos si el siguiente parametro es un perfil definido
+           if [ "$1" != "" ] ; then
+              if [ -e "$HOME/.magtrabajos/perfiles/$1" ] ; then
+                 perfil_actual=$1 ; shift 1
+                 perfil_actual_fich="$HOME/.magtrabajos/perfiles/$perfil_actual"
+                 source $perfil_actual_fich
+              elif [ -f "`dirname "$BASH_SOURCE"`/componentes/maginformes/perfiles/$1" ] ; then 
+                 perfil_actual=$1 ; shift 1
+                 perfil_actual_fich="`dirname "$BASH_SOURCE"`/componentes/maginformes/perfiles/$perfil_actual"
+                 source $perfil_actual_fich
+              fi
+           fi
+           mensajes "Perfil $perfil_actual abierto"
+           ;;
+
+      --listar-plugins) listar_plugins ; exit ;;
+      --listar-informes) shift 1 ; menuInformes l ;;
+      --exportar) 
+         # Si $3 es un archivo existente supondremos que es el
+         # archivo a exportar sino cogemos el $TMP
+         if [ -f "$3" ] ; then
+            exportar "$2" "$3"
+            shift 3
          else
-            errores="$errores\n$1 no existe, no se incluye"
-         fi
-         shift 1
-      done
-
-      echo -e "`color colError`$errores`color`"
-
-      anyadirArchivosDB
-      exit
-      ;;
-    --movimientos-abiertos|-ma) shift 1 ; movimientosAbiertos ;;
-    --tiempos-abiertos|-ta) shift 1 ; tiemposAbiertos ;;
-    --accion) ACCION="$2" ; shift 2 ;;
-    --listar-acciones) shift 1 ; echo -e "\n\nAcciones\n--------" ; for accion in ${acciones[*]} ; do echo - $accion ; done ;; 
-    --factura) seleccionarFactura "$2" ; shift 2 ;;
-    --seleccionar-factura) shift 1 ; seleccionarFactura ;;
-    --consulta) shift 1 ; consulta=1 ;;
-    --editar-archivos) shift 1 ; editarArchivos ;;
-    --seleccionar-tareas) shift 1 ; seleccionarTareas $1 ; shift 1 ;;
-    --informe|-i)
-         shift 1
-         ACCION="informe"
-         # comprobamos si el siguiente parametro es un perfil definido
-         if [ "$1" != "" ] ; then
-            if [ -e "$HOME/.magtrabajos/perfiles/$1" ] ; then
-               perfil_actual=$1 ; shift 1
-               perfil_actual_fich="$HOME/.magtrabajos/perfiles/$perfil_actual"
-               source $perfil_actual_fich
-            elif [ -f "`dirname "$BASH_SOURCE"`/componentes/maginformes/perfiles/$1" ] ; then 
-               perfil_actual=$1 ; shift 1
-               perfil_actual_fich="`dirname "$BASH_SOURCE"`/componentes/maginformes/perfiles/$perfil_actual"
-               source $perfil_actual_fich
-            fi
+           exportar "$2" "$TMP"
+           shift 2 
          fi
          mensajes "Perfil $perfil_actual abierto"
          ;;
+      --editar|-e) shift 1 ; lanzar_editor $@ ; exit ;;
 
-    --listar-plugins) listar_plugins ; exit ;;
-    --listar-informes) shift 1 ; menuInformes l ;;
-    --exportar) 
-       # Si $3 es un archivo existente supondremos que es el
-       # archivo a exportar sino cogemos el $TMP
-       if [ -f "$3" ] ; then
-          exportar "$2" "$3"
-          shift 3
-       else
-         exportar "$2" "$TMP"
-         shift 2 
-       fi
-       ;;
-    --editar|-e) shift 1 ; lanzar_editor $@ ; exit ;;
-
-    --estado_proyecto)
-      shift 1
-      ACCION='estado_proyecto'
-      ;;
-    --estado-subversion)
-      ACCION=estados
-      shift 1
-      ;;
-    --archivos) shift 1 ; lista_archivos $1 ; exit ;;
-    --nueva-tarea-email) shift 1 ; anyadirTareaEmail "$@" ;;
-    --lanzar) shift 1 ; lanzador ;;
-    -h|--help|-help) help ; exit ;;
-    --help-configuracion) help_configuracion ; exit ;;
-    --help-seleccionar-tareas) seleccionarTareas -help ; exit ;;
-    --log) shift 1 ; $mt_miniterminal -e "less $archivo_log" ;;
-    --sesiones_abiertas|-sa) tiemposAbiertos ; if [ "$tareasIds" == "" ] ; then exit 0 ; else exit 1 ; fi ;;
-    --notas) ACCION="presentarNotas" ; shift 1 ;;
-    --pendiente-codigo) ACCION="pendienteCodigo" ; shift 1 ;;
-    --errores-codigo) ACCION="erroresCodigo" ; shift 1 ;;
-    *)
-      echo "Parametro no reconocido: $1"
-      exit
-      #break
-      ;;
-esac
+      --estado_proyecto)
+        shift 1
+        ACCION='estado_proyecto'
+        ;;
+      --estado-subversion)
+        ACCION=estados
+        shift 1
+        ;;
+      --archivos) shift 1 ; lista_archivos $1 ; exit ;;
+      --nueva-tarea-email) shift 1 ; anyadirTareaEmail "$@" ;;
+      --lanzar) shift 1 ; lanzador ;;
+      -h|--help|-help) help ; exit ;;
+      --help-configuracion) help_configuracion ; exit ;;
+      --help-seleccionar-tareas) seleccionarTareas -help ; exit ;;
+      --log) shift 1 ; $mt_miniterminal -e "less $archivo_log" ;;
+      --sesiones_abiertas|-sa) tiemposAbiertos ; if [ "$tareasIds" == "" ] ; then exit 0 ; else exit 1 ; fi ;;
+      --notas) ACCION="presentarNotas" ; shift 1 ;;
+      --pendiente-codigo) ACCION="pendienteCodigo" ; shift 1 ;;
+      --errores-codigo) ACCION="erroresCodigo" ; shift 1 ;;
+      *)
+        echo "Parametro no reconocido: $1"
+        exit
+        #break
+        ;;
+   esac
 done
 
+# Depuración
+
+[[ $DEV ]] && mostrar_variables_magtrabajos
+
 # sino tenemos un proyecto definido, probar si tenemos uno con el nombre del directorio actual
-if [ -z $proyecto ] ; then
+if [ -z $proyectoId ] ; then
    carpeta_actual="`basename "$(pwd)"`"
    sql="SELECT id FROM proyectos WHERE nombre = '$carpeta_actual'";
    id=`ejecutarSQL "$sql" "-N"`
@@ -5220,6 +5158,8 @@ if [ -z $proyecto ] ; then
       mensajes "proyecto: $proyecto"
    fi
 fi
+
+[[ "$ACCION" = "configurar_magtrabajos" ]] && configurar_magtrabajos
 
 if [ "$ACCION" = "menu" ] ; then
 
