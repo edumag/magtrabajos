@@ -2205,6 +2205,8 @@ function cerrar(){
 
       evento pre_cerrar_movimiento
 
+      log "$FUNCNAME" "Salimos de evento pre_cerrar_movimiento"
+
       # Se coge la ultima fecha de los tiempos
       SQL="SELECT fechaFinal FROM tiempos WHERE idMovimiento=$movimientoId ORDER BY id DESC LIMIT 1"
       FECHA="$(ejecutarSQL "$SQL" "-N")"
