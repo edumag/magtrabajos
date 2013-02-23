@@ -8,8 +8,6 @@ echo Cancelamos automatización de llevar tarea a develop,
 echo ya que nos ha dado unos cuantos problemas con los conflictos
 echo
 
-exit
-
-source "`dirname "$BASH_SOURCE"`/../../magcontrolversion_funcs"
-source "`dirname "$BASH_SOURCE"`/../../motores/maggit"
-git_cerrar_tarea "$tarea"
+# source "`dirname "$BASH_SOURCE"`/../../magcontrolversion_funcs"
+# source "`dirname "$BASH_SOURCE"`/../../motores/maggit"
+# git_cerrar_tarea "$tarea"

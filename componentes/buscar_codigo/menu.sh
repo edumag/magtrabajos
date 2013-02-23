@@ -1,7 +1,7 @@
 ## @file buscar_codigo/menu.sh
 ## @brief Buscar en código
 
-cmd="buscar_codigo '@todo|@bug' servidor_vim $proyecto"
+cmd="buscar_codigo buscar '@todo|@bug' servidor_vim $proyecto"
 
 if [ "$mt_codificacion_codigo" != "" ] ; then
    cmd="$cmd encoding_entrada $mt_codificacion_codigo"
@@ -26,10 +26,8 @@ else
    ARCHIVOS=""
 fi
 
-cmd="$cmd menu"
-
 if [ "$ARCHIVOS" != "" ] ; then
-   cmd="$cmd $ARCHIVOS"
+   cmd="$cmd menu $ARCHIVOS"
 fi
 
 log $FUNCNAME "comando:  $cmd"
