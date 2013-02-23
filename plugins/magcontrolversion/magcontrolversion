@@ -379,7 +379,7 @@ function _subversion() {
                func="${motor}_magcontrolversion_commit $archivos_afectados"
             fi
 
-            echo "$func"
+            log "$func"
             eval "$func"
             ;;
 
