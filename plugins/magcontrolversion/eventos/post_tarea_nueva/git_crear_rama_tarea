@@ -1,5 +1,15 @@
 ## @file git_crear_rama_tarea
 ## @brief Creamos rama con el nombre de la tarea nueva
+##
+## Evento cancelado.
+
+echo
+echo Cancelamos automatización de llevar tarea a develop,
+echo ya que nos ha dado unos cuantos problemas con los conflictos
+echo
+
+exit
+
 
 source "`dirname "$BASH_SOURCE"`/../../magcontrolversion_funcs"
 source "`dirname "$BASH_SOURCE"`/../../motores/maggit"

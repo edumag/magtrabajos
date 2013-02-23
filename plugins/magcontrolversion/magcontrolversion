@@ -371,6 +371,8 @@ function _subversion() {
 
             shift 1
 
+            [[ "$archivos_afectados" == "" ]] && archivos_afectados=$(echo "$*")
+
             if [ "$texto" != "" ] ; then
                func="${motor}_magcontrolversion_commit $texto $archivos_afectados"
             else

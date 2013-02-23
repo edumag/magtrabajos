@@ -4,14 +4,14 @@
 source "`dirname "$BASH_SOURCE"`/../../magcontrolversion_funcs"
 # Si se utiliza control de versiones en este proyecto hacemos un commit sobre los archivos afectados de la tarea
 
-if [ -e ".svn" ] ; then
+if [ "`plugin_activado magcontrolversion`" != "" ] ; then 
 
    if [ "$tareaId" != "" ] ; then                                               # Control de versiones sobre tarea
 
       echo 'Control de versiones sobre tarea'
       echo
 
-      modificaciones=`svn status | wc -l`
+      modificaciones=`magcontrolversion status | wc -l`
 
       if [ "$modificaciones" == "0" ] ; then
          echo "No hay modificaciones en proyecto"
@@ -28,11 +28,11 @@ if [ -e ".svn" ] ; then
             echo
             echo Informe para control de versiones
             echo
-            color cDestacado
             echo "$linea"
+            echo -e "`color colDestacado`"
             informe_subversion
+            echo -e "`color`"
             echo "$linea"
-            color
             magcontrolversion texto "$TMP" menu "$ARCHIVOSs"
 
             if [ $? != 0 ] ; then 

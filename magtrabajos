@@ -25,48 +25,48 @@
 ## 
 ## Opciones:    
 ## <pre> 
-## --menu                      Presentar menú
-## --configurar                Configurar proyecto
-## --adjuntar                  Adjuntar documento externo
-## --dependencias              Comprobar dependencias.
-## --proyecto|-p               Proyecto.
-## --tarea|-t                  Tarea.
-## --movimiento|-m             Movimiento.
-## --añadir-archivo|-a         Añadir archivos afectados a un movimiento
-## --nuevo|-n                  Nuevo proyecto, tarea o movimiento.
-## --movimientos-abiertos|-ma  Ver movimientos que estan abiertos.
-## --tiempos-abiertos|-ta      Buscar tiempos abiertos
-## --accion [Accion]           Seleccionamos una acción a realizar 
-## --listar-acciones           Presentar lista de posibles acciones
-## --factura [Nun Factura]     Seleccionaremos tareas por la factura
-## --seleccionar-factura       Listar facturas para seleccionar
-## --consulta                  Indicamos que solo queremos hacer una comprobación, esto hará que nos 
-##                             salga la información por pantalla.
-## --editar-archivos           Editar archivos afectados de movimiento, necesita el movimiento 
-## --seleccionar-tareas '[criterio] [parametro]' Seleccionar tareas por diferentes criterios
-## --informe                   Tipo de informe
-## --listar-informes           Listar los posibles informes
-## --exportar [Formato] [Archivo rst]   Si no se indica formato muestra menú, formatos posibles:
-##                             [H]tml,[E]mail,Email h[t]ml,[P]df,[l]ess,[I]mprimir,[c]sv
-##                             Si no se indica archivo rst se recoge el temporal con el último 
-##                             informe realizado
-## --editar | -e               Editar archivos
-## --estado-subversion         Presentar estado de subversion de proyecto
-## --archivos                  imprimir lista de archivos para poder ser procesada con otro comando, ejemplo: 
-## --borrar_archivo_lista_afectados Borrar archivos afectados de un movimiento, sino se especifican archivos nos permite seleccionar
-##                             magtrabajos -m 1343 --archivos | xargs ls -l
-## --nueva-tarea-email         Crear tarea nueva desde un archivo de email pasado como argumento.
-## --lanzar                    Nos presenta listados para permitirnos seleccionar por diferentes 
-##                             criterios, últimos movimientos, etc...
+## --menu                                         Presentar menú
+## --configurar                                   Configurar proyecto
+## --adjuntar                                     Adjuntar documento externo
+## --dependencias                                 Comprobar dependencias.
+## --proyecto|-p                                  Proyecto.
+## --tarea|-t                                     Tarea.
+## --movimiento|-m                                Movimiento.
+## --añadir-archivo|-a                            Añadir archivos afectados a un movimiento
+## --nuevo|-n                                     Nuevo proyecto, tarea o movimiento.
+## --movimientos-abiertos|-ma                     Ver movimientos que estan abiertos.
+## --tiempos-abiertos|-ta                         Buscar tiempos abiertos
+## --accion [Accion]                              Seleccionamos una acción a realizar 
+## --listar-acciones                              Presentar lista de posibles acciones
+## --factura [Nun Factura]                        Seleccionaremos tareas por la factura
+## --seleccionar-factura                          Listar facturas para seleccionar
+## --consulta                                     Indicamos que solo queremos hacer una comprobación, esto hará que nos 
+##                                                salga la información por pantalla.
+## --editar-archivos                              Editar archivos afectados de movimiento, necesita el movimiento 
+## --seleccionar-tareas '[criterio] [parametro]'  Seleccionar tareas por diferentes criterios
+## --informe                                      Tipo de informe
+## --listar-informes                              Listar los posibles informes
+## --exportar [Formato] [Archivo rst]             Si no se indica formato muestra menú, formatos posibles:
+##                                                [H]tml,[E]mail,Email h[t]ml,[P]df,[l]ess,[I]mprimir,[c]sv
+##                                                Si no se indica archivo rst se recoge el temporal con el último 
+##                                                informe realizado
+## --editar | -e                                  Editar archivos
+## --estado-subversion                            Presentar estado de subversion de proyecto
+## --archivos                                     imprimir lista de archivos para poder ser procesada con otro comando, ejemplo: 
+## --borrar_archivo_lista_afectados               Borrar archivos afectados de un movimiento, sino se especifican archivos nos permite seleccionar
+##                                                magtrabajos -m 1343 --archivos | xargs ls -l
+## --nueva-tarea-email                            Crear tarea nueva desde un archivo de email pasado como argumento.
+## --lanzar                                       Nos presenta listados para permitirnos seleccionar por diferentes 
+##                                                criterios, últimos movimientos, etc...
 ##
-## --terminal                  Lanza una terminal con magtrabajos y los parametros a continuación de --terminal
-## --sesiones_abiertas|-sa     Comprobar si tenemos sesiones abiertas, magtrabajos -sa ; echo $? devolverá 0 en caso de no haya o 1 si hay
-## --listar-plugins            Lista de puglins instalados
-## --log                       Ver registro del programa
-## --help|-h                   Esta misma ayuda
-## --help-configuracion        Presentar configuración
-## --help-seleccionar-tareas   Presentar ayuda para la selección de tareas
-## --depurar                   Muestra por pantalla mucha información sobre el programa, por defecto no
+## --terminal                                     Lanza una terminal con magtrabajos y los parametros a continuación de --terminal
+## --sesiones_abiertas|-sa                        Comprobar si tenemos sesiones abiertas, magtrabajos -sa ; echo $? devolverá 0 en caso de no haya o 1 si hay
+## --listar-plugins                               Lista de puglins instalados
+## --log                                          Ver registro del programa
+## --help|-h                                      Esta misma ayuda
+## --help-configuracion                           Presentar configuración
+## --help-seleccionar-tareas                      Presentar ayuda para la selección de tareas
+## --depurar                                      Muestra por pantalla mucha información sobre el programa, por defecto no
 ## </pre>
 ##
 ## @todo Eliminar variables de configuración mt_archivo_html, mt_archivo_pdf, mt_archivo_cvs y dejarlo en un directorio
@@ -74,13 +74,8 @@
 ## @todo Menú de notas Editar, exportar 
 ## @todo Una tarea en estado posible debe tener la prioridad a 0, una tarea con estado empezado debe tener la prioridad a 9
 ## @todo Crear un evento que compruebe buffers de vim abiertos antes de cerrar movimiento
-## @todo Evento borrar archivo, y subversión lo borre
 ## @todo Acciones de plugins o complementos fuera de magtrabajos, pasarlo a eventos
-## @todo Sistema de colores con temas, como en ftptrabajo
-## @todo Evento ftptrabajo no sube archivos de movimiento
-## @todo Las funciones que utilizan los componentes y que requieren tener en caso de ser lanzados
-##       independientemente deberían estar en un fichero de libash para no tener que estar repitiendo
-##       código
+## @todo Sistema de colores en la libreria general de libash para todos
 ## 
 ## @author   Eduardo Magrané
 ## @internal
@@ -2088,6 +2083,8 @@ function evento() {
          [[ -e "$fevento" ]] && lista="$lista \n`basename $fevento`\t$fevento" 
       done
    done
+
+   [[ "$lista" == "" ]] && ( echo "Eventos: Sin ganchos para $eventos" return )
 
    for fevento in $(echo -e "$lista" | sort | cut -f2) ; do
       [[ -e "$fevento" ]] || break
