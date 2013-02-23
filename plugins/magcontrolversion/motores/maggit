@@ -156,13 +156,14 @@ function git_magcontrolversion_commit() {
       echo
       echo "$cmd"
       echo
-      echo -n 'Ejecutar comando (s/n): '
-      read -n 1 -s OPCION
+
+      read -p "Ejecutar comando (s/n): " OPCION
+
       if [ "$OPCION" == 's' ] ; then
-         eval $cmd
+         log "$FUNCNAME" "$cmd"
+         eval "$cmd"
       else
-         aviso " Commit cancelado"
-         tecla
+         mensajes " Commit cancelado"
       fi
    else
       aviso "No hay archivos especificados, no se hace commit"
