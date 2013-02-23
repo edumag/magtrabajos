@@ -2084,7 +2084,7 @@ function evento() {
       done
    done
 
-   [[ "$lista" == "" ]] && ( echo "Eventos: Sin ganchos para $eventos" return )
+   [[ "$lista" == "" ]] && ( log "$FUNCNAME"  "Eventos: Sin ganchos para $eventos" ; return )
 
    for fevento in $(echo -e "$lista" | sort | cut -f2) ; do
       [[ -e "$fevento" ]] || break
