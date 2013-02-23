@@ -2837,7 +2837,7 @@ presentarCabeceraMovimiento() {
          salida="$(ejecutarSQL "$sql" -N)"
          if [ "$salida" = "" ] ; then
             echo -e "ERROR::$salida \nSQL::$sql"
-            exit
+            return
          fi
          eval "$salida"
 
@@ -2994,7 +2994,7 @@ case $1 in
       ;;
    *) # Sin definir
       mensajes "ERROR::No se ha definido si queremos archivos afectados de movimiento o tarea en $FUNCNAME"
-      exit
+      return 1
       ;;
 
 esac
@@ -3029,7 +3029,7 @@ case $1 in
       ;;
    *) # Sin definir
       mensajes "Error en presentarLiterales::Se necesita definir para tarea o movimiento en $FUNCNAME"
-      exit
+      return 1
       ;;
 
 esac
@@ -4400,7 +4400,7 @@ function menuArchivos(){
                echo "dirDestino: ${dirDestino[*]}"
                echo "listaOrigen: ${listaOrigen[*]}"
                echo "listaDestino: ${listaDestino[*]}"
-               exit
+               return 1
             fi
 
          done
@@ -4873,7 +4873,7 @@ function lanzador() {
    echo
    read -p "Opcion: (0 - salir) " OPCION
 
-   [[ "$OPCION" = "0" ]] && exit 
+   [[ "$OPCION" = "0" ]] && return 
 
    definirProyecto ${seleccion_id[$OPCION]}
 

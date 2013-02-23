@@ -19,6 +19,7 @@
 ## Parámetros:
 ##
 ## <pre>
+##  --proyecto | -p [proyecto]              Proyecto seleccionado
 ##  --configurar                            Configurar proyecto de la carpeta actual
 ##  --comando | -c [comando]                Lanzar comando 
 ##  -a                                      Añadir archivo a la lista de bloqueados, pendientes de subir.
@@ -140,6 +141,14 @@ function info() {
 ## Pantalla de ayuda
 
 function help(){ doxygen2help "$0" "false" "@author" ; }
+
+## ok
+
+function ok() { echo -e "`color colAfirmativo`(ok)`color`" ; }
+
+## ko
+
+function ko() { echo -e "`color colError`[KO]`color`" ; }
 
 ###################
 ## Funciones ftp ##
@@ -1673,6 +1682,7 @@ while [ -n "$1" ]; do
 
    case $1 in
 
+      --proyecto|-p) shift 1 ; proyecto=$1 ; shift 1 ;;
       -info) shift 1 ; info ; exit ;;
       -h|-help|--help) shift 1 ; help ; exit ;;
       --configurar) shift 1 ; accion=configurar;; 
