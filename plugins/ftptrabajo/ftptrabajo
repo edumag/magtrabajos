@@ -535,30 +535,24 @@ function configurar_proyecto() {
    echo Proyecto: $proyecto
    echo
    [[ $DEV ]] && echo -e "\n$CONFIGURACION_FTPTRABAJO_PROYECTO \n\n"
-   read -p 'Configurar ftptrabajo (s/n): ' OPCION
 
-   if [ "$OPCION" = "s" ] ; then
-      # Crear carpetas para contener el nuevo proyecto
-      if [ ! -d "${DIR_FTPTRABAJO_PROYECTO}" ] ; then
-         mkdir "${DIR_FTPTRABAJO_PROYECTO}"
-         if [ $? != 0 ] ; then
-            echo
-            echo "No se pudo crear carpeta de proyecto [$DIR_FTPTRABAJO_PROYECTO]"
-            echo
-            echo salimos
-            exit 4
-         fi
+   # Crear carpetas para contener el nuevo proyecto
+   if [ ! -d "${DIR_FTPTRABAJO_PROYECTO}" ] ; then
+      mkdir "${DIR_FTPTRABAJO_PROYECTO}"
+      if [ $? != 0 ] ; then
+         echo
+         echo "No se pudo crear carpeta de proyecto [$DIR_FTPTRABAJO_PROYECTO]"
+         echo
+         echo salimos
+         exit 4
       fi
-      echo "mt_ftp_directorio: $mt_ftp_directorio / mt_ftp: $mt_ftp"
-      # configurar
-      configuracion_menu  'ftptrabajo' "${CONFIGURACION_FTPTRABAJO_PROYECTO}" "`dirname "$BASH_SOURCE"`/config.default"
-      leer_proyecto
-      # crear archivo de bloqueo
-      [[ ! -e "$BLOQUEO" ]] && echo "$USER ($proyecto)||$USER@$proyecto.com" > $BLOQUEO
-
-   else
-      exit
    fi
+   echo "mt_ftp_directorio: $mt_ftp_directorio / mt_ftp: $mt_ftp"
+   # configurar
+   configuracion_menu  'ftptrabajo' "${CONFIGURACION_FTPTRABAJO_PROYECTO}" "`dirname "$BASH_SOURCE"`/config.default"
+   leer_proyecto
+   # crear archivo de bloqueo
+   [[ ! -e "$BLOQUEO" ]] && echo "$USER ($proyecto)||$USER@$proyecto.com" > $BLOQUEO
 
 }
 
@@ -1568,10 +1562,14 @@ function comprobar_proyecto() {
    CONFIGURACION_FTPTRABAJO_PROYECTO="${DIR_CONF_USUARIO}proyectos/$proyecto/configuracion/ftptrabajo"
    DIR_FTPTRABAJO_PROYECTO="${DIR_CONF_USUARIO}proyectos/$proyecto/ftptrabajo/"
 
-   [[ "$accion" == "configurar" ]] && configurar_proyecto
-
    if [ ! -e "$CONFIGURACION_FTPTRABAJO_PROYECTO" ] ; then
       [[ $DEV ]] && echo -e "\n\nNo existe un proyecto para esta carpeta"
+      echo
+      echo 'ftptrabajo no está configurado'
+      echo
+      echo Coloquese en el directorio y ejecute: ftptrabajo --configurar
+      echo
+      exit
       configurar_proyecto
    else
       source $CONFIGURACION_FTPTRABAJO_PROYECTO
@@ -1685,7 +1683,7 @@ while [ -n "$1" ]; do
       --proyecto|-p) shift 1 ; proyecto=$1 ; shift 1 ;;
       -info) shift 1 ; info ; exit ;;
       -h|-help|--help) shift 1 ; help ; exit ;;
-      --configurar) shift 1 ; accion=configurar;; 
+      --configurar) shift 1 ; comprobar_proyecto && configurar_proyecto ; exit ;; 
       -a) shift 1 ; accion=anyadirLista ;;
       --comando|-c) shift 1 ; accion=lanzar_comando ; ftpcomando="$*" ; shift ;;
       --cambiar-nombre) shift 1 ; accion=cambiarNombre ;;
