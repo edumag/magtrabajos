@@ -1,42 +1,160 @@
-## @file ftptrabajo/config.default
-## @brief Configuración por defecto para ftptrabajo
+## @file
+## @brief Configuración por defecto para los proyectos en magtrabajos
+
+## @defgroup configuracion_magtrabajos Configuración de magtrabajos por defecto
 ##
-## @defgroup configuracion_ftptrabajo Configuración para ftptrabajo
+## Colocamos prefijo 'default_mt_' ha las variables para ser reconocibles
+##
 ## @ingroup configuracion
+##
 ## @{
 
+   ## @var default_mt_dir_local
+   ## Directorio local donde se encuentran el código fuente
 
-   ## @var default_ftptrabajo_server
-   ## Servidor ftp
+   default_mt_dir_local="`pwd`/"
 
-   default_ftptrabajo_server="$mt_ftp"
+   ## @var default_mt_paginador
+   ## Programa con el que paginar la salida
 
-   ## @var default_ftptrabajo_dir_remoto
-   ## Directorio remoto
+   default_mt_paginador="less"
 
-   default_ftptrabajo_dir_remoto="$mt_ftp_directorio"
+   ## @var default_mt_rst2html
+   ## Comando para convertir de rst a html, por defecto: 
 
-   ## @var default_ftptrabajo_dir_local
-   ## Directorio local
+   default_mt_rst2html="rst2html --no-xml-declaration --language=es  --stylesheet-path=/home/eduardo/.magtrabajos/magtrabajos.css " 
 
-   default_ftptrabajo_dir_local="${mt_dir_local:-`pwd`/}"
+   ## @var default_mt_rst2pdf
+   ## Comando para convertir de rst a text, por defecto: rst2newlatex --output-encoding-error-handler=replace
 
-   ## @var default_ftptrabajo_bloqueo_activado
-   ## Sistema de bloque de ficheros compatible con dreamweaver
+   default_mt_rst2pdf="rst2newlatex --output-encoding-error-handler=replace "
 
-   default_ftptrabajo_bloqueo_activado="no"
+   ## @var default_mt_pdflatex
+   ## Comando para convertir de text a pdf
 
-   ## @var default_ftptrabajo_editor
-   ## Editor
-   default_ftptrabajo_editor=gvim
+   default_mt_pdflatex="pdflatex "
 
-   ## @var default_ftptrabajo_com_diff
-   ## Comando para editar diferencias
-   default_ftptrabajo_com_diff=${mt_comando_diff:-vimdiff}
+   ## @var default_mt_editor
+   ## Editor para las descripciones y cosas parecidas, es importante que el programa a lanzar
+   ## no lo haga en segundo plano ya que es cuando acaba el proceso que se guardara el resultado
 
-   ## @var default_ftptrabajo_terminal
-   ## Terminal a utilizar
-   default_ftptrabajo_terminal="${mt_terminal:-xterm}"
+   default_mt_editor="vim"
+
+   ## @var default_mt_editor_dev
+   ## Editor para programar
+
+   default_mt_editor_dev='/usr/bin/gvim -geometry 500x50 --servername $proyecto --remote-silent '
+
+   ## @var default_mt_navegador
+   ## Navegador, por defecto: firefox -new-window
+
+   default_mt_navegador='/etc/alternatives/x-www-browser'
+
+   ## @var default_mt_archivo_html
+   ## Archivo donde guardar la salida en html
+
+   default_mt_archivo_html="$HOME/trabajos.html"
+
+   ## @var default_mt_archivo_pdf
+   ## Archivo donde guardar la salida pdf
+
+   default_mt_archivo_pdf="$HOME/trabajos.pdf"
+
+   ## @var default_mt_archivo_cvs
+   ## Archivo donde guardar la salida cvs
+
+   default_mt_archivo_cvs="$HOME/trabajos.csv"
+
+   ## @var default_mt_terminal
+   ## Programa terminal de trabajo, ejemplos:
+   ## @code
+   ## gnome-terminal --geometry 200x100 -e 
+   ## terminator -m -x
+   ## @endcode
+
+   default_mt_terminal='terminator -m -x'
+
+   ## @var default_mt_miniterminal
+   ## Pequeña terminal para cosas como lanzar comandos externos y cosas así
+
+   default_mt_miniterminal='xterm -bg black -fg white' 
+
+   ## @var default_mt_comando_diff
+   ## Comando para trabajar los conflictos entre versiones, ejemplos:
+   ##
+   ## - meld
+   ## - gvimdiff
+
+   default_mt_comando_diff="meld"
+
+   ## @var default_mt_ocultar_ficheros
+   ## Listado de patrones que nos servirá para descartar ficheros, en comandos como; grep, git, etc...
+   ## Cada patrón viene separado por '|'
+
+   default_mt_ocultar_ficheros='cscope.files|cscope.out|GPATH|GRTAGS|GSYMS|GTAGS|Session.vim|tags|*~'
+
+   ## @var default_mt_codificacion_emails
+   ## Codificación de los emails (Si es en utf8 dejar en blanco)
+   ## Opciones más comunes: iso-8859-1
+
+   default_mt_codificacion_emails=''
+
+   ## @var default_mt_codificacion_codigo
+   ## Codificación de los archivos de código fuente (Si es en utf8 dejar en blanco)
+   ## Opciones más comunes: iso-8859-1
+
+   default_mt_codificacion_codigo=''
+
+   ## @var default_mt_euroshora_defecto
+   ## Euros por hora por defecto
+
+   default_mt_euroshora_defecto=
+
+   ## @var default_mt_plugins_activados
+   ## Lista de plugins activados para proyecto separados por espacios
+   ## Posibles: Todos los plugins dela carpeta plugins
+
+   default_mt_plugins_activados='magcscope magcontrolversion'
+
+   ## @var default_mt_usuario_mysql
+   ## Usuario para mysql
+
+   default_mt_usuario_mysql="root"
+
+   ## @var default_mt_comando_mysql
+   ## Comando para ejecutar mysql
+
+   default_mt_comando_mysql='mysql --default-character-set=utf8 -u$default_mt_usuario_mysql -p`contrasenya mysql` trabajos -N -e '
+
+   ## @var default_mt_tipo_proyecto
+   ## Tipos soportados: php, bash, python
+
+   default_mt_tipo_proyecto='bash'
+
+   ## @var default_mt_web_local
+   ## URL local de pagina de proyecto
+
+   default_mt_web_local='http://localhost/$proyecto'
+
+   ## @var default_mt_url_servidor
+   ## URL del servidor del proyecto 
+
+   default_mt_url_servidor=''
+
+   ## @var default_mt_ftp
+   ## Dirección ftp del proyecto
+
+   default_mt_ftp=''
+
+   ## @var default_mt_ftp_directorio
+   ## Directorio del servidor donde se encuentra la carpeta equivalente a la nuestra en local
+
+   default_mt_ftp_directorio=''
+
+   ## @var default_mt_base_de_datos
+   ## Nombre de la base de datos en local
+
+   default_mt_base_de_datos=''
 
 ## @}
 

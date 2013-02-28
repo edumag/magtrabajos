@@ -5,164 +5,30 @@
 ##
 ## Administrar los diferentes perfiles de informes disponibles.
 ## Presentar todas las posibilidades, y permitir configurarlas
-##
-## @todo maginformes independiente
-## @todo Al modificar un informe guardar en carpeta de perfiles de usuario
-## @todo Mirar primero si el perfil seleccionado esta en zona de usuario
-## @todo La lista de @todos con - al inicio
+
+# Recoger configuración de magtrabajos
+source `dirname "$BASH_SOURCE"`/../../config
 
 # Informe por defecto
 
-perfil_actual='default'                                                       ##< Perfil por defecto
-perfil_actual_fich=''                                                         ##< Fichero con el perfil actual
-dir_perfiles="`dirname "$BASH_SOURCE"`/perfiles"                              ##< Directorio de perfiles predifinidos
-dir_perfiles_usuario="$HOME/.magtrabajos/perfiles"                            ##< Directorio de perfiles de usuario
-dir_perfiles_proyecto="$HOME/.magtrabajos/proyectos/$proyecto/perfiles"       ##< Directorio de perfiles de proyecto
+perfil_actual='default'                                                        ##< Perfil por defecto
+dir_perfiles="`dirname "$BASH_SOURCE"`/perfiles/"                              ##< Directorio de perfiles predefinidos
+dir_perfiles_usuario="${DIR_CONF_USUARIO}perfiles/"                            ##< Directorio de perfiles de usuario
+dir_perfiles_proyecto="${DIR_CONF_USUARIO}proyectos/$proyecto/perfiles/"       ##< Directorio de perfiles de proyecto
 
-## @name Perfil por defecto
-##
-## Perfil por defecto y sus descripciones
-## @{
+# Si no tenemos los directorios creados los creamos
+[[ -d "$dir_perfiles_usuario" ]] || mkdir "$dir_perfiles_usuario"
+[[ -d "$dir_perfiles_proyecto" ]] || mkdir "$dir_perfiles_proyecto"
 
-## @var per_informe_titulo
-## Título del informe un SI hará que añadamos "proyecto / tarea / movimiento" otra cosa será el mismo titulo a poner
+## Fichero con el perfil actual, buscamos en la carpeta del proyecto, sino existe el perfil
+## miramos en la carpeta de magtrabajos, si tampoco existe cogemos el que tenemos en la carpeta
+## del módulo.
 
-per_informe_titulo=NO
-
-## @var per_informe_indice
-## Presentar indice al inicio del documento (SI/NO)
-
-per_informe_indice=NO
-
-## @var per_informe_enlaces
-## Añadir enlaces en los informes para lanzar magtrabajos desde navegador (SI/NO)
-
-per_informe_enlaces=NO
-
-## @var per_informe_formato_enlaces
-## Enlace a generar para editar TODOs, (fichero, Num de linea)
-
-per_informe_formato_enlaces='vim://%s@%s'
-
-## @var per_informe_incluir_readme.dox
-## Incluir dentro de la documentación el contenido de los archivos readme.dox de la lista de archivos afectados. (SI/NO)
-
-per_informe_incluir_readme=SI
-
-## @var per_proyecto_contabilidad
-## Información contable sobre proyecto
-
-per_proyecto_contabilidad=SI
-
-## @var per_proyecto_cabecera
-## Información sobre proyecto puede ser -nombre o -completo para mostrar más información
-
-per_proyecto_cabecera=SI
-
-## @var per_proyecto_notas
-## Mostra archivo con las notas del proyecto
-
-per_proyecto_notas=SI
-
-## @var per_proyecto_control_versiones
-## Mostrar estado de control de versiones
-
-per_proyecto_control_versiones=SI
-
-## @var per_proyecto_pendiente_codigo
-## Mostrar lineas con etiqueta \todo y \bug en código, puede resultar muy lento, pero podemos configurar carpetas
-## que queremos descartar del proyecto a la hora de hacer busquedas en buscar_codigo
-
-per_proyecto_pendiente_codigo=SI
-
-## @var per_proyecto_tareas_pendientes
-## Mostrar tareas pendientes en proyecto
-
-per_proyecto_tareas_pendientes=SI
-
-## @var per_tarea_cabecera
-##
-## - completa: Con estado, total, fechas y descripción
-## - rst: Titulo rst y descripción   
-## - txt: Titulo y descripción
-
-per_tarea_cabecera=completa
-
-## @var per_tarea_futurible
-## Presentar futuribles de tarea(SI/NO)
-
-per_tarea_futurible=SI
-
-## @var per_tarea_arch_afectados
-## Archivos afectados de tarea (SI/NO)
-
-per_tarea_arch_afectados=SI
-
-## @var per_tarea_literales_pendientes
-## Literales pendientes de tarea (SI/NO)
-
-per_tarea_literales_pendientes=SI
-
-## @var per_tarea_TODOs
-## Lista de cosas pendientes en el código en los archivos afectados de tarea "@todo" (SI/NO)
-
-per_tarea_TODOs=SI
-
-## @var per_tarea_contabilidad
-## Numeros contables de tarea (SI/NO)
-
-per_tarea_contabilidad=SI
-
-## @var per_tarea_recursiva
-## Recursividad, en caso de estar en una tarea, mirar también en sus movimientos
-
-per_tarea_recursiva=SI
-
-## @var per_movimiento_cabecera
-##
-## - completa
-## - rst
-## - txt
-
-per_movimiento_cabecera=completa
-
-## @var per_movimiento_arch_afectados
-## Archivos afectados de movimiento (SI/NO)
-
-per_movimiento_arch_afectados=SI
-
-## @var per_movimiento_literales_pendientes
-## Literales pendientes de movimiento (SI/NO)
-
-per_movimiento_literales_pendientes=SI
-
-## @var per_movimiento_contabilidad
-## Numeros contables de movimiento (SI/NO)
-
-per_movimiento_contabilidad=SI
-
-## @var per_movimiento_TODOs
-## Lista de cosas pendientes en el código en los archivos afectados de movimiento "@todo" (SI/NO)
-
-per_movimiento_TODOs=NO
-
-## @var per_pie_totales
-## Totales general (SI/NO)
-
-per_pie_totales=SI
-
-## @var per_pie_codigo_magtrabajos
-## Añadir código con el numero de proyecto, tarea y movimiento al que pertenece el informe
-
-per_pie_codigo_magtrabajos=NO
-
-## @}
+perfil_actual_fich=''
 
 ## Mostrar lista de informes posibles
 
 function lista_informes() {
-
-   dir_perfiles_proyecto="$HOME/.magtrabajos/proyectos/$proyecto/perfiles"
 
    if [ $consulta == 1 ] ; then
       (if [ "`ls $dir_perfiles`" != "" ] ; then
@@ -171,13 +37,13 @@ function lista_informes() {
          done
       fi
       if [ "`ls $dir_perfiles_usuario`" != "" ] ; then
-         for informe in "$dir_perfiles_usuario/"* ; do 
+         for informe in "$dir_perfiles_usuario"* ; do 
             echo `basename $informe`
          done
       fi
       if [ "$proyecto" != "" ] && [ -d "$dir_perfiles_proyecto" ] ; then
          if [ "`ls $dir_perfiles_proyecto`" != "" ] ; then
-            for informe in "$dir_perfiles_proyecto/"* ; do 
+            for informe in "$dir_perfiles_proyecto"* ; do 
                echo `basename $informe`
             done
          fi
@@ -185,19 +51,19 @@ function lista_informes() {
          ) | uniq
    else
       echo -e "\nSistema\n--------"
-      for informe in "$dir_perfiles/"* ; do 
+      for informe in "$dir_perfiles"* ; do 
          echo - `basename $informe`
       done
       if [ "`ls $dir_perfiles_usuario`" != "" ] ; then
       echo -e "\nUsuario\n--------"
-         for informe in "$dir_perfiles_usuario/"* ; do 
+         for informe in "$dir_perfiles_usuario"* ; do 
             echo - `basename $informe`
          done
       fi
       if [ "$proyecto" != "" ] && [ -d "$dir_perfiles_proyecto" ] ; then
          if [ "`ls $dir_perfiles_proyecto`" != "" ] ; then
             echo -e "\n$proyecto\n--------"
-            for informe in "$dir_perfiles_proyecto/"* ; do 
+            for informe in "$dir_perfiles_proyecto"* ; do 
                echo - `basename $informe`
             done
          fi
@@ -209,26 +75,15 @@ function lista_informes() {
 
 function definir_perfil_actual() {
 
-   dir_perfiles_proyecto="$HOME/.magtrabajos/proyectos/$proyecto/perfiles"
-
    ## Recoger la información del perfil actual.
    perfil_actual=${perfil_actual:default}
 
-   ## Definir el fichero de perfil que debe cargarse
-   perfil_actual_fich="$dir_perfiles"
-
-   if [ "$proyecto" != "" ] && [ -e "$dir_perfiles_proyecto/$perfil_actual" ] ; then
-
-      perfil_actual_fich="$dir_perfiles_proyecto/$perfil_actual"
-
-   elif [ -e "$dir_perfiles_usuario/$perfil_actual" ] ; then
-
-      perfil_actual_fich="$dir_perfiles_usuario/$perfil_actual"
-
-   elif [ -e "$dir_perfiles/$perfil_actual" ] ; then
-
-      perfil_actual_fich="$dir_perfiles/$perfil_actual"
-
+   if [ -e "${dir_perfiles_proyecto}$perfil_actual" ] ; then
+      perfil_actual_fich="${dir_perfiles_proyecto}$perfil_actual"
+   elif [ -e "${dir_perfiles_usuario}$perfil_actual" ] ; then
+      perfil_actual_fich="${dir_perfiles_usuario}$perfil_actual"
+   elif [ -e "${dir_perfiles}$perfil_actual" ] ; then
+      perfil_actual_fich="${dir_perfiles}$perfil_actual"
    else
 
       echo 'Error: No se pudo encontrar archivo con perfil definido'
@@ -275,7 +130,7 @@ function menuInformes(){
          [ -e ${DIR_TMP}listado ] && rm ${DIR_TMP}listado
 
          if [ -e "$dir_perfiles_proyecto" ] ; then
-            for perfil in "$dir_perfiles_proyecto"/* ; do
+            for perfil in "$dir_perfiles_proyecto"* ; do
                if [ -e "$perfil" ] ; then
                   echo -e "${perfil}\t`basename "$perfil"`" >> ${DIR_TMP}listado
                fi
@@ -283,14 +138,14 @@ function menuInformes(){
          fi
 
          if [ -e "$dir_perfiles_usuario" ] ; then
-            for perfil in "$dir_perfiles_usuario"/* ; do
+            for perfil in "$dir_perfiles_usuario"* ; do
                if [ -e "$perfil" ] ; then
                   echo -e "${perfil}\t`basename "$perfil"`" >> ${DIR_TMP}listado
                fi
             done
          fi
 
-         for perfil in "$dir_perfiles"/* ; do
+         for perfil in "$dir_perfiles"* ; do
             echo -e "${perfil}\t`basename "$perfil"`" >> ${DIR_TMP}listado
          done
 
@@ -306,31 +161,64 @@ function menuInformes(){
          fi
          ;;
       v|V) # ver perfil actual
-         echo "Visualizar perfil actual: $perfil_actual"
+         echo "Visualizar perfil actual: $perfil_actual_fich"
          # for variable in ${!per_*} ; do
          #    d="desc_$variable"
          #    printf "\n%s: %s" "${!d}" "${!variable}"
          # done
-         configuracion_ver per_ "$BASH_SOURCE"
+         configuracion_ver per_ "`dirname "$BASH_SOURCE"`/config.default"
          echo
          echo
-         read -n1 -s 
+         tecla
          menuInformes
          ;;
       g|G) #Guardar
+
+         # Preguntar a que nivel se desea guardar el perfil, proyecto o usuario
+
+         abre_caja  "Guardar perfil"
+         linea_caja
+         linea_caja "Guardar el perfil de informe para el proyecto actual o guardarlo para"
+         linea_caja "que sea accesible a cualquier proyecto."
+         linea_caja
+         linea_caja "[P]royecto" "Solo para este proyecto"
+         linea_caja "[T]odos"    "Accesible para todos los proyectos"
+         cierra_caja 
+         read -p "Guardar en: " OPCION
+
+         case "$OPCION" in
+            p|P) perfil_actual_fich="$dir_perfiles_proyecto$perfil_actual" ;;
+            t|T) perfil_actual_fich="$dir_perfiles_usuario$perfil_actual"  ;;
+            *) return ;;
+         esac
+
          configuracion_guardar per_ "$perfil_actual_fich"
          if [ $? = 0 ] ; then
-            mensajes "Archivo de perfil $perfil_actual guardado"
+            mensajes "Archivo de perfil [$perfil_actual_fich] guardado"
          else
             mensajes "Error al guardar $perfil_actual"
          fi
          ;;
       u|U) #Guardar como
          read -p "Nombre de perfil: " perfil_actual
-         perfil_actual_fich="$dir_perfiles_usuario"
-         # si no tenemos directorio de perfiles lo creamos
-         [[ -d "$perfil_actual_fich" ]] || mkdir "$perfil_actual_fich"
-         perfil_actual_fich=$perfil_actual_fich/$perfil_actual
+
+         # Preguntar a que nivel se desea guardar el perfil, proyecto o usuario
+
+         abre_caja  "Guardar perfil"
+         linea_caja
+         linea_caja "Guardar el perfil de informe para el proyecto actual o guardarlo para"
+         linea_caja "que sea accesible a cualquier proyecto."
+         linea_caja
+         linea_caja "[P]royecto" "Solo para este proyecto"
+         linea_caja "[T]odos"    "Accesible para todos los proyectos"
+         cierra_caja 
+         read -p "Guardar en: " OPCION
+
+         case "$OPCION" in
+            p|P) perfil_actual_fich="$dir_perfiles_proyecto$perfil_actual" ;;
+            t|T) perfil_actual_fich="$dir_perfiles_usuario$perfil_actual"  ;;
+            *) return ;;
+         esac
 
          configuracion_guardar per_ "$perfil_actual_fich"
          if [ $? = 0 ] ; then
@@ -341,7 +229,7 @@ function menuInformes(){
          ;;
       e|E) # editar
          echo "Editar perfil: $perfil_actual"
-         configuracion_editar per_ "$BASH_SOURCE"
+         configuracion_editar per_ "`dirname "$BASH_SOURCE"`/config.default"
          menuInformes
          ;;
       i|I) 
@@ -706,5 +594,10 @@ function menuInformes(){
 
    }
 
+# Configuración por defecto de ftptrabajo 
+configuracion_leer "${dir_perfiles_usuario}default" "`dirname "$BASH_SOURCE"`/config.default" 'per_' 
+
 definir_perfil_actual
+
+configuracion_leer "${perfil_actual_fich}" "`dirname "$BASH_SOURCE"`/config.default" 'per_' 
 

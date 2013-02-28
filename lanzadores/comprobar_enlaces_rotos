@@ -3,7 +3,22 @@
 ## @file comprobar_enlaces_rotos
 ## @brief Comprobación de los enlaces de un dominio web
 
-url="$1"
+if [ -z "$1" ] ; then
+   # miramos si el directorio actual es un proyecto con su configuración
+   source "`dirname "$BASH_SOURCE"`/../config"
+   if [ -z "$mt_url_servidor" ] ; then
+      echo
+      echo Es necesario la url para poder ser analizada
+      echo
+      tecla
+      exit 1
+   else
+      url="$mt_url_servidor"
+   fi
+else
+   url="$1"
+fi
+
 file_tmp="/tmp/comprobar_enlaces_rotos"
 
 wget --spider -r -l2 -nv "$url" | tee -a "$file_tmp"

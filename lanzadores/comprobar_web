@@ -6,7 +6,22 @@
 ## Referencia:
 ## http://www.linuxhispano.net/2013/02/19/monitorizar-servidor-web-para-ver-si-esta-caido-o-no-de-forma-automatica/
 
-url="$1"
+if [ -z "$1" ] ; then
+   # miramos si el directorio actual es un proyecto con su configuración
+   source "`dirname "$BASH_SOURCE"`/../config"
+   if [ -z "$mt_url_servidor" ] ; then
+      echo
+      echo Es necesario la url para poder ser analizada
+      echo
+      tecla
+      exit 1
+   else
+      url="$mt_url_servidor"
+   fi
+else
+   url="$1"
+fi
+
 response=$(curl -s -I -L $url | grep HTTP); 
 
 status=${response#* };

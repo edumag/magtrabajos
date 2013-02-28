@@ -1,0 +1,145 @@
+#!/bin/bash
+
+## @file maginformes/config.default
+## @brief Perfil por defecto
+##
+## @defgroup configuracion_maginformes Configuración para maginformes
+##
+## Perfil por defecto y sus descripciones
+##
+## @ingroup configuracion
+## @{
+
+## @var default_per_informe_titulo
+## Título del informe un SI hará que añadamos "proyecto / tarea / movimiento" otra cosa será el mismo titulo a poner
+
+default_per_informe_titulo=NO
+
+## @var default_per_informe_indice
+## Presentar indice al inicio del documento (SI/NO)
+
+default_per_informe_indice=NO
+
+## @var default_per_informe_enlaces
+## Añadir enlaces en los informes para lanzar magtrabajos desde navegador (SI/NO)
+
+default_per_informe_enlaces=NO
+
+## @var default_per_informe_formato_enlaces
+## Enlace a generar para editar TODOs, (fichero, Num de linea)
+
+default_per_informe_formato_enlaces='vim://%s@%s'
+
+## @var default_per_informe_incluir_readme.dox
+## Incluir dentro de la documentación el contenido de los archivos readme.dox de la lista de archivos afectados. (SI/NO)
+
+default_per_informe_incluir_readme=SI
+
+## @var default_per_proyecto_contabilidad
+## Información contable sobre proyecto
+
+default_per_proyecto_contabilidad=SI
+
+## @var default_per_proyecto_cabecera
+## Información sobre proyecto puede ser -nombre o -completo para mostrar más información
+
+default_per_proyecto_cabecera=SI
+
+## @var default_per_proyecto_notas
+## Mostra archivo con las notas del proyecto
+
+default_per_proyecto_notas=SI
+
+## @var default_per_proyecto_control_versiones
+## Mostrar estado de control de versiones
+
+default_per_proyecto_control_versiones=SI
+
+## @var default_per_proyecto_pendiente_codigo
+## Mostrar lineas con etiqueta \todo y \bug en código, puede resultar muy lento, pero podemos configurar carpetas
+## que queremos descartar del proyecto a la hora de hacer busquedas en buscar_codigo
+
+default_per_proyecto_pendiente_codigo=SI
+
+## @var default_per_proyecto_tareas_pendientes
+## Mostrar tareas pendientes en proyecto
+
+default_per_proyecto_tareas_pendientes=SI
+
+## @var default_per_tarea_cabecera
+##
+## - completa: Con estado, total, fechas y descripción
+## - rst: Titulo rst y descripción   
+## - txt: Titulo y descripción
+
+default_per_tarea_cabecera=completa
+
+## @var default_per_tarea_futurible
+## Presentar futuribles de tarea(SI/NO)
+
+default_per_tarea_futurible=SI
+
+## @var default_per_tarea_arch_afectados
+## Archivos afectados de tarea (SI/NO)
+
+default_per_tarea_arch_afectados=SI
+
+## @var default_per_tarea_literales_pendientes
+## Literales pendientes de tarea (SI/NO)
+
+default_per_tarea_literales_pendientes=SI
+
+## @var default_per_tarea_TODOs
+## Lista de cosas pendientes en el código en los archivos afectados de tarea "todo" (SI/NO)
+
+default_per_tarea_TODOs=SI
+
+## @var default_per_tarea_contabilidad
+## Numeros contables de tarea (SI/NO)
+
+default_per_tarea_contabilidad=SI
+
+## @var default_per_tarea_recursiva
+## Recursividad, en caso de estar en una tarea, mirar también en sus movimientos
+
+default_per_tarea_recursiva=SI
+
+## @var default_per_movimiento_cabecera
+##
+## - completa
+## - rst
+## - txt
+
+default_per_movimiento_cabecera=completa
+
+## @var default_per_movimiento_arch_afectados
+## Archivos afectados de movimiento (SI/NO)
+
+default_per_movimiento_arch_afectados=SI
+
+## @var default_per_movimiento_literales_pendientes
+## Literales pendientes de movimiento (SI/NO)
+
+default_per_movimiento_literales_pendientes=SI
+
+## @var default_per_movimiento_contabilidad
+## Numeros contables de movimiento (SI/NO)
+
+default_per_movimiento_contabilidad=SI
+
+## @var default_per_movimiento_TODOs
+## Lista de cosas pendientes en el código en los archivos afectados de movimiento "todo" (SI/NO)
+
+default_per_movimiento_TODOs=NO
+
+## @var default_per_pie_totales
+## Totales general (SI/NO)
+
+default_per_pie_totales=SI
+
+## @var default_per_pie_codigo_magtrabajos
+## Añadir código con el numero de proyecto, tarea y movimiento al que pertenece el informe
+
+default_per_pie_codigo_magtrabajos=NO
+
+## @}

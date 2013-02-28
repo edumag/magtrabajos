@@ -1,14 +1,15 @@
 #!/bin/bash
 
 ## @file contrasenya
-##
 ## @brief Imprimir contraseña de comando 
 ##
 ## Nos permite tener un modo simple de recuperar contraseñas a la hora de lanzar comandos 
 ## sin la necesidad de añadirlas en el mismo código, ganando en seguridad.
 ## 
-## El mecanismo es muy simple, se tiene un archivo con los permisos adecuados en la carpeta de usuario
-## con el nombre '.gcm_ctsrc' y con formato 'comando|contraseña'
+## El mecanismo es muy simple, se tiene un archivo con los permisos adecuados ( solo lectura para
+## el dueño, chmod 0400 $datos) en la carpeta de usuario con el nombre '.gcm_ctsrc' y con formato 'comando|contraseña'
+##
+## @todo Encriptar el archivo para más seguridad
 
 datos="$HOME/.gcm_ctsrc"
 grep ^"$1" "$datos" | cut -d\| -f2

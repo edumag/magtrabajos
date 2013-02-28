@@ -6,11 +6,12 @@
 ## Hacer que el grupo de la carpeta del proyecto sea www-data
 ## y dar permisos de escritura al grupo
 ##
-## $1 Carpeta del proyecto
+## $1 Carpeta o archivo 
 
-proyecto=$1
+destino=$1
 usuario=$USER
+grupo=www-data
 
-sudo chown -R www-data:${usuario} "$proyecto"
+sudo chown -R $grupo:${usuario} "$proyecto"
 
-sudo chmod -R 775 "$proyecto"
+sudo chmod -R 775 "$destino"

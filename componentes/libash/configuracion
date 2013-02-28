@@ -27,8 +27,6 @@
 ## que si el archivo por defecto a variado y ahora una variable deja de usarse, al editarse la 
 ## configuración ya no mostrara esta variable, manteniendo limpios los ficheros de configuración.
 ##
-## @todo Al añadir variables las guarda bien pero no las muestra bien
-##
 ## @ingroup libash, configuracion
 ##
 ## @author   Eduardo Magrané
@@ -204,7 +202,7 @@ function configuracion_leer() {
    local configuracion_prefijo="$3"
 
    source "$archivo_default"
-   source "$configuracion_archivo"
+   [[ -e "$configuracion_archivo" ]] && source "$configuracion_archivo"
 
    local pre_default="default_${configuracion_prefijo}"
    local default='${!'$pre_default'*}'
