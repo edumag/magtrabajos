@@ -93,7 +93,7 @@ function git_magcontrolversion_mover() {
     origen="$1"
    destino="$2"
 
-   git move "$origen" "$destino"
+   git mv "$origen" "$destino"
    while [ $? != 0 ] ; do
       echo 'Parece que el archivo a sido modificado'
       echo '¿Que quieres hacer?'
@@ -102,7 +102,7 @@ function git_magcontrolversion_mover() {
       read opcion
       case $opcion in
          1) git move --force "$origen" "$destino" ;;
-         2) git ci $origen ; magcontrolversion mover "$origen" "$destino" ;;
+         2) git commit $origen ; magcontrolversion mover "$origen" "$destino" ;;
          0) exit 1 ;;
       esac
    done

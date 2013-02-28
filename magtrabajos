@@ -2748,7 +2748,7 @@ esac
 
 }
 
-## Presentamos lineas de los archivos afectados que contengan '@todo'
+## Presentamos lineas de los archivos afectados que contengan 'todo'
 ##
 ## Problemas con la códificación de caracteres al estar los archivos en latin1
 ## Hacemos que se guarde la salida en un archivo para pasar su codificación a 
@@ -4508,7 +4508,7 @@ function menuArchivos(){
          SQL="DELETE FROM rMovimientoArchivos $CONDICION"
          ejecutarSQL "$SQL"
 
-         ## Ejecutamos primero subversion
+         ## Ejecutamos primero control de versiones
          if [ "`plugin_activado magcontrolversion`" != "" ] ; then 
             echo
             echo control de versiones

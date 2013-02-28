@@ -65,7 +65,6 @@
 ## @author   Eduardo Magrané
 ##
 ## @todo Con sftp no borra los ficheros de bloqueo ya que no entiende delete y ftp no entiende rm
-## @todo Variables de configuración junto con variables de proyecto.
 ##
 ## @internal
 ##
@@ -721,7 +720,7 @@ function quitarPermisosEscritura() {
    echo -n "  Quitamos permisos de escritura en [${dir}]..."
    # Hay que mantener los permisos en los directorios sino nos da problemas
    # chmod -R ugo-w "$dir"
-   eval "$( find "$dir" -type f -printf 'sudo chmod uog-w "%p"\n')"
+   eval "$( find "$dir" -type f -printf 'permisos_apache --quitar "%p"\n')"
    if [ "$?" = "0" ] ; then
       ok
       return 0
@@ -744,7 +743,7 @@ function darPermisosEscritura() {
    echo -n "  Añadimos permisos de escritura en [${dir}]..."
    # Hay que mantener los permisos en los directorios sino nos da problemas
    #chmod -R ugo+rw "$dir"
-   eval "$( find "$dir" -type f -printf 'sudo chmod uog+rw "%p"\n')" 2>/dev/null
+   eval "$( find "$dir" -type f -printf 'permisos_apache "%p"\n')" 2>/dev/null
    if [ "$?" = "0" ] ; then
       ok
       return 0
