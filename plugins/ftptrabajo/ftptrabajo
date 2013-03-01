@@ -1563,12 +1563,13 @@ function comprobar_proyecto() {
 
    if [ ! -e "$CONFIGURACION_FTPTRABAJO_PROYECTO" ] ; then
       [[ $DEV ]] && echo -e "\n\nNo existe un proyecto para esta carpeta"
+      [[ $consulta ]] && exit 1
       echo
       echo 'ftptrabajo no está configurado'
       echo
       echo Coloquese en el directorio y ejecute: ftptrabajo --configurar
       echo
-      exit
+      exit 1
       configurar_proyecto
    else
       source $CONFIGURACION_FTPTRABAJO_PROYECTO
@@ -1712,6 +1713,7 @@ while [ -n "$1" ]; do
       --lftp) shift 1 ; comprobar_proyecto ; da="`pwd`" ; cd "$ftptrabajo_dir_local" ; lftp $ftptrabajo_server ; cd "$da" ; exit ;;
       --mc) shift 1 ; comprobar_proyecto ; mc "$ftptrabajo_dir_local" /#ftp:$ftptrabajo_server ; exit ;;
       --lista-externa) shift 1 ; archivos=(`cat "$1"`) ; shift 1 ;;
+      --consulta) shift 1 ; consulta=1 ;;
       *) archivos[$na]="$1" ; shift 1 ; let na++ ;;
 
    esac
