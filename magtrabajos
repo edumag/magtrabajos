@@ -2089,6 +2089,12 @@ function evento() {
       done
    done
 
+   # Eventos de proyecto
+
+   for evento_proyecto in ${DIR_PROYECTOS}/$proyecto/eventos/$evento/* ; do
+      [[ -e "$evento_proyecto" ]] && lista="$lista \n`basename $evento_proyecto`\t$evento_proyecto" 
+   done
+
    [[ "$lista" == "" ]] && ( log "$FUNCNAME"  "Eventos: Sin ganchos para $eventos" ; return )
 
    for fevento in $(echo -e "$lista" | sort | cut -f2) ; do
@@ -4991,18 +4997,6 @@ if [ -e "$HOME/.magtrabajos/configuracion/" ] ; then
    done
 fi
 
-# INCLUIMOS EXTENSIONES #
-
-for extension in ${DIR_MAGTRABAJOS}/componentes/*/extension.sh ; do
-   log INICIO "Incluimos extension de componente ${extension}"
-   source "$extension"
-done
-
-for extension in ${DIR_MAGTRABAJOS}/plugins/*/extension.sh ; do
-   log INICIO "Incluimos extension de componente ${extension}"
-   source "$extension"
-done
-
 if [ "$1" = "" ] ; then
    # No hay paremetros de entrada
    PARAMETROS="NO"
@@ -5106,15 +5100,17 @@ while [ -n "$1" ]; do
            ;;
 
       --listar-plugins) listar_plugins ; exit ;;
-      --listar-informes) shift 1 ; menuInformes l ;;
+      --listar-informes) shift 1 ; ACCION_PERSONALIZADA="menuInformes l" ;;
       --exportar) 
          # Si $3 es un archivo existente supondremos que es el
          # archivo a exportar sino cogemos el $TMP
+         #
+         # $2 Es el tipo de exportación ejemplo: html
          if [ -f "$3" ] ; then
-            exportar "$2" "$3"
+            ACCION_PERSONALIZADA="exportar '$2' '$3'"
             shift 3
          else
-           exportar "$2" "$TMP"
+           ACCION_PERSONALIZADA="exportar '$2' '$TMP'"
            shift 2 
          fi
          mensajes "Perfil $perfil_actual abierto"
@@ -5146,6 +5142,18 @@ while [ -n "$1" ]; do
         #break
         ;;
    esac
+done
+
+# INCLUIMOS EXTENSIONES #
+
+for extension in ${DIR_MAGTRABAJOS}/componentes/*/extension.sh ; do
+   log INICIO "Incluimos extension de componente ${extension}"
+   source "$extension"
+done
+
+for extension in ${DIR_MAGTRABAJOS}/plugins/*/extension.sh ; do
+   log INICIO "Incluimos extension de componente ${extension}"
+   source "$extension"
 done
 
 # Depuración
@@ -5181,6 +5189,10 @@ elif [ "$PARAMETROS" = "NO" ] ; then
    menuProyectos
    movimientosAbiertos
    menu
+fi
+
+if [ "$ACCION_PERSONALIZADA" != "" ] ; then
+   eval "$ACCION_PERSONALIZADA"
 fi
 
 if [ "$ACCION" != "" ] ; then
