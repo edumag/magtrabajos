@@ -43,7 +43,7 @@
    ## @var default_mt_editor_dev
    ## Editor para programar
 
-   default_mt_editor_dev='/usr/bin/gvim -geometry 500x50 --servername $proyecto --remote-silent '
+   default_mt_editor_dev='/usr/bin/gvim -f -geometry 500x50 --servername $proyecto --remote-silent '
 
    ## @var default_mt_navegador
    ## Navegador, por defecto: firefox -new-window

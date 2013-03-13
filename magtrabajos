@@ -611,7 +611,7 @@ function editarArchivos(){
        parametros="$(for n in `seq 0 $((${#aSALIDA[*]}-1))` ; do echo -n "'${aSALIDA[$n]}' " ; done)"
        cmd="$mt_editor_dev $parametros"
        log 'Editar' "$cmd"
-       eval "$cmd"
+       eval "$cmd" &
 
     fi
 }
