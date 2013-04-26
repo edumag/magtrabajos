@@ -1,6 +1,23 @@
 var a00023 =
 [
-    [ "url", "a00023_afcd5a3e84f2adb7f83fa6c99911f31e4.htm#afcd5a3e84f2adb7f83fa6c99911f31e4", null ],
-    [ "file_tmp", "a00023_a72bf93009bb6a351a61249e3b765170e.htm#a72bf93009bb6a351a61249e3b765170e", null ],
-    [ "$file_tmp", "a00023_ae9702c937e60dcf36f1a20d6c70c1320.htm#ae9702c937e60dcf36f1a20d6c70c1320", null ]
+    [ "if", "a00023_a8b01fcbfd5d449658f41af1c7a36aa5b.htm#a8b01fcbfd5d449658f41af1c7a36aa5b", null ],
+    [ "then", "a00023_a751ff7ed91d2e43008930137c9fa6925.htm#a751ff7ed91d2e43008930137c9fa6925", null ],
+    [ "config", "a00023_a58ecdd2afc93b4799c5cfea723a04b23.htm#a58ecdd2afc93b4799c5cfea723a04b23", null ],
+    [ "echo", "a00023_ac4fd59c9ee95bff469a7cd55e16f0449.htm#ac4fd59c9ee95bff469a7cd55e16f0449", null ],
+    [ "analizada", "a00023_a0434db74462e5fe789857b608f20cc8b.htm#a0434db74462e5fe789857b608f20cc8b", null ],
+    [ "tecla", "a00023_a713c3cd30b14b9f396016b6c5b7ebd36.htm#a713c3cd30b14b9f396016b6c5b7ebd36", null ],
+    [ "exit", "a00023_a6733eb5f605d09eaede9845835d71c4e.htm#a6733eb5f605d09eaede9845835d71c4e", null ],
+    [ "else", "a00023_a0544c3fe466e421738dae463968b70ba.htm#a0544c3fe466e421738dae463968b70ba", null ],
+    [ "url", "a00023_a553e0f1f35b00449e35f19d716c66535.htm#a553e0f1f35b00449e35f19d716c66535", null ],
+    [ "fi", "a00023_a2430242dc52b9fec75095457ac808899.htm#a2430242dc52b9fec75095457ac808899", null ],
+    [ "n", "a00023_a68e0d3438fcce213e8c35c1ee79f8b2a.htm#a68e0d3438fcce213e8c35c1ee79f8b2a", null ],
+    [ "rotos", "a00023_af87a0036452894d762a9d9715aa31fbc.htm#af87a0036452894d762a9d9715aa31fbc", null ],
+    [ "lynx", "a00023_a68bfa5b806915ee5f4c2593cfdce7f05.htm#a68bfa5b806915ee5f4c2593cfdce7f05", null ],
+    [ "$url", "a00023_a34cee4964b346e998b8ce9d5c0db0d2f.htm#a34cee4964b346e998b8ce9d5c0db0d2f", null ],
+    [ "count", "a00023_aa8808e1c6d5fc017e61f5b78127ff466.htm#aa8808e1c6d5fc017e61f5b78127ff466", null ],
+    [ "txt", "a00023_a0daba57c43d9b29539980e685bb6033f.htm#a0daba57c43d9b29539980e685bb6033f", null ],
+    [ "link", "a00023_ae813444d259ed651d5210f27dfd9cf83.htm#ae813444d259ed651d5210f27dfd9cf83", null ],
+    [ "do", "a00023_a721c6ff80a6d3e4ad4ffa52a04c60085.htm#a721c6ff80a6d3e4ad4ffa52a04c60085", null ],
+    [ "output", "a00023_ad288825273ed7192429ab0474fb2d4a0.htm#ad288825273ed7192429ab0474fb2d4a0", null ],
+    [ "$link", "a00023_a5bf5dd7f08ca26632a74beb9f57ac665.htm#a5bf5dd7f08ca26632a74beb9f57ac665", null ]
 ];

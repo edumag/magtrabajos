@@ -1,6 +1,6 @@
 var a00048 =
 [
-    [ "magcontrolversion_funcs", "a00048_a48c394b0cd3cf05aafbd6b98c3c4d224.htm#a48c394b0cd3cf05aafbd6b98c3c4d224", null ],
-    [ "maggit", "a00048_af38bb2d554de5318fef620fe1c105a8d.htm#af38bb2d554de5318fef620fe1c105a8d", null ],
-    [ "$tarea", "a00048_af7e2a61b091097750c1284dc524a2eba.htm#af7e2a61b091097750c1284dc524a2eba", null ]
+    [ "echo", "a00048_ac4fd59c9ee95bff469a7cd55e16f0449.htm#ac4fd59c9ee95bff469a7cd55e16f0449", null ],
+    [ "develop", "a00048_a9f6bb638ccb71b80f461719790b63967.htm#a9f6bb638ccb71b80f461719790b63967", null ],
+    [ "conflictos", "a00048_ab86f912a44fa38280ba6754f39899a56.htm#ab86f912a44fa38280ba6754f39899a56", null ]
 ];

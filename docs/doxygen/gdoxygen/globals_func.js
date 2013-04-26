@@ -10,6 +10,7 @@ var globals_func =
     [ "g", "globals_func_0x67.htm", null ],
     [ "h", "globals_func_0x68.htm", null ],
     [ "i", "globals_func_0x69.htm", null ],
+    [ "k", "globals_func_0x6b.htm", null ],
     [ "l", "globals_func_0x6c.htm", null ],
     [ "m", "globals_func_0x6d.htm", null ],
     [ "n", "globals_func_0x6e.htm", null ],

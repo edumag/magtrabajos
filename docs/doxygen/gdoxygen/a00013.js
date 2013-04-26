@@ -1,7 +1,7 @@
 var a00013 =
 [
     [ "magcontrolversion_funcs", "a00013_a48c394b0cd3cf05aafbd6b98c3c4d224.htm#a48c394b0cd3cf05aafbd6b98c3c4d224", null ],
-    [ "if", "a00013_aa6ba00fb9c2e4fd90f36efcb0d827c78.htm#aa6ba00fb9c2e4fd90f36efcb0d827c78", null ],
+    [ "if", "a00013_a4585be0fe12d79fde5c5635f7363c01d.htm#a4585be0fe12d79fde5c5635f7363c01d", null ],
     [ "then", "a00013_a751ff7ed91d2e43008930137c9fa6925.htm#a751ff7ed91d2e43008930137c9fa6925", null ],
     [ "tarea", "a00013_a62e290ba1b5da04290fc827e5ad2474d.htm#a62e290ba1b5da04290fc827e5ad2474d", null ],
     [ "echo", "a00013_ac4fd59c9ee95bff469a7cd55e16f0449.htm#ac4fd59c9ee95bff469a7cd55e16f0449", null ],
@@ -12,10 +12,10 @@ var a00013 =
     [ "SQL", "a00013_ae06c74893e7defdf9732f636decfded8.htm#ae06c74893e7defdf9732f636decfded8", null ],
     [ "ARCHIVOSs", "a00013_a8e159a1f0f7f762279d49672ab08fdf8.htm#a8e159a1f0f7f762279d49672ab08fdf8", null ],
     [ "versiones", "a00013_a56eace9d2f63c56c0413d54b571339b8.htm#a56eace9d2f63c56c0413d54b571339b8", null ],
-    [ "cDestacado", "a00013_af2d1956d2229aedaecb5b366e2334029.htm#af2d1956d2229aedaecb5b366e2334029", null ],
     [ "$linea", "a00013_a8956f3d02617cbbe6e5da2e5598f0115.htm#a8956f3d02617cbbe6e5da2e5598f0115", null ],
+    [ "colDestacado", "a00013_a95fc9bb113cbcbc2f5ab39dcd4476b70.htm#a95fc9bb113cbcbc2f5ab39dcd4476b70", null ],
     [ "informe_subversion", "a00013_a657ea302723109197da22a451a4044c9.htm#a657ea302723109197da22a451a4044c9", null ],
-    [ "color", "a00013_a37dbdc30935031c05304482e1be89d8f.htm#a37dbdc30935031c05304482e1be89d8f", null ],
+    [ "color", "a00013_af5185fe2f70f4931a0485c5ea762af8d.htm#af5185fe2f70f4931a0485c5ea762af8d", null ],
     [ "$ARCHIVOSs", "a00013_a09613e2f33c1a89dc2c6826dbc74152e.htm#a09613e2f33c1a89dc2c6826dbc74152e", null ],
     [ "evento_fallido", "a00013_a66b305dfe2a97799a93157ea941da87a.htm#a66b305dfe2a97799a93157ea941da87a", null ],
     [ "fi", "a00013_a2430242dc52b9fec75095457ac808899.htm#a2430242dc52b9fec75095457ac808899", null ],

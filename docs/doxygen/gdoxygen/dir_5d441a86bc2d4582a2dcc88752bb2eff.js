@@ -5,5 +5,6 @@ var dir_5d441a86bc2d4582a2dcc88752bb2eff =
     [ "lanzadores", "dir_f832a86f5b0c8e37a74247591faa558c.htm", "dir_f832a86f5b0c8e37a74247591faa558c" ],
     [ "plugins", "dir_58c43394ad8858b231234bb18974ea42.htm", "dir_58c43394ad8858b231234bb18974ea42" ],
     [ "config", "a00025.htm", null ],
-    [ "magtrabajos", "a00067.htm", null ]
+    [ "config.default", "a00027.htm", null ],
+    [ "magtrabajos", "a00069.htm", null ]
 ];
