@@ -1,0 +1,33 @@
+#!/bin/sh
+
+## @file permisos_apache
+## @brief Cambiar permisos para los proyectos web, para que no den problemas
+##
+## Hacer que el grupo de la carpeta del proyecto sea el nuestro usuario 
+## y el sueño apache, dar permisos de escritura al grupo
+##
+## Si el primer argumento que se pasa es --quitar en vez de dar permisos
+## lo que hacemos es quitarlos para el grupo pero mantenemos los de apache
+
+if [ "$1" = "--quitar" ] ; then
+   shift 1
+   accion_permisos=quitar
+fi
+
+
+destino=$1
+
+## Identificador de usuario
+usuario=www-data
+
+## Identificador de apache
+grupo=$USER
+
+if [ "$accion_permisos" = "quitar" ] ; then
+   sudo chown -R $usuario:$grupo "$destino"
+   sudo chmod -R 750 "$destino"
+else
+   sudo chown -R $usuario:$grupo "$destino"
+   sudo chmod -R 775 "$destino"
+fi
+

@@ -3,8 +3,9 @@
 
 # Si tenim fitxes bloquejats els presentem
 if [ "`plugin_activado ftptrabajo`" != "" ] ; then 
-   local total_bloqueados="$(ftptrabajo --proyecto $proyecto  -tb)"
-   if [ "$total_bloqueados" ==  "0" ] ; then 
+   local total_bloqueados="$(ftptrabajo --consulta --proyecto $proyecto  -tb)"
+   if [ $? != 0 ] || [ "$total_bloqueados" ==  "0" ] || [ "$total_bloqueados" = "" ] ; then 
+      total_bloqueados=0
       SALIDA=''
    elif [ "$total_bloqueados" -gt 8 ] ; then 
       SALIDA="Total de archivos bloqueados: $total_bloqueados"

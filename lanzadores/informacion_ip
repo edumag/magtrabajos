@@ -1,0 +1,21 @@
+#!/bin/bash
+
+## @file informacion_ip
+## @brief Mostrar información sobre una ip o un dominio.
+
+informacion_ip_IP="$1"
+informacion_ip_CMD=/home/eduardo/opt/automater/Automater.py
+
+if [ "$informacion_ip_IP" = "" ] ; then
+
+   echo
+   read -p "URL o IP: " OPCION
+   if [ "$OPCION" != "" ] ; then
+      informacion_ip_IP="$OPCION"
+   fi
+
+fi
+
+if [ "$informacion_ip_IP" != "" ] ; then
+   $informacion_ip_CMD -t "$informacion_ip_IP"
+fi

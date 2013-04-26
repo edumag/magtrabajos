@@ -246,6 +246,7 @@ function generar_listado_fichero() {
    if [ ! -e "${DIR_TMP}listado" ] ; then
       echo Error sin listado a presentar
       resultado_listado=''
+      tecla
       return
    fi
 

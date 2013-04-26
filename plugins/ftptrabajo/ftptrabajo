@@ -19,6 +19,7 @@
 ## Parámetros:
 ##
 ## <pre>
+##  --proyecto | -p [proyecto]              Proyecto seleccionado
 ##  --configurar                            Configurar proyecto de la carpeta actual
 ##  --comando | -c [comando]                Lanzar comando 
 ##  -a                                      Añadir archivo a la lista de bloqueados, pendientes de subir.
@@ -64,7 +65,6 @@
 ## @author   Eduardo Magrané
 ##
 ## @todo Con sftp no borra los ficheros de bloqueo ya que no entiende delete y ftp no entiende rm
-## @todo Variables de configuración junto con variables de proyecto.
 ##
 ## @internal
 ##
@@ -140,6 +140,14 @@ function info() {
 ## Pantalla de ayuda
 
 function help(){ doxygen2help "$0" "false" "@author" ; }
+
+## ok
+
+function ok() { echo -e "`color colAfirmativo`(ok)`color`" ; }
+
+## ko
+
+function ko() { echo -e "`color colError`[KO]`color`" ; }
 
 ###################
 ## Funciones ftp ##
@@ -499,7 +507,15 @@ function leer_proyecto() {
       fi
 
       # Comprobaciones
-      if [ ! -e "$BLOQUEO" ] ; then echo 'Sin archivo de bloqueo, salimos' ; exit 2 ; fi
+      if [ ! -e "$BLOQUEO" ] ; then 
+         echo 'Sin archivo de bloqueo'
+         echo
+         echo 'Creamos archivo de bloqueo'
+         echo
+         read -p 'Su nombre: ' NOMBRE
+         read -p 'Su  email: ' EMAIL
+         echo "$NOMBRE ($proyecto)||$EMAIL" > "$BLOQUEO"
+      fi
 
    else
 
@@ -526,30 +542,24 @@ function configurar_proyecto() {
    echo Proyecto: $proyecto
    echo
    [[ $DEV ]] && echo -e "\n$CONFIGURACION_FTPTRABAJO_PROYECTO \n\n"
-   read -p 'Configurar ftptrabajo (s/n): ' OPCION
 
-   if [ "$OPCION" = "s" ] ; then
-      # Crear carpetas para contener el nuevo proyecto
-      if [ ! -d "${DIR_FTPTRABAJO_PROYECTO}" ] ; then
-         mkdir "${DIR_FTPTRABAJO_PROYECTO}"
-         if [ $? != 0 ] ; then
-            echo
-            echo "No se pudo crear carpeta de proyecto [$DIR_FTPTRABAJO_PROYECTO]"
-            echo
-            echo salimos
-            exit 4
-         fi
+   # Crear carpetas para contener el nuevo proyecto
+   if [ ! -d "${DIR_FTPTRABAJO_PROYECTO}" ] ; then
+      mkdir "${DIR_FTPTRABAJO_PROYECTO}"
+      if [ $? != 0 ] ; then
+         echo
+         echo "No se pudo crear carpeta de proyecto [$DIR_FTPTRABAJO_PROYECTO]"
+         echo
+         echo salimos
+         exit 4
       fi
-      echo "mt_ftp_directorio: $mt_ftp_directorio / mt_ftp: $mt_ftp"
-      # configurar
-      configuracion_menu  'ftptrabajo' "${CONFIGURACION_FTPTRABAJO_PROYECTO}" "`dirname "$BASH_SOURCE"`/config.default"
-      leer_proyecto
-      # crear archivo de bloqueo
-      [[ ! -e "$BLOQUEO" ]] && echo "$USER ($proyecto)||$USER@$proyecto.com" > $BLOQUEO
-
-   else
-      exit
    fi
+   echo "mt_ftp_directorio: $mt_ftp_directorio / mt_ftp: $mt_ftp"
+   # configurar
+   configuracion_menu  'ftptrabajo' "${CONFIGURACION_FTPTRABAJO_PROYECTO}" "`dirname "$BASH_SOURCE"`/config.default"
+   leer_proyecto
+   # crear archivo de bloqueo
+   [[ ! -e "$BLOQUEO" ]] && echo "$USER ($proyecto)||$USER@$proyecto.com" > $BLOQUEO
 
 }
 
@@ -637,9 +647,9 @@ function trabajarArchivo(){
             echo 
             echo ¿Que deseas hacer?
             echo
-            echo 1 - Mantener el archivo local y desechar las diferencias
+            echo '1 - Mantener el archivo local y desechar las diferencias'
             echo '2 - Chafar el archivo local con el del servidor, (por defecto)'
-            echo 3 - Editar las diferencias con $ftptrabajo_com_diff
+            echo "3 - Editar las diferencias con $ftptrabajo_com_diff"
             echo
             echo -e "Opción: \c "
             read OPCION
@@ -653,11 +663,8 @@ function trabajarArchivo(){
 
          fi
 
-         # echo -e "\nEliminar fichero local: (s/n) \c "
-         # read OPCION
-         # [[ "$OPCION" = "s" ]] && rm -f "$fich_ft"
          # Movvemos el archivo local a carpeta tmp para evitar perdidas por despiste
-         mv "$fich_ft" "/tmp/`basename "$x"``date +-%H.%M`"
+         [[ -e "$fich_ft" ]] && mv "$fich_ft" "/tmp/`basename "$x"``date +-%H.%M`"
 
       fi
 
@@ -718,7 +725,7 @@ function quitarPermisosEscritura() {
    echo -n "  Quitamos permisos de escritura en [${dir}]..."
    # Hay que mantener los permisos en los directorios sino nos da problemas
    # chmod -R ugo-w "$dir"
-   eval "$( find "$dir" -type f -printf 'sudo chmod uog-w "%p"\n')"
+   eval "$( find "$dir" -type f -printf 'permisos_apache --quitar "%p"\n')"
    if [ "$?" = "0" ] ; then
       ok
       return 0
@@ -741,7 +748,7 @@ function darPermisosEscritura() {
    echo -n "  Añadimos permisos de escritura en [${dir}]..."
    # Hay que mantener los permisos en los directorios sino nos da problemas
    #chmod -R ugo+rw "$dir"
-   eval "$( find "$dir" -type f -printf 'sudo chmod uog+rw "%p"\n')" 2>/dev/null
+   eval "$( find "$dir" -type f -printf 'permisos_apache "%p"\n')" 2>/dev/null
    if [ "$?" = "0" ] ; then
       ok
       return 0
@@ -1559,10 +1566,15 @@ function comprobar_proyecto() {
    CONFIGURACION_FTPTRABAJO_PROYECTO="${DIR_CONF_USUARIO}proyectos/$proyecto/configuracion/ftptrabajo"
    DIR_FTPTRABAJO_PROYECTO="${DIR_CONF_USUARIO}proyectos/$proyecto/ftptrabajo/"
 
-   [[ "$accion" == "configurar" ]] && configurar_proyecto
-
    if [ ! -e "$CONFIGURACION_FTPTRABAJO_PROYECTO" ] ; then
       [[ $DEV ]] && echo -e "\n\nNo existe un proyecto para esta carpeta"
+      [[ $consulta ]] && exit 1
+      echo
+      echo 'ftptrabajo no está configurado'
+      echo
+      #echo Coloquese en el directorio y ejecute: ftptrabajo --configurar
+      #echo
+      #exit 1
       configurar_proyecto
    else
       source $CONFIGURACION_FTPTRABAJO_PROYECTO
@@ -1578,6 +1590,11 @@ function comprobar_proyecto() {
       read -p 'Nombre proyecto: ' PROYECTO
       read -p 'Email: ' EMAIL
       echo "$USUARIO ($PROYECTO)||$EMAIL" > $BLOQUEO
+   fi
+
+   # Comprobar directorios y archivos imprescindibles
+   if [ ! -e "$LISTA_BLOQUEOS" ] ; then
+      touch "$LISTA_BLOQUEOS"
    fi
 
    if [ $DEV ] ; then
@@ -1673,9 +1690,10 @@ while [ -n "$1" ]; do
 
    case $1 in
 
+      --proyecto|-p) shift 1 ; proyecto=$1 ; shift 1 ;;
       -info) shift 1 ; info ; exit ;;
       -h|-help|--help) shift 1 ; help ; exit ;;
-      --configurar) shift 1 ; accion=configurar;; 
+      --configurar) shift 1 ; comprobar_proyecto && configurar_proyecto ; exit ;; 
       -a) shift 1 ; accion=anyadirLista ;;
       --comando|-c) shift 1 ; accion=lanzar_comando ; ftpcomando="$*" ; shift ;;
       --cambiar-nombre) shift 1 ; accion=cambiarNombre ;;
@@ -1705,6 +1723,7 @@ while [ -n "$1" ]; do
       --lftp) shift 1 ; comprobar_proyecto ; da="`pwd`" ; cd "$ftptrabajo_dir_local" ; lftp $ftptrabajo_server ; cd "$da" ; exit ;;
       --mc) shift 1 ; comprobar_proyecto ; mc "$ftptrabajo_dir_local" /#ftp:$ftptrabajo_server ; exit ;;
       --lista-externa) shift 1 ; archivos=(`cat "$1"`) ; shift 1 ;;
+      --consulta) shift 1 ; consulta=1 ;;
       *) archivos[$na]="$1" ; shift 1 ; let na++ ;;
 
    esac

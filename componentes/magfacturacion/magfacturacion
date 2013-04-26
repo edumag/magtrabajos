@@ -759,8 +759,15 @@ function pendiente_facturas(){
 
    salida=$(ejecutarSQL "$SQL $SQL_WHERE $SQL_GROUP" "-N")
 
-   [[ "$salida" == "" ]] && return
+   if [ "$salida" == "" ] ; then
+      echo
+      echo No hay facturas pendientes
+      echo
+      tecla
+      return
+   fi
 
+   echo 
    titulo_por_nivel "Facturas pendientes en $proyecto" 
    echo ":fecha: $HOY"
    echo 

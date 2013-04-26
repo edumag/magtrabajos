@@ -33,96 +33,109 @@
 ##
 ## @{
 
-## Directorio donde se guardan las configuraciones del usuario
-DIR_CONF_USUARIO="$HOME/.magtrabajos/"
+## Si ya ha sido cogido el fichero no hace falta repetir
+if [ "$config_magtrabajos_cargado" == "" ] ; then
 
-# Creamos directorio temporal
-[[ -d '/tmp/magtrabajos' ]] && cambiar_permisos=0 || cambiar_permisos=1
-DIR_TMP="/tmp/magtrabajos/$USER/"
-[[ -d "$DIR_TMP" ]] || mkdir -p "$DIR_TMP"
-# Añadir permisos para que cualquier usuario pueda crear su carpeta dentro de magtrabajos
-[[ $cambiar_permisos == 1 ]] && chmod go+rwx "/tmp/magtrabajos"
+   config_magtrabajos_cargado=1
 
-## Para construir la url del servidor local donde se genera la documentación 
-## cambiamos la parte del directorio correspondiente por localhost/
-parte_dir='/home/eduardo/SERVIDOR'
+   ## Directorio donde se guardan las configuraciones del usuario
+   DIR_CONF_USUARIO="$HOME/.magtrabajos/"
 
-## Directorio de magtrabajos
-DIR_MAGTRABAJOS=$(dirname "$BASH_SOURCE")
+   # Creamos directorio temporal
+   [[ -d '/tmp/magtrabajos' ]] && cambiar_permisos=0 || cambiar_permisos=1
+   DIR_TMP="/tmp/magtrabajos/$USER/"
+   [[ -d "$DIR_TMP" ]] || mkdir -p "$DIR_TMP"
+   # Añadir permisos para que cualquier usuario pueda crear su carpeta dentro de magtrabajos
+   [[ $cambiar_permisos == 1 ]] && chmod go+rwx "/tmp/magtrabajos"
 
-# Si es un enlace hay que buscar el directorio de programas sobre al que apunta
-if [ -L "$0" ] ; then
-   DIR_PROGRAMA=$(dirname "`readlink $0`")  ##< Directorio del script actual
-   PROGRAMA=$(basename "`readlink $0`")     ##< Nombre del script actual
-else
-   DIR_PROGRAMA=$(dirname "$0")
-   PROGRAMA=$(basename "$0")
-fi
+   ## Para construir la url del servidor local donde se genera la documentación 
+   ## cambiamos la parte del directorio correspondiente por localhost/
+   parte_dir='/home/eduardo/SERVIDOR'
 
-# Añadimos configuración por defecto
-# @todo coger el $HOME/.magtrabajos/configuracion/libash
+   ## Directorio de magtrabajos
+   DIR_MAGTRABAJOS=$(dirname "$BASH_SOURCE")
 
-[[ -e ~/.libashrc ]] && source ~/.libashrc         # Buscamos configuración personal sobre libash
+   # Si es un enlace hay que buscar el directorio de programas sobre al que apunta
+   if [ -L "$0" ] ; then
+      DIR_PROGRAMA=$(dirname "`readlink $0`")  ##< Directorio del script actual
+      PROGRAMA=$(basename "`readlink $0`")     ##< Nombre del script actual
+   else
+      DIR_PROGRAMA=$(dirname "$0")
+      PROGRAMA=$(basename "$0")
+   fi
 
-# Añadimos librerías necesarias
+   # Añadimos configuración por defecto
+   # @todo coger el $HOME/.magtrabajos/configuracion/libash
 
-LIBS="general configuracion $LIBS"  # Librerías a cargar
-DIR_LIB="${DIR_MAGTRABAJOS}/componentes/libash/"
+   [[ -e ~/.libashrc ]] && source ~/.libashrc         # Buscamos configuración personal sobre libash
 
-for LIB in $LIBS ; do
-   LIBRERIA="${DIR_LIB}$LIB"
-   if [ -e "$LIBRERIA" ] ; then
-      source "$LIBRERIA"
-      if [ $? != 0 ] ; then
-         echo "ERROR::Insertando librería $LIBRERIA"
+   # Añadimos librerías necesarias
+
+   LIBS="general configuracion $LIBS"  # Librerías a cargar
+   DIR_LIB="${DIR_MAGTRABAJOS}/componentes/libash/"
+
+   for LIB in $LIBS ; do
+      LIBRERIA="${DIR_LIB}$LIB"
+      if [ -e "$LIBRERIA" ] ; then
+         source "$LIBRERIA"
+         if [ $? != 0 ] ; then
+            echo "ERROR::Insertando librería $LIBRERIA"
+            exit
+         fi
+      else
+         echo "Falta la librería $LIBRERIA de libash o no se encuentra"
          exit
       fi
-   else
-      echo "Falta la librería $LIBRERIA de libash o no se encuentra"
-      exit
+      log "INICIO" "Librería insertada: $LIBRERIA"
+   done
+
+   # Recogemos configuración por defecto de magtrabajos 
+
+   configuracion_por_defecto_magtrabajos="${DIR_MAGTRABAJOS}/config.default"
+   configuracion_leer "${DIR_CONF_USUARIO}configuracion/magtrabajos" "$configuracion_por_defecto_magtrabajos" 'mt_' 
+
+   # Si no se pasa un proyecto probamos con nombre de carpeta actual
+
+   if [ -z $proyecto ] ; then
+      # Comprobamos que hay una carpeta de proyecto en la configuración
+      carpeta_actual="`basename "$(pwd)"`"
+      if [ -d "${DIR_CONF_USUARIO}/proyectos/${carpeta_actual}" ] ; then
+         [[ $DEV ]] && echo "Recogemos carpeta actual como proyecto"
+         proyecto="$carpeta_actual"
+      fi
    fi
-   log "INICIO" "Librería insertada: $LIBRERIA"
-done
 
-# Recogemos configuración por defecto de magtrabajos 
+   # Recogemos configuración del proyecto
 
-configuracion_por_defecto_magtrabajos="${DIR_MAGTRABAJOS}/config.default"
-configuracion_leer "${DIR_CONF_USUARIO}configuracion/magtrabajos" "$configuracion_por_defecto_magtrabajos" 'mt_' 
+   configuracion_de_proyecto="${DIR_CONF_USUARIO}proyectos/$proyecto/configuracion/magtrabajos"
+   [[ -e "$configuracion_de_proyecto" ]] && configuracion_leer "$configuracion_de_proyecto" "$configuracion_por_defecto_magtrabajos" 'mt_' 
 
-# Si no se pasa un proyecto probamos con nombre de carpeta actual
+   ## Mostrar variables globales
 
-if [ -z $proyecto ] ; then
-   proyecto="`basename "$(pwd)"`"
+   function mostrar_variables_globales() {
+
+      echo
+      echo Variables globales que se definen en config
+      echo
+      echo "DIR_CONF_USUARIO .......$DIR_CONF_USUARIO"
+      echo "DIR_TMP ................$DIR_TMP"
+      echo "parte_dir ...............$parte_dir"
+      echo "DIR_MAGTRABAJOS ........$DIR_MAGTRABAJOS"
+      echo "DIR_PROGRAMA ...........$DIR_PROGRAMA"
+      echo "PROGRAMA ...............$PROGRAMA"
+      echo "LIBS ...................$LIBS"
+      echo "DIR_LIB ................$DIR_LIB"
+      echo
+      }
+
+   # Si encontramos --depurar dentro de los parametros recibidos activamos
+   # depuración.
+
+   [[ "`echo $* | grep -e '--depurar'`" != "" ]] && DEV=1
+
+   [[ $DEV ]] && mostrar_variables_globales 
+
 fi
 
-# Recogemos configuración del proyecto
-
-configuracion_de_proyecto="${DIR_CONF_USUARIO}proyectos/$proyecto/configuracion/magtrabajos"
-[[ -e "$configuracion_de_proyecto" ]] && configuracion_leer "$configuracion_de_proyecto" "$configuracion_por_defecto_magtrabajos" 'mt_' 
-
-## Mostrar variables globales
-
-function mostrar_variables_globales() {
-
-   echo
-   echo Variables globales que se definen en config
-   echo
-   echo "DIR_CONF_USUARIO .......$DIR_CONF_USUARIO"
-   echo "DIR_TMP ................$DIR_TMP"
-   echo "parte_dir ...............$parte_dir"
-   echo "DIR_MAGTRABAJOS ........$DIR_MAGTRABAJOS"
-   echo "DIR_PROGRAMA ...........$DIR_PROGRAMA"
-   echo "PROGRAMA ...............$PROGRAMA"
-   echo "LIBS ...................$LIBS"
-   echo "DIR_LIB ................$DIR_LIB"
-   echo
-   }
-
-# Si encontramos --depurar dentro de los parametros recibidos activamos
-# depuración.
-
-[[ "`echo $* | grep -e '--depurar'`" != "" ]] && DEV=1
-
-[[ $DEV ]] && mostrar_variables_globales 
 
 ## @} 

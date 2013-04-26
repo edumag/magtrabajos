@@ -324,7 +324,6 @@ function _buscar_codigo() {
             ;;
          menu)
             shift 1
-            [[ "$archivos_afectados" = "" ]] && archivos_afectados=$*
             clear
             echo
             echo '+---------------+'

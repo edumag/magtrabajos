@@ -92,6 +92,11 @@
 ## This source code is released for free distribution under the terms of the
 ## GNU General Public License as published by the Free Software Foundation.
 
+## Mirar si se desea depurar
+[[ "`echo $* | grep -e '--depurar'`" != "" ]] && DEV=1
+
+[[ $DEV ]] && echo "Depuración activada"
+
 ## Recoger configuración de magtrabajos
 source "`dirname "$BASH_SOURCE"`/config"
 
@@ -606,7 +611,7 @@ function editarArchivos(){
        parametros="$(for n in `seq 0 $((${#aSALIDA[*]}-1))` ; do echo -n "'${aSALIDA[$n]}' " ; done)"
        cmd="$mt_editor_dev $parametros"
        log 'Editar' "$cmd"
-       eval "$cmd"
+       eval "$cmd" &
 
     fi
 }
@@ -2084,6 +2089,12 @@ function evento() {
       done
    done
 
+   # Eventos de proyecto
+
+   for evento_proyecto in ${DIR_PROYECTOS}/$proyecto/eventos/$evento/* ; do
+      [[ -e "$evento_proyecto" ]] && lista="$lista \n`basename $evento_proyecto`\t$evento_proyecto" 
+   done
+
    [[ "$lista" == "" ]] && ( log "$FUNCNAME"  "Eventos: Sin ganchos para $eventos" ; return )
 
    for fevento in $(echo -e "$lista" | sort | cut -f2) ; do
@@ -2748,7 +2759,7 @@ esac
 
 }
 
-## Presentamos lineas de los archivos afectados que contengan '@todo'
+## Presentamos lineas de los archivos afectados que contengan 'todo'
 ##
 ## Problemas con la códificación de caracteres al estar los archivos en latin1
 ## Hacemos que se guarde la salida en un archivo para pasar su codificación a 
@@ -2837,7 +2848,7 @@ presentarCabeceraMovimiento() {
          salida="$(ejecutarSQL "$sql" -N)"
          if [ "$salida" = "" ] ; then
             echo -e "ERROR::$salida \nSQL::$sql"
-            exit
+            return
          fi
          eval "$salida"
 
@@ -2994,7 +3005,7 @@ case $1 in
       ;;
    *) # Sin definir
       mensajes "ERROR::No se ha definido si queremos archivos afectados de movimiento o tarea en $FUNCNAME"
-      exit
+      return 1
       ;;
 
 esac
@@ -3029,7 +3040,7 @@ case $1 in
       ;;
    *) # Sin definir
       mensajes "Error en presentarLiterales::Se necesita definir para tarea o movimiento en $FUNCNAME"
-      exit
+      return 1
       ;;
 
 esac
@@ -4400,7 +4411,7 @@ function menuArchivos(){
                echo "dirDestino: ${dirDestino[*]}"
                echo "listaOrigen: ${listaOrigen[*]}"
                echo "listaDestino: ${listaDestino[*]}"
-               exit
+               return 1
             fi
 
          done
@@ -4508,7 +4519,7 @@ function menuArchivos(){
          SQL="DELETE FROM rMovimientoArchivos $CONDICION"
          ejecutarSQL "$SQL"
 
-         ## Ejecutamos primero subversion
+         ## Ejecutamos primero control de versiones
          if [ "`plugin_activado magcontrolversion`" != "" ] ; then 
             echo
             echo control de versiones
@@ -4873,7 +4884,7 @@ function lanzador() {
    echo
    read -p "Opcion: (0 - salir) " OPCION
 
-   [[ "$OPCION" = "0" ]] && exit 
+   [[ "$OPCION" = "0" ]] && return 
 
    definirProyecto ${seleccion_id[$OPCION]}
 
@@ -4986,18 +4997,6 @@ if [ -e "$HOME/.magtrabajos/configuracion/" ] ; then
    done
 fi
 
-# INCLUIMOS EXTENSIONES #
-
-for extension in ${DIR_MAGTRABAJOS}/componentes/*/extension.sh ; do
-   log INICIO "Incluimos extension de componente ${extension}"
-   source "$extension"
-done
-
-for extension in ${DIR_MAGTRABAJOS}/plugins/*/extension.sh ; do
-   log INICIO "Incluimos extension de componente ${extension}"
-   source "$extension"
-done
-
 if [ "$1" = "" ] ; then
    # No hay paremetros de entrada
    PARAMETROS="NO"
@@ -5101,15 +5100,17 @@ while [ -n "$1" ]; do
            ;;
 
       --listar-plugins) listar_plugins ; exit ;;
-      --listar-informes) shift 1 ; menuInformes l ;;
+      --listar-informes) shift 1 ; ACCION_PERSONALIZADA="menuInformes l" ;;
       --exportar) 
          # Si $3 es un archivo existente supondremos que es el
          # archivo a exportar sino cogemos el $TMP
+         #
+         # $2 Es el tipo de exportación ejemplo: html
          if [ -f "$3" ] ; then
-            exportar "$2" "$3"
+            ACCION_PERSONALIZADA="exportar '$2' '$3'"
             shift 3
          else
-           exportar "$2" "$TMP"
+           ACCION_PERSONALIZADA="exportar '$2' '$TMP'"
            shift 2 
          fi
          mensajes "Perfil $perfil_actual abierto"
@@ -5143,6 +5144,18 @@ while [ -n "$1" ]; do
    esac
 done
 
+# INCLUIMOS EXTENSIONES #
+
+for extension in ${DIR_MAGTRABAJOS}/componentes/*/extension.sh ; do
+   log INICIO "Incluimos extension de componente ${extension}"
+   source "$extension"
+done
+
+for extension in ${DIR_MAGTRABAJOS}/plugins/*/extension.sh ; do
+   log INICIO "Incluimos extension de componente ${extension}"
+   source "$extension"
+done
+
 # Depuración
 
 [[ $DEV ]] && mostrar_variables_magtrabajos
@@ -5153,6 +5166,7 @@ if [ -z $proyectoId ] ; then
    sql="SELECT id FROM proyectos WHERE nombre = '$carpeta_actual'";
    id=`ejecutarSQL "$sql" "-N"`
    mensajes "ID de proyecto: $id"
+   [[ $DEV ]] && echo "ID de proyecto: $id"
    if [ ! -z $id ] ; then
       definirProyecto -p $id
       mensajes "proyecto: $proyecto"
@@ -5175,6 +5189,10 @@ elif [ "$PARAMETROS" = "NO" ] ; then
    menuProyectos
    movimientosAbiertos
    menu
+fi
+
+if [ "$ACCION_PERSONALIZADA" != "" ] ; then
+   eval "$ACCION_PERSONALIZADA"
 fi
 
 if [ "$ACCION" != "" ] ; then

@@ -5,3 +5,8 @@ Los comandos nos permiten de una forma sencilla, ampliar la aplicación.
 Hay comandos externos para todos los proyectos en la carpeta lanzadores de 
 la aplicación, y tenemos otra o sino se puede crear para cada proyecto en su carpeta
 correspondiente $HOME/.magtrabajos/[proyecto]/lanzadores.
+
+En lanzadores/comprobar_enlaces_rotos tenemos un ejemplo de script que se puede 
+utilizar de forma independiente pasandole la url a analizar o en caso de no hacerlo,
+recoge la configuración del proyecto añadiendo config para tenerla disponible y 
+utiliza la url configurada del proyecto.

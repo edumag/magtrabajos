@@ -3,12 +3,17 @@
 ## @file mc_con_ftp
 ## @brief Lanzar mc con dirección ftp del proyecto
 
-if [ "$proyecto_ftp" == "" ] ; then
+terminal='xterm -geometry 150x50 -bg black -fg white -e '
+comando_mc='mc ftp://${mt_ftp}/${mt_ftp_directorio}'
+
+if [ -z "$mt_ftp" ] ; then
    echo
    echo No tenemos configurado ningún ftp en este proyecto
    echo
-   read -p 'Dominio ftp a conectar: ' proyecto_ftp
-   [ "$proyecto_ftp" == "" ] && exit
+else
+   comando_mc="`eval echo "$comando_mc"`"
+   echo 
+   echo "Comando: $terminal '$comando_mc'"
+   echo
+   eval "$terminal '$comando_mc'" 
 fi
-
-xterm -geometry 150x50 -bg black -fg white -e "read -p '`pwd` $proyecto_ftp' && mc ./ /#ftp:$proyecto_ftp" &

@@ -4,4 +4,4 @@
 ##
 ## @brief Lanzar terminal con los registros
 
-xterm -e "grc tail -f /var/log/apache2/error.log -f /var/log/mysql.err" &
+xterm -bg black -fg yellow  -maximized -e "grc tail -f /var/log/apache2/error.log -f /var/log/mysql.err" &
