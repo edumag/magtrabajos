@@ -507,7 +507,15 @@ function leer_proyecto() {
       fi
 
       # Comprobaciones
-      if [ ! -e "$BLOQUEO" ] ; then echo 'Sin archivo de bloqueo, salimos' ; exit 2 ; fi
+      if [ ! -e "$BLOQUEO" ] ; then 
+         echo 'Sin archivo de bloqueo'
+         echo
+         echo 'Creamos archivo de bloqueo'
+         echo
+         read -p 'Su nombre: ' NOMBRE
+         read -p 'Su  email: ' EMAIL
+         echo "$NOMBRE ($proyecto)||$EMAIL" > "$BLOQUEO"
+      fi
 
    else
 
@@ -639,9 +647,9 @@ function trabajarArchivo(){
             echo 
             echo ¿Que deseas hacer?
             echo
-            echo 1 - Mantener el archivo local y desechar las diferencias
+            echo '1 - Mantener el archivo local y desechar las diferencias'
             echo '2 - Chafar el archivo local con el del servidor, (por defecto)'
-            echo 3 - Editar las diferencias con $ftptrabajo_com_diff
+            echo "3 - Editar las diferencias con $ftptrabajo_com_diff"
             echo
             echo -e "Opción: \c "
             read OPCION
@@ -655,11 +663,8 @@ function trabajarArchivo(){
 
          fi
 
-         # echo -e "\nEliminar fichero local: (s/n) \c "
-         # read OPCION
-         # [[ "$OPCION" = "s" ]] && rm -f "$fich_ft"
          # Movvemos el archivo local a carpeta tmp para evitar perdidas por despiste
-         mv "$fich_ft" "/tmp/`basename "$x"``date +-%H.%M`"
+         [[ -e "$fich_ft" ]] && mv "$fich_ft" "/tmp/`basename "$x"``date +-%H.%M`"
 
       fi
 
@@ -1567,9 +1572,9 @@ function comprobar_proyecto() {
       echo
       echo 'ftptrabajo no está configurado'
       echo
-      echo Coloquese en el directorio y ejecute: ftptrabajo --configurar
-      echo
-      exit 1
+      #echo Coloquese en el directorio y ejecute: ftptrabajo --configurar
+      #echo
+      #exit 1
       configurar_proyecto
    else
       source $CONFIGURACION_FTPTRABAJO_PROYECTO
@@ -1585,6 +1590,11 @@ function comprobar_proyecto() {
       read -p 'Nombre proyecto: ' PROYECTO
       read -p 'Email: ' EMAIL
       echo "$USUARIO ($PROYECTO)||$EMAIL" > $BLOQUEO
+   fi
+
+   # Comprobar directorios y archivos imprescindibles
+   if [ ! -e "$LISTA_BLOQUEOS" ] ; then
+      touch "$LISTA_BLOQUEOS"
    fi
 
    if [ $DEV ] ; then
