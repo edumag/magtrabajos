@@ -24,14 +24,10 @@ usuario=www-data
 grupo=$USER
 
 if [ "$accion_permisos" = "quitar" ] ; then
-   eval "$( find "$destino" -type d -printf 'sudo chown $usuario:$grupo "%p"; sudo chmod 775 "%p"\n')"
-   eval "$( find "$destino" -type f -printf 'sudo chown $usuario:$grupo "%p"; sudo chmod 774 "%p"\n')"
-   # sudo chown -R $usuario:$grupo "$destino"
-   # sudo chmod -R 750 "$destino"
+   sudo find "$destino" -type d -exec chmod 755 {} \;
+   sudo find "$destino" -type f -exec chmod 744 {} \;
 else
-   eval "$( find "$destino" -type d -printf 'sudo chown $usuario:$grupo "%p"; sudo chmod 755 "%p"\n')"
-   eval "$( find "$destino" -type f -printf 'sudo chown $usuario:$grupo "%p"; sudo chmod 744 "%p"\n')"
-   # sudo chown -R $usuario:$grupo "$destino"
-   # sudo chmod -R 775 "$destino"
+   sudo find "$destino" -type d -exec chmod 775 {} \;
+   sudo find "$destino" -type f -exec chmod 774 {} \;
 fi
 
