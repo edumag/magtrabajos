@@ -23,6 +23,8 @@ usuario=www-data
 ## Identificador de apache
 grupo=$USER
 
+sudo chown -R $usuario:$grupo $destino
+
 if [ "$accion_permisos" = "quitar" ] ; then
    sudo find "$destino" -type d -exec chmod 755 {} \;
    sudo find "$destino" -type f -exec chmod 744 {} \;
