@@ -375,6 +375,7 @@ function ftp_sincronizar() {
 
 if [ "$1" == "servidor" ] ; then
    local servidor=1
+   shift
 else
    local servidor=0
 fi
@@ -418,12 +419,17 @@ echo Dir Remoto: $dir_remoto
 echo
 
 if [ $servidor == 1 ] ; then
-   local comando='mirror -R --verbose=3 --ignore-time --ignore-size ./' 
+   local comando="mirror -R --verbose=3 $borrar --ignore-time --ignore-size ./"
 else
    local comando="mirror -n --verbose=3 $borrar $descartados ./"
 fi
 
-echo "  Actualizando local [$dir]"
+if [ $servidor == 1 ] ; then
+   echo "  Actualizando servidor [$dir_local]"
+else
+   echo "  Actualizando local [$dir_local]"
+fi
+
 ## Sincronizar local con l servidor
 #ftp no baja el directorio completo
 #ftp -p -i -v $ftptrabajo_server > $LOG 2>&1<<FIN
@@ -441,7 +447,7 @@ if [ "$?" != "0" ] ; then
    echo ERROR: No se pudo bajar $dir
    color
 else
-   ok
+   echo "  Actualizado `ok`"
 fi
 
 #done
@@ -857,7 +863,7 @@ function comprobarBloqueoServidor(){
             echo 
             read -p "Enviar email. (s/n): " OPCION
             if [ "$OPCION" = "s" ] ; then
-               echo $body | mail -s "$subject" $mail_bloqueado
+               echo -e "$body" | mail -a "Content-Type: text/plain; charset=UTF-8" -s "$subject" $mail_bloqueado
             fi
          fi
          # Borramos archivo de bloqueo
@@ -1388,12 +1394,12 @@ function sincronizar_servidor() {
 
    }
 
-## Sincronizar local con servidor
+## Sincronizar local con servidor o al reves
 
 function sincronizar() {
 
    if [ "$1" == "servidor" ] ; then
-      local servidor="-R"
+      local servidor="servidor"
    else
       local servidor=""
    fi
@@ -1410,16 +1416,11 @@ function sincronizar() {
       echo Sincronizando servidor con local [$dir_sync]
    fi
 
-   if [ "$servidor" == "" ] ; then
-      local pregunta="  Borrar archivos o directorios de local no encontrados en servidor (s/n): "
-      read -n 1 -s -p "$pregunta" OPCION
-      echo
-      if [ "$OPCION" == "s" ] ;then
-         local borrar="borrar"
-      else
-         local borrar=""
-      fi
-
+   local pregunta="  Borramos los archivos o directorios no existentes (s/n): "
+   read -n 1 -s -p "$pregunta" OPCION
+   echo
+   if [ "$OPCION" == "s" ] ;then
+      local borrar="borrar"
    else
       local borrar=""
    fi
@@ -1436,38 +1437,35 @@ function sincronizar() {
       cat $LISTA_BLOQUEOS
       echo
       color comentario
-      echo -n "Hay archivos bloqueados, no se puede sincronizar"
+      echo -n "Hay archivos bloqueados"
       color
       echo
-
-   else
-
-      cd $ftptrabajo_dir_local
-
-      if [ "$?" != 0 ] ; then
-         echo
-         color ko
-         echo No se pudo entrar en directorio local $ftptrabajo_dir_local
-         color
-         exit
-      fi
-
-      echo `date` >> "$REG"
-      #$ftptrabajo_terminal -e "tail -f $LOG -f $REG" &
-
-      [[ "$servidor" == "" ]] && darPermisosEscritura "$dir_sync"
-      # generar_lista_dir_bajar "$dir_sync"
-      if [ -e "$LS_REMOTO" ] ; then
-         ftp_sincronizar $borrar "$dir_sync"
-      else
-         echo
-         color ko
-         echo '  No se pudo bajar lista de directorios'
-         color
-      fi
-      [[ "$servidor" == "" ]] && quitarPermisosEscritura "$dir_sync"
+      read -p "Forzar la sincronización (s/n): " OPCION
+      [[ "$OPCION" != "s" ]] && return
 
    fi
+
+   echo -en " Directorio local $ftptrabajo_dir_local ..."
+   cd $ftptrabajo_dir_local
+   [[ $? == 0 ]] && ok || ko 
+
+   if [ "$?" != 0 ] ; then
+      echo
+      color ko
+      echo No se pudo entrar en directorio local $ftptrabajo_dir_local
+      color
+      exit
+   fi
+
+   echo `date` >> "$REG"
+   #$ftptrabajo_terminal -e "tail -f $LOG -f $REG" &
+
+   [[ "$servidor" == "" ]] && darPermisosEscritura "$dir_sync"
+
+   ftp_sincronizar $servidor $borrar "$dir_sync"
+
+   [[ "$servidor" == "" ]] && quitarPermisosEscritura "$dir_sync"
+
 }
 
 ## Bajar los archivos de bloqueo que haya en el servidor
