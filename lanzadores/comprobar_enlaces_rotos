@@ -41,7 +41,7 @@ echo
 mkdir /tmp/$$.lynx
 cd /tmp/$$.lynx
 # lynx -traversal $url > /dev/null
-lynx -traversal $url
+lynx -traversal http://$url
 count=0;
 sort -u reject.dat > links.txt
 while read link;

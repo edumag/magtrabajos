@@ -13,11 +13,11 @@ var a00023 =
     [ "n", "a00023_a68e0d3438fcce213e8c35c1ee79f8b2a.htm#a68e0d3438fcce213e8c35c1ee79f8b2a", null ],
     [ "rotos", "a00023_af87a0036452894d762a9d9715aa31fbc.htm#af87a0036452894d762a9d9715aa31fbc", null ],
     [ "lynx", "a00023_a68bfa5b806915ee5f4c2593cfdce7f05.htm#a68bfa5b806915ee5f4c2593cfdce7f05", null ],
-    [ "$url", "a00023_a34cee4964b346e998b8ce9d5c0db0d2f.htm#a34cee4964b346e998b8ce9d5c0db0d2f", null ],
-    [ "count", "a00023_aa8808e1c6d5fc017e61f5b78127ff466.htm#aa8808e1c6d5fc017e61f5b78127ff466", null ],
+    [ "http", "a00023_a028fae609bf2c7300b986248a51e078f.htm#a028fae609bf2c7300b986248a51e078f", null ],
     [ "txt", "a00023_a0daba57c43d9b29539980e685bb6033f.htm#a0daba57c43d9b29539980e685bb6033f", null ],
     [ "link", "a00023_ae813444d259ed651d5210f27dfd9cf83.htm#ae813444d259ed651d5210f27dfd9cf83", null ],
     [ "do", "a00023_a721c6ff80a6d3e4ad4ffa52a04c60085.htm#a721c6ff80a6d3e4ad4ffa52a04c60085", null ],
     [ "output", "a00023_ad288825273ed7192429ab0474fb2d4a0.htm#ad288825273ed7192429ab0474fb2d4a0", null ],
-    [ "$link", "a00023_a5bf5dd7f08ca26632a74beb9f57ac665.htm#a5bf5dd7f08ca26632a74beb9f57ac665", null ]
+    [ "$link", "a00023_a5bf5dd7f08ca26632a74beb9f57ac665.htm#a5bf5dd7f08ca26632a74beb9f57ac665", null ],
+    [ "count", "a00023_aa8808e1c6d5fc017e61f5b78127ff466.htm#aa8808e1c6d5fc017e61f5b78127ff466", null ]
 ];
