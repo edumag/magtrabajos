@@ -122,7 +122,7 @@ definir_configuracion() {
    }
 
 
-buscar=''                                 ##< Palabra a buscar
+buscar='@todo|@bug'                       ##< Palabra a buscar, por defecto tareas y errores
 archivos_afectados=""                     ##< Selección en la que buscar
 formato=txt                               ##< Tipo de salida, puede ser rst o vim
 encoding_entrada='utf-8'                  ##< Encoding de archivos del código
