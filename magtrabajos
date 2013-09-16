@@ -2657,9 +2657,12 @@ function presentarReadme() {
          fi
 
          let nivel_informe++
-         titulo_por_nivel "$file" | tee -a "$TMP"
-         cat "$file" | grep -v '/\*\*' | grep -v '\*/' | tee -a $TMP
-         echo | tee -a $TMP
+         #titulo_por_nivel "$file" | tee -a "$TMP"
+         echo               | tee -a "$TMP"
+         echo "${file}::"   | tee -a "$TMP"
+         echo               | tee -a "$TMP"
+         cat "$file" | grep -v '/\*\*' | grep -v '\*/' | sed 's/^./\t/' | tee -a $TMP
+         echo               | tee -a $TMP
          let nivel_informe--
       fi
    done
