@@ -525,6 +525,7 @@ function _subversion() {
 
          *) # Lista de archivos afectados
             archivos_afectados=$(echo "$*")
+            shift 
             ;;
 
       esac
