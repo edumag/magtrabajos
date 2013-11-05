@@ -55,6 +55,11 @@ proyecto=''
 ## comando según configuración
 comando=''
 
+## carpeta destino
+## Podemos seleccionar una carpeta donde buscar para limitar la busqueda
+
+carpeta_busqueda=""
+
 ## @defgroup configuracion Configuración 
 ## @{
 ##
@@ -115,7 +120,11 @@ definir_configuracion() {
       comando="$comando --exclude=$exclude "
    done
 
-   comando="$comando  \"$buscar\" ${archivos_afectados:-./}"
+   if [ "$carpeta_busqueda" != "" ] ; then
+      comando="$comando  \"$buscar\" ${carpeta_busqueda}"
+   else
+      comando="$comando  \"$buscar\" ${archivos_afectados:-./}"
+   fi
 
    # guardamos salida a fichero temporal
    comando="$comando > $resultado"
@@ -339,6 +348,7 @@ function _buscar_codigo() {
             abre_caja
             [[ -z "$proyecto" ]] || linea_caja "proyecto: $proyecto"
             linea_caja "Palabra a buscar:       $buscar"
+            [[ "$carpeta_busqueda" != "" ]] && linea_caja "Carpeta a buscar:       $carpeta_busqueda"
             # [[ "$encoding_entrada" != "$encoding_salida" ]] && echo "Encoding para salida:   $encoding_salida"
             [[ "$debug" = "true" ]] && linea_caja "Resultado:              $resultado"
             linea_caja "Formato:                $formato"
@@ -355,6 +365,7 @@ function _buscar_codigo() {
             fi
             linea_caja ' [B]uscar'
             [[ "$archivos_afectados" ]] && linea_caja ' B[u]scar solo en selección'
+            linea_caja ' [S]eleccionar carpeta donde buscar'
             cierra_caja
             if [ -e "$resultado" ] ; then
                abre_caja
@@ -382,6 +393,9 @@ function _buscar_codigo() {
                   archivos_afectados=''
                   escanear_codigo
                   archivos_afectados=$seleccion_anterior
+                  _buscar_codigo menu  
+                  ;;
+               s) seleccionar_carpeta
                   _buscar_codigo menu  
                   ;;
                *) exit ;;
@@ -415,6 +429,15 @@ function _buscar_codigo() {
       esac
 
    done
+
+   }
+
+## Seleccionar carpeta donde buscar
+
+function seleccionar_carpeta() {
+
+   read -p 'Nombre de carpeta: ' carpeta_busqueda
+   [[ "$carpeta_busqueda" == "" ]] && return ;
 
    }
 
