@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ## @file buscar_codigo
+## @bug No esta sirviendo las coincidencias a magtrabajos en los informes
 ##
 ## @brief Buscar palabras seleccionadas en el código
 ##
@@ -97,6 +98,8 @@ buscar_codigo_exclude="'*.swp' 'tags' 'cscope.out'"
 
 definir_configuracion() {
 
+   [[ "$debug" == "true" ]] && echo -e "\ndefinir_configuracion"
+
    # Sino hemos definido un proyecto probamos si la carpeta actual está 
    # definido como proyecto para automatizar la recogida de la configuración
    # del mismo.
@@ -147,11 +150,20 @@ debug=false                               ##< Debug true/false
 
 ejecutar_comando(){
 
+   [[ "$debug" == "true" ]] && echo -e "\nejecutamos comando"
+
    [[ -z "$1" ]] && mostrar=0 || mostrar=1
 
    definir_configuracion
 
    # ejecutarComando "$comando" $mostrar
+   if [ "$debug" == "true" ] ; then 
+      echo -e "\n$comando"
+      echo -e "\nbuscar: $buscar"
+      echo -e "\nformato: $formato"
+      echo -e "\nproyecto: $proyecto"
+   fi
+
    eval "$comando"
 
    }
@@ -254,6 +266,7 @@ function _buscar_codigo() {
 
          buscar)
             buscar="$2"
+            [[ "$debug" == "true" ]] && echo -e "\nbuscar: $buscar"
             shift 2
             ;;
 
@@ -406,10 +419,14 @@ function _buscar_codigo() {
             # sino hemos detectado la palabra a buscar damos por echo que es el primer 
             # parámetro que nos llega.
 
-            [[ "$*" == "" ]] && exit ;
+            if [ "$*" == "" ] ; then 
+               [[ "$debug" == "true" ]] && echo -e "\nSin parametros salimos"
+               exit ;
+            fi
 
             if [ -z "$buscar" ] ; then
                buscar="$1"
+               [[ "$debug" == "true" ]] && echo -e "\nbuscar: $buscar"
                shift 1
             fi
 
@@ -445,4 +462,5 @@ if [ "$1" = "" ] ; then
    _buscar_codigo menu
 else
    _buscar_codigo "$@"
+   escanear_codigo
 fi
