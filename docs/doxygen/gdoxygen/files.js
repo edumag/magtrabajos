@@ -61,5 +61,5 @@ var files =
     [ "semanas_horas.magraficas", "a00092.htm", "a00092" ],
     [ "terminal", "a00093.htm", null ],
     [ "ultimos_archivos_modificados", "a00094.htm", "a00094" ],
-    [ "xdebug_conmutador", "a00095.htm", "a00095" ]
+    [ "xdebug_conmutador", "a00096.htm", "a00096" ]
 ];

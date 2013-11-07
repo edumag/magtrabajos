@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>magTrabajos: Lista de bugs</title>
+<title>magTrabajos: Lista de tareas pendientes</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -89,16 +89,70 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
 <div id="doc-content">
 <div class="header">
   <div class="headertitle">
-<div class="title">Lista de bugs </div>  </div>
+<div class="title">Lista de tareas pendientes </div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><dl class="reflist">
-<dt><a class="anchor" id="_bug000001"></a>Namespace <a class="el" href="a00096.htm">componentes</a>  </dt>
-<dd>Se presenta segunda columna de listados anteriores, hay que hacer limpieza </dd>
-<dt><a class="anchor" id="_bug000002"></a>Miembro <a class="el" href="a00101_ga7db7073ee0934328391a050787aeb6d6.htm#ga7db7073ee0934328391a050787aeb6d6">default_per_proyecto_pendiente_codigo</a>  </dt>
-<dd>en código, puede resultar muy lento, pero podemos configurar carpetas que queremos descartar del proyecto a la hora de hacer busquedas en buscar_codigo  </dd>
-<dt><a class="anchor" id="_bug000003"></a>Miembro <a class="el" href="a00046_ab57aec29401bbbc986644acdbda93974.htm#ab57aec29401bbbc986644acdbda93974">verError</a>  ()</dt>
-<dd>Puede fallar si coincide el tamaño del archivo con un código </dd>
+<dt><a class="anchor" id="_todo000016"></a>Miembro <a class="el" href="a00069_a6b09de75cacd639ec2483b707d9dd2fa.htm#a6b09de75cacd639ec2483b707d9dd2fa">borrar</a>  ()</dt>
+<dd>borrar proyecto esta pendiente de hacer  </dd>
+<dt><a class="anchor" id="_todo000002"></a>Miembro <a class="el" href="a00100_gae28887b666238c40587d77cc5fb07500.htm#gae28887b666238c40587d77cc5fb07500">color</a>  ()</dt>
+<dd>Detectar si la terminal actual permite colores  </dd>
+<dt><a class="anchor" id="_todo000003"></a>Namespace <a class="el" href="a00097.htm">componentes</a>  </dt>
+<dd>Unir en una misma función generar_listado y generar_listado_fichero  </dd>
+<dt><a class="anchor" id="_todo000012"></a>Grupo <a class="el" href="a00098.htm">configuracion</a>  </dt>
+<dd>Aplicar este sistema a todos los sripts de magtrabajos </dd>
+<dt><a class="anchor" id="_todo000013"></a>Archivo <a class="el" href="a00031.htm">contrasenya</a>  </dt>
+<dd>Encriptar el archivo para más seguridad  </dd>
+<dt><a class="anchor" id="_todo000008"></a>Miembro <a class="el" href="a00102_ga7db7073ee0934328391a050787aeb6d6.htm#ga7db7073ee0934328391a050787aeb6d6">default_per_proyecto_pendiente_codigo</a>  </dt>
+<dd>y </dd>
+<dt><a class="anchor" id="_todo000001"></a>Archivo <a class="el" href="a00043.htm">elegirArchivo</a>  </dt>
+<dd>Si solo tenemos un archivo y el directorio es el de inicio, se selecciona directamente. </dd>
+<dt><a class="anchor" id="_todo000015"></a>Miembro <a class="el" href="a00069_a78660d02c03f9b214b3ae580ea752bfe.htm#a78660d02c03f9b214b3ae580ea752bfe">estados</a>  </dt>
+<dd>Esto se debe sacar de la base de datos  </dd>
+<dt><a class="anchor" id="_todo000017"></a>Archivo <a class="el" href="a00046.htm">ftptrabajo</a>  </dt>
+<dd>Con sftp no borra los ficheros de bloqueo ya que no entiende delete y ftp no entiende rm </dd>
+<dt><a class="anchor" id="_todo000004"></a>Miembro <a class="el" href="a00054_aff734e4ecac5bc6ee36d39289e60b6fd.htm#aff734e4ecac5bc6ee36d39289e60b6fd">generar_listado</a>  ()</dt>
+<dd>Evitar que sean interpretadas la variables en el contenido que recibimos  </dd>
+<dt><a class="anchor" id="_todo000007"></a>Miembro <a class="el" href="a00063_abf00e9e8c4a5e60eaa4f493941fd8e2e.htm#abf00e9e8c4a5e60eaa4f493941fd8e2e">listado_tareas_totales</a>  ()</dt>
+<dd>Si no hay tareas no presentar nada  </dd>
+<dt><a class="anchor" id="_todo000018"></a>Archivo <a class="el" href="a00055.htm">magbackup</a>  </dt>
+<dd><p class="startdd">Si pasamos un archivo o directorio creamos archivo comprimido </p>
+<p>Copias para mysql </p>
+<p class="enddd">Copias para git </p>
+</dd>
+<dt><a class="anchor" id="_todo000019"></a>Archivo <a class="el" href="a00057.htm">magcontrolversion</a>  </dt>
+<dd><p class="startdd">Comprobar permisos de escritura para ahorrarnos problemas </p>
+<p class="enddd">Al ejecutar subversión permitir editar la descripción </p>
+</dd>
+<dt><a class="anchor" id="_todo000020"></a>Archivo <a class="el" href="a00059.htm">magcscope</a>  </dt>
+<dd>generar configuración al vuelo y para el proyecto </dd>
+<dt><a class="anchor" id="_todo000021"></a>Archivo <a class="el" href="a00060.htm">magdoxygen</a>  </dt>
+<dd>Configuración a sistema de magtrabajos </dd>
+<dt><a class="anchor" id="_todo000005"></a>Archivo <a class="el" href="a00061.htm">magexportar</a>  </dt>
+<dd><p class="startdd">Terminar script </p>
+<p class="enddd">Exportar: html,pdf,s5, excel </p>
+</dd>
+<dt><a class="anchor" id="_todo000014"></a>page <a class="el" href="index.htm">magTrabajos</a>  </dt>
+<dd><p class="startdd">Eliminar variables de configuración mt_archivo_html, mt_archivo_pdf, mt_archivo_cvs y dejarlo en un directorio </p>
+<p>Archivo con la información para desarrolladores. Enviar, Editar, recuperar </p>
+<p>Menú de notas Editar, exportar </p>
+<p>Una tarea en estado posible debe tener la prioridad a 0, una tarea con estado empezado debe tener la prioridad a 9 </p>
+<p>Crear un evento que compruebe buffers de vim abiertos antes de cerrar movimiento </p>
+<p>Acciones de plugins o complementos fuera de magtrabajos, pasarlo a eventos </p>
+<p class="enddd">Sistema de colores en la libreria general de libash para todos </p>
+</dd>
+<dt><a class="anchor" id="_todo000010"></a>Archivo <a class="el" href="a00071.htm">mail2rst</a>  </dt>
+<dd>Quitar cabecera de emails  </dd>
+<dt><a class="anchor" id="_todo000011"></a>Archivo <a class="el" href="a00073.htm">mDocumentos</a>  </dt>
+<dd><p class="startdd">Implementar la relación entre movimiento y adjuntos </p>
+<p class="enddd">Configurar comando que abre los documentos  </p>
+</dd>
+<dt><a class="anchor" id="_todo000006"></a>Miembro <a class="el" href="a00061_a629a894469ea6f00a65267fd8141d841.htm#a629a894469ea6f00a65267fd8141d841">menuExportar</a>  ()</dt>
+<dd><p class="startdd">Configurar carpeta destino para los archivos exportados </p>
+<p class="enddd">Buscar archivos con extensión .rst en la carpeta de proyecto y permitir seleccionar entre ellos, ahora e encuentran programadores.rst y pendiente.rst </p>
+</dd>
+<dt><a class="anchor" id="_todo000009"></a>Miembro <a class="el" href="a00065_acbacc2a772600a9c37aec0bb825c7187.htm#acbacc2a772600a9c37aec0bb825c7187">menuInformes</a>  ()</dt>
+<dd>colocar todo esto en una función a parte </dd>
 </dl>
 </div></div><!-- contents -->
 </div>
