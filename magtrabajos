@@ -2657,9 +2657,12 @@ function presentarReadme() {
          fi
 
          let nivel_informe++
-         titulo_por_nivel "$file" | tee -a "$TMP"
-         cat "$file" | grep -v '/\*\*' | grep -v '\*/' | tee -a $TMP
-         echo | tee -a $TMP
+         #titulo_por_nivel "$file" | tee -a "$TMP"
+         echo               | tee -a "$TMP"
+         echo "${file}::"   | tee -a "$TMP"
+         echo               | tee -a "$TMP"
+         cat "$file" | grep -v '/\*\*' | grep -v '\*/' | sed 's/^/\t/' | tee -a $TMP
+         echo               | tee -a $TMP
          let nivel_informe--
       fi
    done
@@ -4919,8 +4922,10 @@ function movimientosRecientes() {
       echo "-----------------------"
    fi
 
-   SQL="SELECT CONCAT('-m ',m.id,'::', p.nombre,' ', t.nombre ,' ', m.nombre, '   ', max(ti.fechaFinal) ) FROM movimientos m, tiempos ti, proyectos p, tareas t  "
-   SQL="$SQL WHERE t.idProyecto=p.id AND t.id=m.idTarea AND m.id=ti.idMovimiento "
+   SQL="SELECT CONCAT('-m ',m.id,'::', p.nombre,' ', t.nombre ,' ', m.nombre, '   ', max(ti.fechaFinal), ' ',e.nombre ) 
+   FROM movimientos m, tiempos ti, proyectos p, tareas t , estados e
+   WHERE t.idProyecto=p.id AND t.id=m.idTarea AND m.id=ti.idMovimiento AND t.idEstado=e.id
+   "
    if [ "$proyectoId" != "" ] ; then        # Si tenemos proyecto listamos los del proyecto solamente
       SQL="$SQL AND p.id=$proyectoId "
    fi
@@ -5051,18 +5056,20 @@ while [ -n "$1" ]; do
         declare -a e_archivos_seleccionados=()
         c=0
         while [ -n "$1" ]; do
-           if [ -d "$1" ] ; then
-              for f in `find "$1" -type f ! -wholename '*\.svn*' ! -wholename '*\.git*' ! -wholename '*\.swp' ` ; do
+           # Quitamos ./ del inicio
+           archivo="`echo $1 | sed 's/^\.\///'`"
+           if [ -d "$archivo" ] ; then
+              for f in `find "$archivo" -type f ! -wholename '*\.svn*' ! -wholename '*\.git*' ! -wholename '*\.swp' ` ; do
                  echo - "$c) $f"
                  e_archivos_seleccionados[$c]="$f"
                  let c=c+1
               done
-           elif [ -e "$1" ] ; then
+           elif [ -e "$archivo" ] ; then
               echo - "$c) $1"
               e_archivos_seleccionados[$c]="$1"
               let c=c+1
            else
-              errores="$errores\n$1 no existe, no se incluye"
+              errores="$errores\n$archivo no existe, no se incluye"
            fi
            shift 1
         done

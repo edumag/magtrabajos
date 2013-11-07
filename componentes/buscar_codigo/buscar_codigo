@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ## @file buscar_codigo
+## @bug No esta sirviendo las coincidencias a magtrabajos en los informes
 ##
 ## @brief Buscar palabras seleccionadas en el código
 ##
@@ -55,6 +56,11 @@ proyecto=''
 ## comando según configuración
 comando=''
 
+## carpeta destino
+## Podemos seleccionar una carpeta donde buscar para limitar la busqueda
+
+carpeta_busqueda=""
+
 ## @defgroup configuracion Configuración 
 ## @{
 ##
@@ -92,6 +98,8 @@ buscar_codigo_exclude="'*.swp' 'tags' 'cscope.out'"
 
 definir_configuracion() {
 
+   [[ "$debug" == "true" ]] && echo -e "\ndefinir_configuracion"
+
    # Sino hemos definido un proyecto probamos si la carpeta actual está 
    # definido como proyecto para automatizar la recogida de la configuración
    # del mismo.
@@ -115,7 +123,11 @@ definir_configuracion() {
       comando="$comando --exclude=$exclude "
    done
 
-   comando="$comando  \"$buscar\" ${archivos_afectados:-./}"
+   if [ "$carpeta_busqueda" != "" ] ; then
+      comando="$comando  \"$buscar\" ${carpeta_busqueda}"
+   else
+      comando="$comando  \"$buscar\" ${archivos_afectados:-./}"
+   fi
 
    # guardamos salida a fichero temporal
    comando="$comando > $resultado"
@@ -138,11 +150,20 @@ debug=false                               ##< Debug true/false
 
 ejecutar_comando(){
 
+   [[ "$debug" == "true" ]] && echo -e "\nejecutamos comando"
+
    [[ -z "$1" ]] && mostrar=0 || mostrar=1
 
    definir_configuracion
 
    # ejecutarComando "$comando" $mostrar
+   if [ "$debug" == "true" ] ; then 
+      echo -e "\n$comando"
+      echo -e "\nbuscar: $buscar"
+      echo -e "\nformato: $formato"
+      echo -e "\nproyecto: $proyecto"
+   fi
+
    eval "$comando"
 
    }
@@ -245,6 +266,7 @@ function _buscar_codigo() {
 
          buscar)
             buscar="$2"
+            [[ "$debug" == "true" ]] && echo -e "\nbuscar: $buscar"
             shift 2
             ;;
 
@@ -325,13 +347,9 @@ function _buscar_codigo() {
          menu)
             shift 1
             clear
-            echo
-            echo '+---------------+'
-            echo '| Buscar código |'
-            echo '+---------------+'
-            echo
+            definir_configuracion 
+            caja 'Buscar código'
             if [ "$archivos_afectados" != "" ] ; then
-               echo
                echo Selección:
                echo
                for a in $archivos_afectados ; do
@@ -340,33 +358,57 @@ function _buscar_codigo() {
                echo
             fi
 
-            [[ -z "$proyecto" ]] || echo -e "proyecto: $proyecto \n"
-            echo "Palabra a buscar:       $buscar"
-            [[ "$encoding_entrada" != "$encoding_salida" ]] && echo "Encoding para salida:   $encoding_salida"
-            [[ "$debug" = "true" ]] && echo "Resultado:              $resultado"
-            echo "Formato:                $formato"
-            echo
-            echo ' [C]ambiar palabra a buscar'
-            [[ -e "$resultado" ]] && echo ' [V]er resultado'
-            [[ -e "$resultado" ]] && echo ' [E]nviar a vim'
-            echo ' [B]uscar'
-            [[ "$archivos_afectados" ]] && echo ' B[u]scar solo en selección'
-            echo
-            [[ -e "$resultado" ]] && echo -e " Resultados: `wc -l $resultado`\n"
+            abre_caja
+            [[ -z "$proyecto" ]] || linea_caja "proyecto: $proyecto"
+            linea_caja "Palabra a buscar:       $buscar"
+            [[ "$carpeta_busqueda" != "" ]] && linea_caja "Carpeta a buscar:       $carpeta_busqueda"
+            # [[ "$encoding_entrada" != "$encoding_salida" ]] && echo "Encoding para salida:   $encoding_salida"
+            [[ "$debug" = "true" ]] && linea_caja "Resultado:              $resultado"
+            linea_caja "Formato:                $formato"
+            linea_caja "Dir actual: `pwd`"
+            linea_caja "Directorios a excluir: `for exclude_dir in $buscar_codigo_exclude_dir ; do echo "$exclude_dir " ; done`"
+            linea_caja "Archivos a excluir: `for exclude_dir in $buscar_codigo_exclude ; do echo "$exclude_dir " ; done`"
+            cierra_caja
+            abre_caja
+            linea_caja ' [C]ambiar palabra a buscar'
+            if [ -e "$resultado" ] ; then
+               linea_caja ' [V]er resultado'
+               linea_caja ' [E]nviar a vim'
+               [[ -z "$proyecto" ]] || linea_caja "[A]ñadir a magtrabajos"
+            fi
+            linea_caja ' [B]uscar'
+            [[ "$archivos_afectados" ]] && linea_caja ' B[u]scar solo en selección'
+            linea_caja ' [S]eleccionar carpeta donde buscar'
+            cierra_caja
+            if [ -e "$resultado" ] ; then
+               abre_caja
+               linea_caja " Resultados: `wc -l $resultado` `cat $resultado | cut -d: -f1 | uniq | wc -l` archivos"
+               cierra_caja
+            fi
 
-            read -n 1 -s -p 'Opción: ' OPCION
+            read -p 'Opción: ' OPCION
 
             case "$OPCION" in
 
+               a) magtrabajos -a `cat $resultado | cut -d: -f1 | uniq ` ;;
                c) echo -e "\n" ; read -p "Nueva palabra: " buscar ; _buscar_codigo menu ;;
                v) _buscar_codigo paginar ; _buscar_codigo menu  ;;
                e) _buscar_codigo enviar_vim ; _buscar_codigo menu  ;;
                u) escanear_codigo ; _buscar_codigo menu  ;;
                b) 
+                  echo "Comando: "
+                  echo
+                  echo "$comando"
+                  echo
+                  echo escaneando código...
+                  echo
                   local seleccion_anterior=$archivos_afectados
                   archivos_afectados=''
                   escanear_codigo
                   archivos_afectados=$seleccion_anterior
+                  _buscar_codigo menu  
+                  ;;
+               s) seleccionar_carpeta
                   _buscar_codigo menu  
                   ;;
                *) exit ;;
@@ -377,8 +419,14 @@ function _buscar_codigo() {
             # sino hemos detectado la palabra a buscar damos por echo que es el primer 
             # parámetro que nos llega.
 
+            if [ "$*" == "" ] ; then 
+               [[ "$debug" == "true" ]] && echo -e "\nSin parametros salimos"
+               exit ;
+            fi
+
             if [ -z "$buscar" ] ; then
                buscar="$1"
+               [[ "$debug" == "true" ]] && echo -e "\nbuscar: $buscar"
                shift 1
             fi
 
@@ -401,8 +449,17 @@ function _buscar_codigo() {
 
    }
 
+## Seleccionar carpeta donde buscar
+
+function seleccionar_carpeta() {
+
+   read -p 'Nombre de carpeta: ' carpeta_busqueda
+   [[ "$carpeta_busqueda" == "" ]] && return ;
+
+   }
+
 if [ "$1" = "" ] ; then
-   menu
+   _buscar_codigo menu
 else
    _buscar_codigo "$@"
    escanear_codigo

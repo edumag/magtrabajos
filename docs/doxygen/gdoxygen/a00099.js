@@ -1,19 +1,7 @@
 var a00099 =
 [
-    [ "Configuración para libash", "a00100.htm", "a00100" ],
-    [ "configuracion", "a00029.htm", null ],
-    [ "doxygen2help", "a00037.htm", null ],
-    [ "elegirArchivo", "a00043.htm", null ],
-    [ "listado", "a00054.htm", null ],
-    [ "mysql2rst", "a00081.htm", null ],
-    [ "pantalla", "a00082.htm", null ],
-    [ "source", "a00099_ga327a1717ff37e756c07052836823c39a.htm#ga327a1717ff37e756c07052836823c39a", null ],
-    [ "color", "a00099_gae28887b666238c40587d77cc5fb07500.htm#gae28887b666238c40587d77cc5fb07500", null ],
-    [ "mensajes", "a00099_ga2dc3828595bd67b107e6d4e8d1464c44.htm#ga2dc3828595bd67b107e6d4e8d1464c44", null ],
-    [ "tecla", "a00099_gabac1f6a2bc7d69c5fd4567b4ad41104b.htm#gabac1f6a2bc7d69c5fd4567b4ad41104b", null ],
-    [ "AHORA", "a00099_ga75e4e893b1711e299fe552e6ecf77dc5.htm#ga75e4e893b1711e299fe552e6ecf77dc5", null ],
-    [ "pasarMinHoras", "a00099_ga8fcb08f369bf879c037b8cc58afb3927.htm#ga8fcb08f369bf879c037b8cc58afb3927", null ],
-    [ "comandoExterno", "a00099_gac8b37fb9bfa7bec83174eedd44d0e2b4.htm#gac8b37fb9bfa7bec83174eedd44d0e2b4", null ],
-    [ "ejecutarComando", "a00099_ga73d1f850e70f66c869db2a2878befb42.htm#ga73d1f850e70f66c869db2a2878befb42", null ],
-    [ "libash_general_incluida", "a00099_ga5ee032259237843bc7c5ebb596792461.htm#ga5ee032259237843bc7c5ebb596792461", null ]
+    [ "buscar_codigo_formato_enlaces", "a00099_gab67ff4b7bc3e6c58f74aa54f1a56f107.htm#gab67ff4b7bc3e6c58f74aa54f1a56f107", null ],
+    [ "buscar_codigo_paginador", "a00099_ga5efb1d5bdfdfbb420038f0632e2661d9.htm#ga5efb1d5bdfdfbb420038f0632e2661d9", null ],
+    [ "buscar_codigo_exclude_dir", "a00099_ga3575bd91224761f3d3df6982ca4b17b7.htm#ga3575bd91224761f3d3df6982ca4b17b7", null ],
+    [ "buscar_codigo_exclude", "a00099_gaec0fd27f3529e15b1e8242ec1d3e6368.htm#gaec0fd27f3529e15b1e8242ec1d3e6368", null ]
 ];

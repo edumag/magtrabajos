@@ -366,7 +366,11 @@ function git_rama_version() {
    versión en los archivos, etc...
 
    "
-   evento "rama_version"
+
+   # Comprobamos i tenemos gestión de eventos, si hemos llamado a magcontrolversion 
+   # individualmente no lo tendra
+
+   [[ $(type evento >/dev/null 2>&1) ]] && evento "rama_version"
 
    echo "
 

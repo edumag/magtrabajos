@@ -10,5 +10,5 @@ var dir_f832a86f5b0c8e37a74247591faa558c =
     [ "registros", "a00091.htm", null ],
     [ "terminal", "a00093.htm", null ],
     [ "ultimos_archivos_modificados", "a00094.htm", null ],
-    [ "xdebug_conmutador", "a00095.htm", null ]
+    [ "xdebug_conmutador", "a00096.htm", null ]
 ];

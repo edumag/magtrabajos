@@ -13,7 +13,7 @@ var a00073 =
     [ "mensajes", "a00073_a2dc3828595bd67b107e6d4e8d1464c44.htm#a2dc3828595bd67b107e6d4e8d1464c44", null ],
     [ "log", "a00073_ae828aca6609f4ab584dc979e308ebb5b.htm#ae828aca6609f4ab584dc979e308ebb5b", null ],
     [ "tecla", "a00073_abac1f6a2bc7d69c5fd4567b4ad41104b.htm#abac1f6a2bc7d69c5fd4567b4ad41104b", null ],
-    [ "mdoc_comando_abrir", "a00102_gabb80b1134dfed4cdeaa0f1fa3c53ee09.htm#gabb80b1134dfed4cdeaa0f1fa3c53ee09", null ],
+    [ "mdoc_comando_abrir", "a00103_gabb80b1134dfed4cdeaa0f1fa3c53ee09.htm#gabb80b1134dfed4cdeaa0f1fa3c53ee09", null ],
     [ "lista_documentos", "a00073_a36b1bd830485e038d4229a10a6f5b056.htm#a36b1bd830485e038d4229a10a6f5b056", null ],
     [ "documentos_seleccionados", "a00073_a6f963f15753a3f8c4c62080e1b64859c.htm#a6f963f15753a3f8c4c62080e1b64859c", null ],
     [ "menConta", "a00073_aa946f036fd2b3b1914caa43f7b44fe57.htm#aa946f036fd2b3b1914caa43f7b44fe57", null ],
