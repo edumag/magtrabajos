@@ -480,9 +480,16 @@ function lanzar_editor() {
 
       echo "editor: $editor"
 
-      $editor ''
+      # comprobar si tenemos el servidor en marcha
+      if [ "`vim --serverlist | grep -i $proyecto`" == "" ] ; then
+         # cogemos el primer archivo de la lista de errores para editar
+         f=$(head -n 1 "$2" | cut -d: -f1)
+         $editor "$f" &
+         sleep 1s
+      fi
 
       gvim --servername "$proyecto" --remote-send "<C-\><C-N>:set errorformat=%f:%l:%m<CR>:cfile $2<CR>:copen<CR>"
+
       return
 
    fi
@@ -567,54 +574,59 @@ function editarArchivos(){
 
    log $FUNCNAME "$*"
 
-    echo "Editando archivos"
+   echo "Editando archivos"
 
-    if [ "$movimientoId" = "" ] ; then
-       mensajes " No hay movimientos seleccionado"
-    else
+   if [ "$movimientoId" = "" ] ; then
+      mensajes " No hay movimientos seleccionado"
+   else
 
-       # Listar archivos para seleccionar
-       SQL="SELECT CONCAT('\'',nombre,'\' ') FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId"
-       aSALIDA=($(ejecutarSQL "$SQL" "-N"))
+      # Listar archivos para seleccionar
+      SQL="SELECT CONCAT('\'',nombre,'\' ') FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId"
+      aSALIDA=($(ejecutarSQL "$SQL" "-N"))
 
-       NUM_SALIDA=${#aSALIDA[*]}
+      NUM_SALIDA=${#aSALIDA[*]}
 
-       if [ $NUM_SALIDA -gt 1 ] ; then     # Hay más de un archivo
+      if [ $NUM_SALIDA -gt 1 ] ; then     # Hay más de un archivo
 
-          resultado_listado=''
-          cmd="generar_listado -t 'Archivos afectados' ${aSALIDA[*]}"
-          log "$FUNCNAME" "$cmd"
-          eval "$cmd"
-          echo $resultado_listado
-          eval "aSALIDA=($resultado_listado)"
-          if [ "$aSALIDA" = "" ] ; then
-             mensajes 'No hay archivos afectados para este movimiento'
-             return
-          fi
+         resultado_listado=''
+         cmd="generar_listado -t 'Archivos afectados' ${aSALIDA[*]}"
+         log "$FUNCNAME" "$cmd"
+         eval "$cmd"
+         echo $resultado_listado
+         eval "aSALIDA=($resultado_listado)"
+         if [ "$aSALIDA" = "" ] ; then
+            mensajes 'No hay archivos afectados para este movimiento'
+            return
+         fi
 
-       elif [ $NUM_SALIDA = 0 ] ; then     # No hay archivos afectados
+      elif [ $NUM_SALIDA = 0 ] ; then     # No hay archivos afectados
 
-          mensajes 'No hay archivos afectados para este movimiento'
-          return
+         mensajes 'No hay archivos afectados para este movimiento'
+         return
 
-       fi
+      fi
 
-       # Comprobar contador
-       if [ "$tiempoId" = "" ] ; then
-          echo
-          read -p 'Lanzar contador (s/n): ' OPCION
-          if [ "$OPCION" = "s" ] ; then contador -s ; fi
-       fi
+      # Comprobar contador
+      if [ "$tiempoId" = "" ] ; then
+         echo
+         read -p 'Lanzar contador (s/n): ' OPCION
+         if [ "$OPCION" = "s" ] ; then contador -s ; fi
+      fi
 
-       evento pre_editar_archivo
+      evento pre_editar_archivo
 
-       parametros="$(for n in `seq 0 $((${#aSALIDA[*]}-1))` ; do echo -n "'${aSALIDA[$n]}' " ; done)"
-       cmd="$mt_editor_dev $parametros"
-       log 'Editar' "$cmd"
-       eval "$cmd" &
+      if [ $? == 1 ] ; then
+         mensajes "Editar archivo cancelado"
+         return 1
+      fi
 
-    fi
-}
+      parametros="$(for n in `seq 0 $((${#aSALIDA[*]}-1))` ; do echo -n "'${aSALIDA[$n]}' " ; done)"
+      cmd="$mt_editor_dev $parametros"
+      log 'Editar' "$cmd"
+      eval "$cmd" &
+
+   fi
+   }
 
 ## Editamos futurible de tarea
 
@@ -877,9 +889,9 @@ function editarTarea(){
       read -p "Nombre de tarea: ($tarea)" nTarea
       if [ "$nTarea" != "$tarea" ] ; then
          evento 'pre_cambio_nombre_tarea'
-         if [ "$interrunpir_evento" = "true" ] ; then
+         if [ $? == 1 ] ; then
             mensajes "Cambio de nombre cancelado"
-            return
+            return 1
          fi
       fi
 
@@ -908,6 +920,10 @@ function editarTarea(){
       tareaId=$(ejecutarSQL "$SQL" "-N")
       definirProyecto -t $tareaId
       evento post_tarea_nueva
+      if [ $? == 1 ] ; then
+         mensajes "Tarea nueva cancelado"
+         return 1
+      fi
 
    else
 
@@ -1916,6 +1932,10 @@ function anyadirArchivosDB(){
            else
               mensajes "Archivo: $x añadido a movimiento: $movimientoId"
               evento archivo_afectado_incluido
+              if [ $? == 1 ] ; then
+                 mensajes "Incluir archivo cancelado"
+                 return 1
+              fi
            fi
 
          else
@@ -1927,6 +1947,10 @@ function anyadirArchivosDB(){
       done
 
       evento archivos_afectados_incluidos
+      if [ $? == 1 ] ; then
+         mensajes "Incluir archivo cancelado"
+         return 1
+      fi
 
     else
        mensajes " Acción cancelada"
@@ -2215,6 +2239,10 @@ function cerrar(){
    elif [ "$movimientoId" != '' ] ; then                                                    # Movimiento seleccionado
 
       evento pre_cerrar_movimiento
+      if [ $? == 1 ] ; then
+         mensajes "Cerrar movimiento cancelado"
+         return 1
+      fi
 
       log "$FUNCNAME" "Salimos de evento pre_cerrar_movimiento"
 
@@ -2236,6 +2264,10 @@ function cerrar(){
 
       evento post_cerrar_movimiento
 
+      if [ $? == 1 ] ; then
+         mensajes "Cerrar tarea cancelado"
+         return 1
+      fi
    else                                                                                     # No hay nada seleccinoado
 
       mensajes " No hay nada seleccionado, no hacemos nada"

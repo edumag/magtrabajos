@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ## @file buscar_codigo
-## @bug No esta sirviendo las coincidencias a magtrabajos en los informes
 ##
 ## @brief Buscar palabras seleccionadas en el código
 ##
@@ -156,7 +155,6 @@ ejecutar_comando(){
 
    definir_configuracion
 
-   # ejecutarComando "$comando" $mostrar
    if [ "$debug" == "true" ] ; then 
       echo -e "\n$comando"
       echo -e "\nbuscar: $buscar"
@@ -164,6 +162,7 @@ ejecutar_comando(){
       echo -e "\nproyecto: $proyecto"
    fi
 
+   # ejecutarComando "$comando" $mostrar # Desde libash
    eval "$comando"
 
    }
@@ -290,7 +289,7 @@ function _buscar_codigo() {
             #   escanear_codigo
             #fi
             if [ "`vim --serverlist | grep -i $servidor_vim`" != "" ] ; then
-               cmd="gvim --servername $servidor_vim --remote-send '<C-\><C-N>:set errorformat=%f:%l:%m<CR>:cfile $resultado<CR>:copen<CR>'"
+               cmd="gvim --servername $servidor_vim --remote-send '<C-\><C-N>:set errorformat=%f:%l:%m<CR>:cfile $resultado<CR>:copen<CR>' &"
             else
                local -a servidores_vim=(`vim --serverlist`)
                echo ${servidores_vim[0]}
@@ -309,11 +308,12 @@ function _buscar_codigo() {
                   servername=${servidores_vim[*]}
                   if [ "$servername" == "" ] ; then
                      servername=$servidor_vim
-                     gvim --servername $servername
+                     gvim --servername $servername &
                   fi
                fi
                cmd="gvim --servername $servername --remote-send '<C-\><C-N>:set errorformat=%f:%l:%m<CR>:cfile $resultado<CR>:copen<CR>'"
             fi
+            echo -e "\ncomando: $cmd"
             ejecutarComando "$cmd"
             ;;
 
