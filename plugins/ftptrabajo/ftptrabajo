@@ -402,7 +402,7 @@ fi
 local descartados=
 
 # si subimos no miramos descartados
-if [ $servidor == 0 ] ; then 
+#if [ $servidor == 0 ] ; then 
    echo '  Archivos o directorios descartados'
    for d in `cat "$LISTA_DIR_DESCARTADOS"` ; do
       descartados="$descartados -x $d"
@@ -412,14 +412,15 @@ if [ $servidor == 0 ] ; then
    if [ -z "$descartados" ] ; then
       echo '  No hay descartados'
    fi
-fi
+#fi
 echo
 echo Dir local:  $dir_local
 echo Dir Remoto: $dir_remoto
 echo
 
 if [ $servidor == 1 ] ; then
-   local comando="mirror -R --verbose=3 $borrar --ignore-time --ignore-size ./"
+   # local comando="mirror -R --verbose=3 $borrar $descartados --ignore-time --ignore-size ./"
+   local comando="mirror -R --verbose=3 $borrar $descartados ./"
 else
    local comando="mirror -n --verbose=3 $borrar $descartados ./"
 fi
@@ -429,6 +430,8 @@ if [ $servidor == 1 ] ; then
 else
    echo "  Actualizando local [$dir_local]"
 fi
+
+[[ $DEV ]] && echo comando: $comando
 
 ## Sincronizar local con l servidor
 #ftp no baja el directorio completo

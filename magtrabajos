@@ -1394,13 +1394,13 @@ function informacionProyecto() {
    proyecto_facturacion="$(echo $SALIDA | awk -v FS="$separador" '{print $4 }')"
    proyecto_correos=($(ejecutarSQL 'SELECT email from personal p left join r_personal_proyecto rpp ON rpp.personal_id=p.id WHERE enviarTareas=1 AND rpp.proyecto_id=$proyectoId' '-N'))
    # El archivo de pendientes para cada proyecto
-   FICH_PENDIENTE="${HOME}/.magtrabajos/proyectos/${proyecto}/pendiente.rst"
+   FICH_PENDIENTE=".magtrabajos/pendiente.rst"
    #TMP="${DIR_TMP}magtrabajos-$proyectoId.rst"
    [[ -d "$DIR_PROYECTOS" ]] && cd $DIR_PROYECTOS
 
    # Incluimos ficheros de configuración de proyecto
-   # if [ -e "$HOME/.magtrabajos/proyectos/$proyecto/configuracion/" ] ; then
-   #    for conf in $HOME/.magtrabajos/proyectos/$proyecto/configuracion/* ; do
+   # if [ -e ".magtrabajos/configuracion/" ] ; then
+   #    for conf in .magtrabajos/configuracion/* ; do
    #       if [ -f "$conf" ] ; then
    #          log $FUNCNAME "Incluimos fichero de configuración del proyecto: $conf"
    #          source $conf
@@ -1410,7 +1410,7 @@ function informacionProyecto() {
 
    # Configuración del proyecto
    configuracion_leer \
-      "$HOME/.magtrabajos/proyectos/$proyecto/configuracion/magtrabajos" \
+      ".magtrabajos/configuracion/magtrabajos" \
       "${DIR_MAGTRABAJOS}/config.default" \
       "mt_"
 
@@ -1637,7 +1637,7 @@ function help_configuracion() {
    echo
    echo "La configuración especifica de cada proyecto se guarda en:"
    echo
-   echo "$HOME/.magtrabajos/proyectos/[proyecto]/configuracion/magtrabajos"
+   echo ".magtrabajos/configuracion/magtrabajos"
    echo
    echo La configuración de los componentes o plugins se guarda con el nombre del script
    echo en la carpeta global:
@@ -1646,7 +1646,7 @@ function help_configuracion() {
    echo
    echo y si se desea una configuración especifica para un proyecto en concreto:
    echo
-   echo "$HOME/.magtrabajos/proyectos/[proyecto]/configuracion/[script]"
+   echo ".magtrabajos/configuracion/[script]"
    echo
    echo "Configuración actual:"
 
@@ -3798,7 +3798,7 @@ function menu(){
       +) menuVarios ;;
       n|N) $mt_editor $FICH_PENDIENTE ;;
       g|G) # Editar archivo para programadores
-         FICH="${HOME}/.magtrabajos/proyectos/${proyecto}/programadores.rst"
+         FICH=".magtrabajos/programadores.rst"
          $mt_editor $FICH
          ;;
       a|A) # atajo
@@ -3914,7 +3914,7 @@ function menuHerramientas(){
       r|R) $mt_miniterminal -T "Reg::$proyecto" -e "tail -F $archivo_log" & ;;
       b|B) bash ;;
       p|P) # phpref
-         FICH_PHPXREF="${HOME}/.magtrabajos/proyectos/${proyecto}/phpxref.conf"
+         FICH_PHPXREF=".magtrabajos/phpxref.conf"
          $mt_miniterminal -T phpxref -e "cd ~/opt/phpxref ; ./phpxref.pl -c '$FICH_PHPXREF' ; read " &
          ;;
       s|S) # Recuperar sesión de vim
@@ -4923,7 +4923,7 @@ function lanzador() {
 
    definirProyecto ${seleccion_id[$OPCION]}
 
-   LANZADORES="$HOME/.magtrabajos/proyectos/$proyecto/lanzadores_inicio"
+   LANZADORES=".magtrabajos/lanzadores_inicio"
    [[ -e "$LANZADORES" ]] && source "$LANZADORES"
 
    ##   # lanzamos terminal con magtrabajos

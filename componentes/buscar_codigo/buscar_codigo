@@ -91,7 +91,7 @@ buscar_codigo_exclude="'*.swp' 'tags' 'cscope.out'"
 ## @}
 
 ## Si tenemos configuración de usuario la recogemos
-[[ -e "$HOME/.magtrabajos/configuracion/$programa" ]] && source "$HOME/.magtrabajos/configuracion/$programa"
+[[ -e ".magtrabajos/configuracion/$programa" ]] && source "$HOME/.magtrabajos/configuracion/$programa"
 
 ## definimos la configuración según proyecto
 
@@ -108,7 +108,7 @@ definir_configuracion() {
    fi
 
    ## Si tenemos configuración de proyecto la recogemos
-   [[ -e "$HOME/.magtrabajos/proyectos/$proyecto/configuracion/$programa" ]] && source "$HOME/.magtrabajos/proyectos/$proyecto/configuracion/$programa"
+   [[ -e ".magtrabajos/configuracion/$programa" ]] && source ".magtrabajos/configuracion/$programa"
 
    ## Comando de busqueda
 

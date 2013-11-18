@@ -6,7 +6,7 @@ La configuración sigue una jerarquía desde la configuración global hasta la d
 cada proyecto individual.
 
 - Primero cargamos $HOME/.magtrabajos/configuracion/*
-- Después $HOME/.magtrabajos/proyectos/$proyecto/configuracion/*
+- Después .magtrabajos/configuracion/*
 
 En cada una de estas carpetas puede añadirse configuración para el mismo magtrabajos
 o para alguno de sus componentes o plugins que utiliza.
@@ -18,12 +18,12 @@ Ejemplo en buscar_codigo:
 [[ -e "$HOME/.magtrabajos/configuracion/$programa" ]] && source "$HOME/.magtrabajos/configuracion/$programa"
 
 ## Si tenemos configuración de proyecto la recogemos
-[[ -e "$HOME/.magtrabajos/proyectos/$proyecto/configuracion/$programa" ]] && source "$HOME/.magtrabajos/configuracion/$programa"
+[[ -e ".magtrabajos/configuracion/$programa" ]] && source "$HOME/.magtrabajos/configuracion/$programa"
 @endcode
 
 @section lanzadores Lanzadores al inicio
 
-Si encontramos "$HOME/.magtrabajos/proyectos/$proyecto/lanzadores" el archivo lo añadimos
+Si encontramos ".magtrabajos/lanzadores" el archivo lo añadimos
 al iniciar el programa. Para automatizar el lanzamiento de aplicaciones que abrimos
 al trabajar en el proyecto.
 
