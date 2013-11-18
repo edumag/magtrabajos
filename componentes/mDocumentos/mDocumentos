@@ -38,7 +38,7 @@ fich_conf=
 
 function comprobaciones (){
 
-   dir_proyecto="$HOME/.magtrabajos/proyectos/$proyecto"
+   dir_proyecto=".magtrabajos/"
    dir_adjuntos="$dir_proyecto/documentos/"
    fich_conf="${dir_proyecto}/configuracion/mDocumentos"
 

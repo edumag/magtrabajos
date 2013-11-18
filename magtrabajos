@@ -406,7 +406,7 @@ function configurar_magtrabajos() {
       fich_configuracion="$HOME/.magtrabajos/configuracion/magtrabajos"
       configuracion_menu mt_ "$fich_configuracion" "${DIR_MAGTRABAJOS}/config.default" "${DIR_MAGTRABAJOS}/config.default"
    elif [ "$OPCION" = "p" ] ; then
-      fich_configuracion="$HOME/.magtrabajos/proyectos/$proyecto/configuracion/magtrabajos"
+      fich_configuracion=".magtrabajos/configuracion/magtrabajos"
       configuracion_menu mt_ "$fich_configuracion" "${DIR_MAGTRABAJOS}/config.default" "${DIR_MAGTRABAJOS}/config.default"
    else
       mensajes "Configuración cancelada"

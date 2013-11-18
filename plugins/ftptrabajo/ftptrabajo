@@ -1561,8 +1561,8 @@ function comprobar_proyecto() {
       proyecto="`basename "$(pwd)"`"
    fi
 
-   CONFIGURACION_FTPTRABAJO_PROYECTO="${DIR_CONF_USUARIO}proyectos/$proyecto/configuracion/ftptrabajo"
-   DIR_FTPTRABAJO_PROYECTO="${DIR_CONF_USUARIO}proyectos/$proyecto/ftptrabajo/"
+   CONFIGURACION_FTPTRABAJO_PROYECTO=".magtrabajos/configuracion/ftptrabajo"
+   DIR_FTPTRABAJO_PROYECTO=".magtrabajos/ftptrabajo/"
 
    if [ ! -e "$CONFIGURACION_FTPTRABAJO_PROYECTO" ] ; then
       [[ $DEV ]] && echo -e "\n\nNo existe un proyecto para esta carpeta"
