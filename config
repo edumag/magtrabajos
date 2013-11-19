@@ -9,9 +9,11 @@
 ##
 ## - Tener disponible las variables:
 ##   
-##   + DIR_CONF_USUARIO: Directorio conlas configuraciones del usuario
+##   + DIR_CONF_USUARIO: Directorio con las configuraciones del usuario
 ##   
 ##   + DIR_MAGTRABAJOS: Directorio de magtrabajos
+##   
+##   + DIR_PROYECTO: Directorio del proyecto actual
 ##   
 ##   + DIR_TMP: Directorio temporal
 ##   
@@ -99,7 +101,7 @@ if [ "$config_magtrabajos_cargado" == "" ] ; then
    if [ -z $proyecto ] ; then
       # Comprobamos que hay una carpeta de proyecto en la configuración
       carpeta_actual="`basename "$(pwd)"`"
-      if [ -d "${DIR_CONF_USUARIO}/proyectos/${carpeta_actual}" ] ; then
+      if [ -d "./magtrabajos/" ] ; then
          [[ $DEV ]] && echo "Recogemos carpeta actual como proyecto"
          proyecto="$carpeta_actual"
       fi
@@ -107,7 +109,7 @@ if [ "$config_magtrabajos_cargado" == "" ] ; then
 
    # Recogemos configuración del proyecto
 
-   configuracion_de_proyecto="${DIR_CONF_USUARIO}proyectos/$proyecto/configuracion/magtrabajos"
+   configuracion_de_proyecto=".magtrabajos/configuracion/magtrabajos"
    [[ -e "$configuracion_de_proyecto" ]] && configuracion_leer "$configuracion_de_proyecto" "$configuracion_por_defecto_magtrabajos" 'mt_' 
 
    ## Mostrar variables globales
@@ -118,6 +120,7 @@ if [ "$config_magtrabajos_cargado" == "" ] ; then
       echo Variables globales que se definen en config
       echo
       echo "DIR_CONF_USUARIO .......$DIR_CONF_USUARIO"
+      echo "DIR_PROYECTO ...........$DIR_PROYECTO"
       echo "DIR_TMP ................$DIR_TMP"
       echo "parte_dir ...............$parte_dir"
       echo "DIR_MAGTRABAJOS ........$DIR_MAGTRABAJOS"

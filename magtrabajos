@@ -1389,14 +1389,14 @@ function informacionProyecto() {
       return
    fi
    proyecto="$(echo $SALIDA | awk -v FS="$separador" '{print $1 }')"
-   DIR_PROYECTOS="$(echo $SALIDA | awk -v FS="$separador" '{print $2 }')"
+   DIR_PROYECTO="$(echo $SALIDA | awk -v FS="$separador" '{print $2 }')"
    proyecto_activado="$(echo $SALIDA | awk -v FS="$separador" '{print $3 }')"
    proyecto_facturacion="$(echo $SALIDA | awk -v FS="$separador" '{print $4 }')"
    proyecto_correos=($(ejecutarSQL 'SELECT email from personal p left join r_personal_proyecto rpp ON rpp.personal_id=p.id WHERE enviarTareas=1 AND rpp.proyecto_id=$proyectoId' '-N'))
    # El archivo de pendientes para cada proyecto
    FICH_PENDIENTE=".magtrabajos/pendiente.rst"
    #TMP="${DIR_TMP}magtrabajos-$proyectoId.rst"
-   [[ -d "$DIR_PROYECTOS" ]] && cd $DIR_PROYECTOS
+   [[ -d "$DIR_PROYECTO" ]] && cd $DIR_PROYECTO
 
    # Incluimos ficheros de configuración de proyecto
    # if [ -e ".magtrabajos/configuracion/" ] ; then
@@ -1418,11 +1418,17 @@ function informacionProyecto() {
    archivo_log="${DIR_TMP}${proyecto}.log"
 
    log "$FUNCNAME" "proyecto: $proyecto"
-   log "$FUNCNAME" "Directorio de proyecto: $DIR_PROYECTOS"
+   log "$FUNCNAME" "Directorio de proyecto: $DIR_PROYECTO"
    log "$FUNCNAME" "correos: $proyecto_correos"
    log "$FUNCNAME" "Fich. de pendiente: $FICH_PENDIENTE"
    log "$FUNCNAME" "Editor dev: $mt_editor_dev"
    log "$FUNCNAME" "Archivo log: $archivo_log"
+
+   # Si tenemos directorio de proyecto no situamos en él
+   if [ ! -z $DIR_PROYECTO ] ; then
+      [[ $DEV ]] && echo "Nos situamos en carpeta de proyecto $DIR_PROYECTO"
+      cd "$DIR_PROYECTO"
+   fi
 
    }
 
@@ -2115,7 +2121,7 @@ function evento() {
 
    # Eventos de proyecto
 
-   for evento_proyecto in ${DIR_PROYECTOS}/$proyecto/eventos/$evento/* ; do
+   for evento_proyecto in ${DIR_PROYECTO}/eventos/$evento/* ; do
       [[ -e "$evento_proyecto" ]] && lista="$lista \n`basename $evento_proyecto`\t$evento_proyecto" 
    done
 
@@ -3146,7 +3152,7 @@ function erroresCodigo() {
 
 function estado_control_versiones() {
 
-   if [ -e "$DIR_PROYECTOS/.svn" ] ; then
+   if [ -e "$DIR_PROYECTO/.svn" ] ; then
 
       # subversion
       SALIDA="$(magcontrolversion status)"
@@ -3158,7 +3164,7 @@ function estado_control_versiones() {
 
       fi
 
-   elif [ -e "$DIR_PROYECTOS/.git" ] ; then
+   elif [ -e "$DIR_PROYECTO/.git" ] ; then
 
       # git
       SALIDA="$(git status)"
