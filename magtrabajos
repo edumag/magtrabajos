@@ -4158,10 +4158,10 @@ function menuComandos(){
    
    dir_comandos[0]="$DIR_MAGTRABAJOS/extensiones/"
    dir_comandos[1]="$DIR_MAGTRABAJOS/lanzadores/"
-   [[ -e "${HOME}/.`basename "$0"`/proyectos/${proyecto}/lanzadores/" ]] && \
-      dir_comandos[2]="${HOME}/.`basename "$0"`/proyectos/${proyecto}/lanzadores/"
-   [ -e "${HOME}/.`basename "$0"`/proyectos/${proyecto}/extensiones/" ] && \
-      dir_comandos[$((${#dir_comandos[*]}-1))]="${HOME}/.`basename "$0"`/proyectos/${proyecto}/extensiones/"
+   [[ -e ".`basename "$0"`/lanzadores/" ]] && \
+      dir_comandos[2]=".`basename "$0"`/lanzadores/"
+   [ -e ".`basename "$0"`/extensiones/" ] && \
+      dir_comandos[$((${#dir_comandos[*]}-1))]=".`basename "$0"`/extensiones/"
 
    log $FUNCNAME "Directorios de lanzadores y extensiones: ${dir_comandos[*]}"
 
