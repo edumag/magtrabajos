@@ -1557,12 +1557,16 @@ function tecla(){
 
 function comprobar_proyecto() {
    
+   [[ $DEV ]] && echo -e "\n\nComprobar proyecto"
+
    # Si no se pasa un proyecto determinado buscamos si la carpeta actual coincide
    # con una configuración.
 
    if [ -z $proyecto ] ; then
       proyecto="`basename "$(pwd)"`"
    fi
+
+   [[ $DEV ]] && echo -e "\n\nproyecto: $proyecto"
 
    CONFIGURACION_FTPTRABAJO_PROYECTO=".magtrabajos/configuracion/ftptrabajo"
    DIR_FTPTRABAJO_PROYECTO=".magtrabajos/ftptrabajo/"
@@ -1580,6 +1584,7 @@ function comprobar_proyecto() {
    else
       source $CONFIGURACION_FTPTRABAJO_PROYECTO
       leer_proyecto
+      [[ $DEV ]] && configuracion_ver  'ftptrabajo' "`dirname "$BASH_SOURCE"`/config.default"
    fi
 
    # Comprobar que tenemos configurado el bloqueo.
@@ -1687,6 +1692,8 @@ function menu() {
 ## Inicio ##
 ############
 
+comprobar_proyecto
+
 while [ -n "$1" ]; do
 
    case $1 in
@@ -1738,7 +1745,6 @@ fi
 
 
 if [ -n "$accion" ] ; then
-   comprobar_proyecto
    echo "`date +"%A %d de %B del %Y"` $accion: $*" >> $REG
    cmd="$accion $@"
    [[ $DEV ]] && echo proyecto: $proyecto
