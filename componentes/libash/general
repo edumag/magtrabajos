@@ -33,7 +33,7 @@ libash_general_incluida=1 ##< Para saber si ya la tenemos incluida
 ## @defgroup configuracion_libash Configuración para libash
 ## @{
 
-conf_proyecto="$HOME/.magtrabajos/proyectos/$proyecto/configuracion/libash.conf"    ##< Con proyecto
+conf_proyecto=".magtrabajos/configuracion/libash.conf"    ##< Con proyecto
 conf_magtrabajos="$HOME/.magtrabajos/configuracion/libash.conf"                     ##< Sin proyecto
 conf="`dirname $BASH_SOURCE`/libash.conf"                                           ##< Por defecto
 

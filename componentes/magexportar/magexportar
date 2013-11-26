@@ -162,7 +162,7 @@ function exportar() {
          log $mt_rst2pdf $origen -o trabajos.pdf
          $mt_rst2pdf "$origen" -o trabajos.pdf
          xdg-open trabajos.pdf
-         cd $DIR_PROYECTOS
+         cd $DIR_PROYECTO
          ;;
 
       raw-pdf) 
@@ -171,7 +171,7 @@ function exportar() {
          log $mt_rst2pdf $origen -o trabajos.pdf
          $mt_rst2pdf "$origen" -o trabajos.pdf
          echo "`pwd`/trabajos.pdf" ; exit 0
-         cd $DIR_PROYECTOS
+         cd $DIR_PROYECTO
          ;;
 
       less|l) # less

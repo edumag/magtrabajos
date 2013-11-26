@@ -14,15 +14,15 @@ source `dirname "$BASH_SOURCE"`/../../config
 [[ $DEV ]] && echo "PROYECTO ($proyectoId): [$proyecto]"
 # Informe por defecto
 
-perfil_actual='default'                                                                        ##< Perfil por defecto
-dir_perfiles="`dirname "$BASH_SOURCE"`/perfiles/"                                              ##< Directorio de perfiles predefinidos
-dir_perfiles_usuario="${DIR_CONF_USUARIO}perfiles/"                                            ##< Directorio de perfiles de usuario
-[[ $proyecto ]] && dir_perfiles_proyecto="${DIR_CONF_USUARIO}proyectos/$proyecto/perfiles/"    ##< Directorio de perfiles de proyecto
+perfil_actual='default'                                             ##< Perfil por defecto
+dir_perfiles="`dirname "$BASH_SOURCE"`/perfiles/"                   ##< Directorio de perfiles predefinidos
+dir_perfiles_usuario="${DIR_CONF_USUARIO}perfiles/"                 ##< Directorio de perfiles de usuario
+[[ $proyecto ]] && dir_perfiles_proyecto="./magtrabajos/perfiles/"  ##< Directorio de perfiles de proyecto
 
 # Si no tenemos los directorios creados los creamos
 [[ -d "$dir_perfiles_usuario" ]] || mkdir "$dir_perfiles_usuario"
 if [ $proyecto ] ; then
-   [[ -d "$dir_perfiles_proyecto" ]] || mkdir "$dir_perfiles_proyecto"
+   [[ -d "$dir_perfiles_proyecto" ]] || mkdir "$dir_perfiles_proyecto" 2>/dev/null # evitamos mensajes de error por no tener permisos
 fi
 
 ## Fichero con el perfil actual, buscamos en la carpeta del proyecto, sino existe el perfil

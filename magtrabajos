@@ -406,7 +406,7 @@ function configurar_magtrabajos() {
       fich_configuracion="$HOME/.magtrabajos/configuracion/magtrabajos"
       configuracion_menu mt_ "$fich_configuracion" "${DIR_MAGTRABAJOS}/config.default" "${DIR_MAGTRABAJOS}/config.default"
    elif [ "$OPCION" = "p" ] ; then
-      fich_configuracion="$HOME/.magtrabajos/proyectos/$proyecto/configuracion/magtrabajos"
+      fich_configuracion=".magtrabajos/configuracion/magtrabajos"
       configuracion_menu mt_ "$fich_configuracion" "${DIR_MAGTRABAJOS}/config.default" "${DIR_MAGTRABAJOS}/config.default"
    else
       mensajes "Configuración cancelada"
@@ -480,9 +480,16 @@ function lanzar_editor() {
 
       echo "editor: $editor"
 
-      $editor ''
+      # comprobar si tenemos el servidor en marcha
+      if [ "`vim --serverlist | grep -i $proyecto`" == "" ] ; then
+         # cogemos el primer archivo de la lista de errores para editar
+         f=$(head -n 1 "$2" | cut -d: -f1)
+         $editor "$f" &
+         sleep 1s
+      fi
 
       gvim --servername "$proyecto" --remote-send "<C-\><C-N>:set errorformat=%f:%l:%m<CR>:cfile $2<CR>:copen<CR>"
+
       return
 
    fi
@@ -567,54 +574,59 @@ function editarArchivos(){
 
    log $FUNCNAME "$*"
 
-    echo "Editando archivos"
+   echo "Editando archivos"
 
-    if [ "$movimientoId" = "" ] ; then
-       mensajes " No hay movimientos seleccionado"
-    else
+   if [ "$movimientoId" = "" ] ; then
+      mensajes " No hay movimientos seleccionado"
+   else
 
-       # Listar archivos para seleccionar
-       SQL="SELECT CONCAT('\'',nombre,'\' ') FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId"
-       aSALIDA=($(ejecutarSQL "$SQL" "-N"))
+      # Listar archivos para seleccionar
+      SQL="SELECT CONCAT('\'',nombre,'\' ') FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId"
+      aSALIDA=($(ejecutarSQL "$SQL" "-N"))
 
-       NUM_SALIDA=${#aSALIDA[*]}
+      NUM_SALIDA=${#aSALIDA[*]}
 
-       if [ $NUM_SALIDA -gt 1 ] ; then     # Hay más de un archivo
+      if [ $NUM_SALIDA -gt 1 ] ; then     # Hay más de un archivo
 
-          resultado_listado=''
-          cmd="generar_listado -t 'Archivos afectados' ${aSALIDA[*]}"
-          log "$FUNCNAME" "$cmd"
-          eval "$cmd"
-          echo $resultado_listado
-          eval "aSALIDA=($resultado_listado)"
-          if [ "$aSALIDA" = "" ] ; then
-             mensajes 'No hay archivos afectados para este movimiento'
-             return
-          fi
+         resultado_listado=''
+         cmd="generar_listado -t 'Archivos afectados' ${aSALIDA[*]}"
+         log "$FUNCNAME" "$cmd"
+         eval "$cmd"
+         echo $resultado_listado
+         eval "aSALIDA=($resultado_listado)"
+         if [ "$aSALIDA" = "" ] ; then
+            mensajes 'No hay archivos afectados para este movimiento'
+            return
+         fi
 
-       elif [ $NUM_SALIDA = 0 ] ; then     # No hay archivos afectados
+      elif [ $NUM_SALIDA = 0 ] ; then     # No hay archivos afectados
 
-          mensajes 'No hay archivos afectados para este movimiento'
-          return
+         mensajes 'No hay archivos afectados para este movimiento'
+         return
 
-       fi
+      fi
 
-       # Comprobar contador
-       if [ "$tiempoId" = "" ] ; then
-          echo
-          read -p 'Lanzar contador (s/n): ' OPCION
-          if [ "$OPCION" = "s" ] ; then contador -s ; fi
-       fi
+      # Comprobar contador
+      if [ "$tiempoId" = "" ] ; then
+         echo
+         read -p 'Lanzar contador (s/n): ' OPCION
+         if [ "$OPCION" = "s" ] ; then contador -s ; fi
+      fi
 
-       evento pre_editar_archivo
+      evento pre_editar_archivo
 
-       parametros="$(for n in `seq 0 $((${#aSALIDA[*]}-1))` ; do echo -n "'${aSALIDA[$n]}' " ; done)"
-       cmd="$mt_editor_dev $parametros"
-       log 'Editar' "$cmd"
-       eval "$cmd" &
+      if [ $? == 1 ] ; then
+         mensajes "Editar archivo cancelado"
+         return 1
+      fi
 
-    fi
-}
+      parametros="$(for n in `seq 0 $((${#aSALIDA[*]}-1))` ; do echo -n "'${aSALIDA[$n]}' " ; done)"
+      cmd="$mt_editor_dev $parametros"
+      log 'Editar' "$cmd"
+      eval "$cmd" &
+
+   fi
+   }
 
 ## Editamos futurible de tarea
 
@@ -877,9 +889,9 @@ function editarTarea(){
       read -p "Nombre de tarea: ($tarea)" nTarea
       if [ "$nTarea" != "$tarea" ] ; then
          evento 'pre_cambio_nombre_tarea'
-         if [ "$interrunpir_evento" = "true" ] ; then
+         if [ $? == 1 ] ; then
             mensajes "Cambio de nombre cancelado"
-            return
+            return 1
          fi
       fi
 
@@ -908,6 +920,10 @@ function editarTarea(){
       tareaId=$(ejecutarSQL "$SQL" "-N")
       definirProyecto -t $tareaId
       evento post_tarea_nueva
+      if [ $? == 1 ] ; then
+         mensajes "Tarea nueva cancelado"
+         return 1
+      fi
 
    else
 
@@ -1373,18 +1389,18 @@ function informacionProyecto() {
       return
    fi
    proyecto="$(echo $SALIDA | awk -v FS="$separador" '{print $1 }')"
-   DIR_PROYECTOS="$(echo $SALIDA | awk -v FS="$separador" '{print $2 }')"
+   DIR_PROYECTO="$(echo $SALIDA | awk -v FS="$separador" '{print $2 }')"
    proyecto_activado="$(echo $SALIDA | awk -v FS="$separador" '{print $3 }')"
    proyecto_facturacion="$(echo $SALIDA | awk -v FS="$separador" '{print $4 }')"
    proyecto_correos=($(ejecutarSQL 'SELECT email from personal p left join r_personal_proyecto rpp ON rpp.personal_id=p.id WHERE enviarTareas=1 AND rpp.proyecto_id=$proyectoId' '-N'))
    # El archivo de pendientes para cada proyecto
-   FICH_PENDIENTE="${HOME}/.magtrabajos/proyectos/${proyecto}/pendiente.rst"
+   FICH_PENDIENTE=".magtrabajos/pendiente.rst"
    #TMP="${DIR_TMP}magtrabajos-$proyectoId.rst"
-   [[ -d "$DIR_PROYECTOS" ]] && cd $DIR_PROYECTOS
+   [[ -d "$DIR_PROYECTO" ]] && cd $DIR_PROYECTO
 
    # Incluimos ficheros de configuración de proyecto
-   # if [ -e "$HOME/.magtrabajos/proyectos/$proyecto/configuracion/" ] ; then
-   #    for conf in $HOME/.magtrabajos/proyectos/$proyecto/configuracion/* ; do
+   # if [ -e ".magtrabajos/configuracion/" ] ; then
+   #    for conf in .magtrabajos/configuracion/* ; do
    #       if [ -f "$conf" ] ; then
    #          log $FUNCNAME "Incluimos fichero de configuración del proyecto: $conf"
    #          source $conf
@@ -1394,7 +1410,7 @@ function informacionProyecto() {
 
    # Configuración del proyecto
    configuracion_leer \
-      "$HOME/.magtrabajos/proyectos/$proyecto/configuracion/magtrabajos" \
+      ".magtrabajos/configuracion/magtrabajos" \
       "${DIR_MAGTRABAJOS}/config.default" \
       "mt_"
 
@@ -1402,11 +1418,17 @@ function informacionProyecto() {
    archivo_log="${DIR_TMP}${proyecto}.log"
 
    log "$FUNCNAME" "proyecto: $proyecto"
-   log "$FUNCNAME" "Directorio de proyecto: $DIR_PROYECTOS"
+   log "$FUNCNAME" "Directorio de proyecto: $DIR_PROYECTO"
    log "$FUNCNAME" "correos: $proyecto_correos"
    log "$FUNCNAME" "Fich. de pendiente: $FICH_PENDIENTE"
    log "$FUNCNAME" "Editor dev: $mt_editor_dev"
    log "$FUNCNAME" "Archivo log: $archivo_log"
+
+   # Si tenemos directorio de proyecto no situamos en él
+   if [ ! -z $DIR_PROYECTO ] ; then
+      [[ $DEV ]] && echo "Nos situamos en carpeta de proyecto $DIR_PROYECTO"
+      cd "$DIR_PROYECTO"
+   fi
 
    }
 
@@ -1621,7 +1643,7 @@ function help_configuracion() {
    echo
    echo "La configuración especifica de cada proyecto se guarda en:"
    echo
-   echo "$HOME/.magtrabajos/proyectos/[proyecto]/configuracion/magtrabajos"
+   echo ".magtrabajos/configuracion/magtrabajos"
    echo
    echo La configuración de los componentes o plugins se guarda con el nombre del script
    echo en la carpeta global:
@@ -1630,7 +1652,7 @@ function help_configuracion() {
    echo
    echo y si se desea una configuración especifica para un proyecto en concreto:
    echo
-   echo "$HOME/.magtrabajos/proyectos/[proyecto]/configuracion/[script]"
+   echo ".magtrabajos/configuracion/[script]"
    echo
    echo "Configuración actual:"
 
@@ -1916,6 +1938,10 @@ function anyadirArchivosDB(){
            else
               mensajes "Archivo: $x añadido a movimiento: $movimientoId"
               evento archivo_afectado_incluido
+              if [ $? == 1 ] ; then
+                 mensajes "Incluir archivo cancelado"
+                 return 1
+              fi
            fi
 
          else
@@ -1927,6 +1953,10 @@ function anyadirArchivosDB(){
       done
 
       evento archivos_afectados_incluidos
+      if [ $? == 1 ] ; then
+         mensajes "Incluir archivo cancelado"
+         return 1
+      fi
 
     else
        mensajes " Acción cancelada"
@@ -2091,7 +2121,7 @@ function evento() {
 
    # Eventos de proyecto
 
-   for evento_proyecto in ${DIR_PROYECTOS}/$proyecto/eventos/$evento/* ; do
+   for evento_proyecto in ${DIR_PROYECTO}/eventos/$evento/* ; do
       [[ -e "$evento_proyecto" ]] && lista="$lista \n`basename $evento_proyecto`\t$evento_proyecto" 
    done
 
@@ -2215,6 +2245,10 @@ function cerrar(){
    elif [ "$movimientoId" != '' ] ; then                                                    # Movimiento seleccionado
 
       evento pre_cerrar_movimiento
+      if [ $? == 1 ] ; then
+         mensajes "Cerrar movimiento cancelado"
+         return 1
+      fi
 
       log "$FUNCNAME" "Salimos de evento pre_cerrar_movimiento"
 
@@ -2236,6 +2270,10 @@ function cerrar(){
 
       evento post_cerrar_movimiento
 
+      if [ $? == 1 ] ; then
+         mensajes "Cerrar tarea cancelado"
+         return 1
+      fi
    else                                                                                     # No hay nada seleccinoado
 
       mensajes " No hay nada seleccionado, no hacemos nada"
@@ -3114,7 +3152,7 @@ function erroresCodigo() {
 
 function estado_control_versiones() {
 
-   if [ -e "$DIR_PROYECTOS/.svn" ] ; then
+   if [ -e "$DIR_PROYECTO/.svn" ] ; then
 
       # subversion
       SALIDA="$(magcontrolversion status)"
@@ -3126,7 +3164,7 @@ function estado_control_versiones() {
 
       fi
 
-   elif [ -e "$DIR_PROYECTOS/.git" ] ; then
+   elif [ -e "$DIR_PROYECTO/.git" ] ; then
 
       # git
       SALIDA="$(git status)"
@@ -3766,7 +3804,7 @@ function menu(){
       +) menuVarios ;;
       n|N) $mt_editor $FICH_PENDIENTE ;;
       g|G) # Editar archivo para programadores
-         FICH="${HOME}/.magtrabajos/proyectos/${proyecto}/programadores.rst"
+         FICH=".magtrabajos/programadores.rst"
          $mt_editor $FICH
          ;;
       a|A) # atajo
@@ -3882,7 +3920,7 @@ function menuHerramientas(){
       r|R) $mt_miniterminal -T "Reg::$proyecto" -e "tail -F $archivo_log" & ;;
       b|B) bash ;;
       p|P) # phpref
-         FICH_PHPXREF="${HOME}/.magtrabajos/proyectos/${proyecto}/phpxref.conf"
+         FICH_PHPXREF=".magtrabajos/phpxref.conf"
          $mt_miniterminal -T phpxref -e "cd ~/opt/phpxref ; ./phpxref.pl -c '$FICH_PHPXREF' ; read " &
          ;;
       s|S) # Recuperar sesión de vim
@@ -4120,10 +4158,10 @@ function menuComandos(){
    
    dir_comandos[0]="$DIR_MAGTRABAJOS/extensiones/"
    dir_comandos[1]="$DIR_MAGTRABAJOS/lanzadores/"
-   [[ -e "${HOME}/.`basename "$0"`/proyectos/${proyecto}/lanzadores/" ]] && \
-      dir_comandos[2]="${HOME}/.`basename "$0"`/proyectos/${proyecto}/lanzadores/"
-   [ -e "${HOME}/.`basename "$0"`/proyectos/${proyecto}/extensiones/" ] && \
-      dir_comandos[$((${#dir_comandos[*]}-1))]="${HOME}/.`basename "$0"`/proyectos/${proyecto}/extensiones/"
+   [[ -e ".`basename "$0"`/lanzadores/" ]] && \
+      dir_comandos[2]=".`basename "$0"`/lanzadores/"
+   [ -e ".`basename "$0"`/extensiones/" ] && \
+      dir_comandos[$((${#dir_comandos[*]}-1))]=".`basename "$0"`/extensiones/"
 
    log $FUNCNAME "Directorios de lanzadores y extensiones: ${dir_comandos[*]}"
 
@@ -4891,7 +4929,7 @@ function lanzador() {
 
    definirProyecto ${seleccion_id[$OPCION]}
 
-   LANZADORES="$HOME/.magtrabajos/proyectos/$proyecto/lanzadores_inicio"
+   LANZADORES=".magtrabajos/lanzadores_inicio"
    [[ -e "$LANZADORES" ]] && source "$LANZADORES"
 
    ##   # lanzamos terminal con magtrabajos
