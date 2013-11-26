@@ -108,9 +108,6 @@ DIR_FTPTRABAJO_PROYECTO=''
 declare -a archivos   ##< Array de archivos
 declare -i na=0       ##< Nuemro de archivos
 
-## Errores que nos puede presentar ftp
-posibles_errores='^202 |^426 |^450 |^500 |^501 |^503 |^505 |^550 |^553 |^666 |^999 |not found'
-
 ## Ultimo error
 ultimoError=${DIR_TMP}ftptrabajo.ultimoError
 
@@ -153,7 +150,7 @@ function ko() { echo -e "`color colError`[KO]`color`" ; }
 ## Funciones ftp ##
 ###################
 
-## Comprobar el estado de la ultima acción
+## Comprobar el estado de la última acción
 
 function comprobarEstado() {
 
@@ -162,7 +159,7 @@ function comprobarEstado() {
    if [ ! -e "$LOG" ] ; then
       mensaje="No pude acceder al registro de ftp [$LOG]"
 
-   elif egrep "^421 " $LOG > /dev/null 2>&1 ; then
+   elif egrep "^421 " $LOG | grep  -v "^421 bytes "  > /dev/null 2>&1 ; then
       mensaje="Servidor no accesible$"
 
    elif grep "Unknown host" $LOG > /dev/null 2>&1 ; then
@@ -171,13 +168,13 @@ function comprobarEstado() {
    elif grep "Not connected" $LOG > /dev/null 2>&1 ; then
       mensaje="Sin conexión en red"
 
-   elif grep "^530 " $LOG > /dev/null 2>&1 ; then
+   elif grep "^530 " $LOG | grep  -v "^530 bytes "> /dev/null 2>&1 ; then
       mensaje="Fallo de autentificación"
 
-   elif grep "^550 " $LOG > /dev/null 2>&1 ; then
+   elif grep "^550 " $LOG | grep  -v "^550 bytes " > /dev/null 2>&1 ; then
       mensaje="No existe archivo"
 
-   elif grep "^553 " $LOG > /dev/null 2>&1 ; then
+   elif grep "^553 " $LOG | grep  -v "^553 bytes "  > /dev/null 2>&1 ; then
       mensaje="No existe archivo o directorio, Quiza falte crear directorio en el servidor"
 
    elif grep "No such file or directory" $LOG > /dev/null 2>&1 ; then
@@ -195,8 +192,38 @@ function comprobarEstado() {
    elif grep "Operation not permitted" $LOG > /dev/null 2>&1 ; then
       mensaje="Operación no permitida"
  
-   elif egrep "$posibles_errores" $LOG > /dev/null 2>&1 ; then
-      mensaje="$(egrep '$posibles_errores' $LOG)"
+   elif grep "^202 " $LOG | grep  -v "^202 bytes "  > /dev/null 2>&1 ; then
+      mensaje="`grep "^202 " $LOG | grep  -v "^202 bytes "`"
+
+   elif grep "^426 " $LOG | grep  -v "^426 bytes "  > /dev/null 2>&1 ; then
+      mensaje="`grep "^426 " $LOG | grep  -v "^426 bytes "`"
+
+   elif grep "^202 " $LOG | grep  -v "^202 bytes "  > /dev/null 2>&1 ; then
+      mensaje="`grep "^202 " $LOG | grep  -v "^202 bytes "`"
+
+   elif grep "^999 " $LOG | grep  -v "^999 bytes "  > /dev/null 2>&1 ; then
+      mensaje="`grep "^999 " $LOG | grep  -v "^999 bytes "`"
+
+   elif grep "^666 " $LOG | grep  -v "^666 bytes "  > /dev/null 2>&1 ; then
+      mensaje="`grep "^666 " $LOG | grep  -v "^666 bytes "`"
+
+   elif grep "^505 " $LOG | grep  -v "^505 bytes "  > /dev/null 2>&1 ; then
+      mensaje="`grep "^505 " $LOG | grep  -v "^505 bytes "`"
+
+   elif grep "^503 " $LOG | grep  -v "^503 bytes "  > /dev/null 2>&1 ; then
+      mensaje="`grep "^503 " $LOG | grep  -v "^503 bytes "`"
+
+   elif grep "^501 " $LOG | grep  -v "^501 bytes "  > /dev/null 2>&1 ; then
+      mensaje="`grep "^501 " $LOG | grep  -v "^501 bytes "`"
+
+   elif grep "^500 " $LOG | grep  -v "^500 bytes "  > /dev/null 2>&1 ; then
+      mensaje="`grep "^500 " $LOG | grep  -v "^500 bytes "`"
+
+   elif grep "^450 " $LOG | grep  -v "^450 bytes "  > /dev/null 2>&1 ; then
+      mensaje="`grep "^450 " $LOG | grep  -v "^450 bytes "`"
+
+   elif grep "^not found " $LOG  > /dev/null 2>&1 ; then
+      mensaje="`grep "^not found " $LOG`"
 
    fi
 
@@ -215,7 +242,6 @@ function comprobarEstado() {
 }
 
 ## Buscar códigos de error en la salida de ftp
-## @bug Puede fallar si coincide el tamaño del archivo con un código
 
 function verError(){
 
