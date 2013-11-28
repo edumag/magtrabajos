@@ -163,16 +163,18 @@ function insertarDocumento () {
    if [ -z "${documentos_seleccionados[*]}" ] ; then
 
       read -p 'Documento: ' DOC
-      documentos_seleccionados=($DOC)
+      documentos_seleccionados=("$DOC")
 
    else
 
       echo
       echo "Insertar: "
       echo
+      DIFS="$IFS" ; IFS=$'\n'
       for x in ${documentos_seleccionados[*]} ; do
-         echo - $x
+         echo - "$x"
       done
+      IFS="$DIFS"
       echo
 
    fi
@@ -180,16 +182,18 @@ function insertarDocumento () {
    read -n 1 -s -p "Insertar documentos (s/n): " OPCION
 
    if [ "$OPCION" = 's' ] ; then
+      DIFS="$IFS" ; IFS=$'\n'
       for x in ${documentos_seleccionados[*]} ; do
          cp "$x" ${dir_adjuntos}/
          if [ $? != 0 ] ; then
             mensajes "Error al adjuntar documento: $x"
             break
          fi
-         SQL="INSERT INTO documentos VALUES ($movimientoId,'`basename $x`') "
+         SQL="INSERT INTO documentos VALUES ($movimientoId,'`basename '$x'`') "
          ejecutarSQL "$SQL"
          echo "Insertado $x"
       done
+      IFS="$DIFS"
    else
       mensajes "Insertar cancelado"
    fi
@@ -202,18 +206,24 @@ function listadoDocumentos () {
    cd "$dir_adjuntos"
    [[ $? = 0 ]] || ( echo "No se pudo accedeer a directorio de documentos $dir_adjuntos" ; help_documentos ; exit )
    local -i c=0
+   DIFS="$IFS" ; IFS=$'\n'
    for documento in * ; do
       [[ -z "$documento" ]] && break
       set c=c++
       lista_documentos[$c]="$documento"
    done
+   IFS="$DIFS"
 
    echo
    echo Numero de documentos: ${#lista_documentos[*]}
    echo
+   DIFS="$IFS" ; IFS=$'\n'
    for d in ${lista_documentos[*]} ; do
       echo "$c) $documento"
    done
+   IFS="$DIFS"
+
+   tecla
 
    cd "$pwd_a"
 
