@@ -1,17 +1,14 @@
 var a00065 =
 [
-    [ "PROYECTO", "a00065_a3b7d6e5216eb6a27738dc4f9a9ff63d9.htm#a3b7d6e5216eb6a27738dc4f9a9ff63d9", null ],
-    [ "lista_informes", "a00065_a154e86a844e68a3b647b5c0200910a04.htm#a154e86a844e68a3b647b5c0200910a04", null ],
-    [ "definir_perfil_actual", "a00065_a0de630b15992abf7cd84887ef19d9546.htm#a0de630b15992abf7cd84887ef19d9546", null ],
-    [ "menuInformes", "a00065_acbacc2a772600a9c37aec0bb825c7187.htm#acbacc2a772600a9c37aec0bb825c7187", null ],
-    [ "config", "a00065_a58ecdd2afc93b4799c5cfea723a04b23.htm#a58ecdd2afc93b4799c5cfea723a04b23", null ],
-    [ "proyecto", "a00065_a923f6adfdd6c5015df90ef9ae2b3842a.htm#a923f6adfdd6c5015df90ef9ae2b3842a", null ],
-    [ "perfiles", "a00065_a6830278d6d717db86f7b1a0dfaf00583.htm#a6830278d6d717db86f7b1a0dfaf00583", null ],
-    [ "dir_perfiles_proyecto", "a00065_a00ece2857898ebcbcfcc1e22c9d5d794.htm#a00ece2857898ebcbcfcc1e22c9d5d794", null ],
-    [ "$dir_perfiles_usuario", "a00065_a0a109d0fc4a3b339e115e36775550e74.htm#a0a109d0fc4a3b339e115e36775550e74", null ],
-    [ "if", "a00065_a7e2f8e9dafd5474846a3692f6082cb4a.htm#a7e2f8e9dafd5474846a3692f6082cb4a", null ],
-    [ "then", "a00065_a751ff7ed91d2e43008930137c9fa6925.htm#a751ff7ed91d2e43008930137c9fa6925", null ],
-    [ "$dir_perfiles_proyecto", "a00065_ae3010fb2ca8740d77bddde945536424b.htm#ae3010fb2ca8740d77bddde945536424b", null ],
-    [ "fi", "a00065_a2430242dc52b9fec75095457ac808899.htm#a2430242dc52b9fec75095457ac808899", null ],
-    [ "perfil_actual_fich", "a00065_a4258533858d55b95509980a3cd0d3bd2.htm#a4258533858d55b95509980a3cd0d3bd2", null ]
+    [ "_cscope", "a00065_aec15d787a8607260fffa9bebee212068.htm#aec15d787a8607260fffa9bebee212068", null ],
+    [ "mcs_cseditor", "a00065_a6136fb6cac75ed8a4e26d33bdcd19999.htm#a6136fb6cac75ed8a4e26d33bdcd19999", null ],
+    [ "mcs_csdir_codigo", "a00065_a800e210fd055e18c1701e647dbef9a37.htm#a800e210fd055e18c1701e647dbef9a37", null ],
+    [ "mcs_csexclude", "a00065_af473fd62ddcb1682378c77e9bf56a1bd.htm#af473fd62ddcb1682378c77e9bf56a1bd", null ],
+    [ "mcs_cspatron", "a00065_a4f3978ccf44e37d72bfd00f2fff8a853.htm#a4f3978ccf44e37d72bfd00f2fff8a853", null ],
+    [ "desc_mcs_cseditor", "a00065_a0958f19cac45929b63062f713af4f48e.htm#a0958f19cac45929b63062f713af4f48e", null ],
+    [ "desc_mcs_csdir_codigo", "a00065_a5e9be99d0e967df19845c7ea87ac3e09.htm#a5e9be99d0e967df19845c7ea87ac3e09", null ],
+    [ "desc_mcs_csexclude", "a00065_a5fe0ae83170b354741bdb8cf9038ab84.htm#a5fe0ae83170b354741bdb8cf9038ab84", null ],
+    [ "desc_mcs_cspatron", "a00065_ad67f0a8490c695af022f407e52652d45.htm#ad67f0a8490c695af022f407e52652d45", null ],
+    [ "conf", "a00065_ac1090b2b9d21e14d8651504351e308e1.htm#ac1090b2b9d21e14d8651504351e308e1", null ],
+    [ "_cscope", "a00065_a8b4adfdef36ace8c5bcab17a26bb6fbf.htm#a8b4adfdef36ace8c5bcab17a26bb6fbf", null ]
 ];

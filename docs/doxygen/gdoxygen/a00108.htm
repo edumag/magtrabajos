@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>magTrabajos: Lista de bugs</title>
+<title>magTrabajos: Configuración</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -36,7 +36,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">magTrabajos
-   &#160;<span id="projectnumber">1</span>
+   &#160;<span id="projectnumber">3.2</span>
    </div>
    
   </td>
@@ -55,7 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.htm"><span>Página&#160;principal</span></a></li>
-      <li class="current"><a href="pages.htm"><span>Páginas&#160;relacionadas</span></a></li>
+      <li><a href="pages.htm"><span>Páginas&#160;relacionadas</span></a></li>
       <li><a href="modules.htm"><span>Módulos</span></a></li>
       <li><a href="files.htm"><span>Archivos</span></a></li>
       <li><a href="dirs.htm"><span>Directorios</span></a></li>
@@ -88,23 +88,84 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
 </script>
 <div id="doc-content">
 <div class="header">
+  <div class="summary">
+<a href="#groups">Módulos</a> &#124;
+<a href="#files">Archivos</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
-<div class="title">Lista de bugs </div>  </div>
+<div class="title">Configuración</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><dl class="reflist">
-<dt><a class="anchor" id="_bug000001"></a>Archivo <a class="el" href="a00017.htm">buscar_codigo</a>  </dt>
-<dd>No esta sirviendo las coincidencias a magtrabajos en los informes </dd>
-<dt><a class="anchor" id="_bug000002"></a>Namespace <a class="el" href="a00097.htm">componentes</a>  </dt>
-<dd>Se presenta segunda columna de listados anteriores, hay que hacer limpieza </dd>
-<dt><a class="anchor" id="_bug000003"></a>Miembro <a class="el" href="a00102_ga7db7073ee0934328391a050787aeb6d6.htm#ga7db7073ee0934328391a050787aeb6d6">default_per_proyecto_pendiente_codigo</a>  </dt>
-<dd>en código, puede resultar muy lento, pero podemos configurar carpetas que queremos descartar del proyecto a la hora de hacer busquedas en buscar_codigo  </dd>
-<dt><a class="anchor" id="_bug000005"></a>Archivo <a class="el" href="a00057.htm">magcontrolversion</a>  </dt>
-<dd>No se puede generar release  </dd>
-<dt><a class="anchor" id="_bug000004"></a>Miembro <a class="el" href="a00046_ab57aec29401bbbc986644acdbda93974.htm#ab57aec29401bbbc986644acdbda93974">verError</a>  ()</dt>
-<dd>Puede fallar si coincide el tamaño del archivo con un código </dd>
-</dl>
-</div></div><!-- contents -->
+
+<p>Añadir con source a cualquier script que se utilice, nos automatiza:  
+<a href="#details">Más...</a></p>
+<table class="memberdecls">
+<tr><td colspan="2"><h2><a name="groups"></a>
+Módulos</h2></td></tr>
+<tr class="memitem:a00109"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00109.htm">Configuración para buscar_codigo</a></td></tr>
+<tr class="memitem:a00112"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00112.htm">Configuración para maginformes</a></td></tr>
+<tr class="memdesc:a00112"><td class="mdescLeft">&#160;</td><td class="mdescRight"><p>Perfil por defecto y sus descripciones. </p>
+<br/></td></tr>
+<tr class="memitem:a00113"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00113.htm">Configuración para mDocumentos</a></td></tr>
+<tr class="memitem:a00114"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00114.htm">Configuración de magtrabajos por defecto</a></td></tr>
+<tr class="memdesc:a00114"><td class="mdescLeft">&#160;</td><td class="mdescRight"><p>Colocamos prefijo 'default_mt_' ha las variables para ser reconocibles. </p>
+<br/></td></tr>
+<tr class="memitem:a00115"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00115.htm">Configuración para ftptrabajo</a></td></tr>
+<tr><td colspan="2"><h2><a name="files"></a>
+Archivos</h2></td></tr>
+<tr class="memitem:a00030"><td class="memItemLeft" align="right" valign="top">archivo &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00030.htm">configuracion</a></td></tr>
+<tr class="memdesc:a00030"><td class="mdescLeft">&#160;</td><td class="mdescRight"><p>Librería para gestionar la configuración de los scripts de bash. </p>
+<br/></td></tr>
+<tr><td colspan="2"><h2><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ga88098f48eb3b79e5cc4a25a9c55bd2aa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00108_ga88098f48eb3b79e5cc4a25a9c55bd2aa.htm#ga88098f48eb3b79e5cc4a25a9c55bd2aa">if</a> [&quot;$config_magtrabajos_cargado&quot;==&quot;&quot;]</td></tr>
+<tr class="memdesc:ga88098f48eb3b79e5cc4a25a9c55bd2aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Si ya ha sido cogido el fichero no hace falta repetir.  <a href="#ga88098f48eb3b79e5cc4a25a9c55bd2aa"></a><br/></td></tr>
+<tr class="memitem:ga3bdb7b71db7c3cd887d4c8363eca683e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00108_ga3bdb7b71db7c3cd887d4c8363eca683e.htm#ga3bdb7b71db7c3cd887d4c8363eca683e">DIR_CONF_USUARIO</a> = &quot;$HOME/.magtrabajos/&quot;</td></tr>
+<tr class="memdesc:ga3bdb7b71db7c3cd887d4c8363eca683e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Directorio donde se guardan las configuraciones del usuario.  <a href="#ga3bdb7b71db7c3cd887d4c8363eca683e"></a><br/></td></tr>
+<tr class="memitem:ga7457ea1d63f35cc560e26b97c7637641"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00108_ga7457ea1d63f35cc560e26b97c7637641.htm#ga7457ea1d63f35cc560e26b97c7637641">parte_dir</a> = '/home/eduardo/SERVIDOR'</td></tr>
+<tr class="memdesc:ga7457ea1d63f35cc560e26b97c7637641"><td class="mdescLeft">&#160;</td><td class="mdescRight">Para construir la url del servidor local donde se genera la documentación cambiamos la parte del directorio correspondiente por localhost/.  <a href="#ga7457ea1d63f35cc560e26b97c7637641"></a><br/></td></tr>
+<tr class="memitem:gab3c75d2e7f29761338b422df6ea1db4a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00108_gab3c75d2e7f29761338b422df6ea1db4a.htm#gab3c75d2e7f29761338b422df6ea1db4a">DIR_MAGTRABAJOS</a> = $(dirname &quot;$BASH_SOURCE&quot;)</td></tr>
+<tr class="memdesc:gab3c75d2e7f29761338b422df6ea1db4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Directorio de magtrabajos.  <a href="#gab3c75d2e7f29761338b422df6ea1db4a"></a><br/></td></tr>
+<tr class="memitem:ga9c30f54aa8b346a1bc7b5dfd88184f95"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00108_ga9c30f54aa8b346a1bc7b5dfd88184f95.htm#ga9c30f54aa8b346a1bc7b5dfd88184f95">DIR_PROGRAMA</a> = $(dirname &quot;`readlink $0`&quot;)</td></tr>
+<tr class="memdesc:ga9c30f54aa8b346a1bc7b5dfd88184f95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Directorio del script actual.  <a href="#ga9c30f54aa8b346a1bc7b5dfd88184f95"></a><br/></td></tr>
+<tr class="memitem:ga04d2d5567ecf15bd7e9edb6edefe7bf4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00108_ga04d2d5567ecf15bd7e9edb6edefe7bf4.htm#ga04d2d5567ecf15bd7e9edb6edefe7bf4">PROGRAMA</a> = $(basename &quot;`readlink $0`&quot;)</td></tr>
+<tr class="memdesc:ga04d2d5567ecf15bd7e9edb6edefe7bf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nombre del script actual.  <a href="#ga04d2d5567ecf15bd7e9edb6edefe7bf4"></a><br/></td></tr>
+</table>
+<hr/><a name="details" id="details"></a><h2>Descripción detallada</h2>
+<p>Añadir con source a cualquier script que se utilice, nos automatiza: </p>
+<ul>
+<li><p class="startli">Tener disponible las variables:</p>
+<ul>
+<li>DIR_CONF_USUARIO: Directorio con las configuraciones del usuario</li>
+</ul>
+<ul>
+<li>DIR_MAGTRABAJOS: Directorio de magtrabajos</li>
+</ul>
+<ul>
+<li>DIR_PROYECTO: Directorio del proyecto actual</li>
+</ul>
+<ul>
+<li>DIR_TMP: Directorio temporal</li>
+</ul>
+<ul>
+<li>parte_dir: Contenido de la dirección que debemos sustituir por localhost si queremos tener la url local.</li>
+</ul>
+<ul>
+<li>DIR_PROGRAMA: Directorio del script actual</li>
+</ul>
+<ul>
+<li>PROGRAMA: Nombre del script actual.</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>Añadir librerías de libash Por defecto nos añade la general y configuracion, pero podemos antes de llamarlo indicar más librerías a incluir mediante LIBS="pantalla" por ejemplo.</li>
+</ul>
+<ul>
+<li>Si estamos en un componente o pluging buscara su configuración por defecto en su directorio con nombre config.default y la del usuarios si la hay.</li>
+</ul>
+<dl class="todo"><dt><b><a class="el" href="a00117.htm#_todo000012">Tareas pendientes:</a></b></dt><dd>Aplicar este sistema a todos los sripts de magtrabajos</dd></dl>
+</div><!-- contents -->
 </div>
   <div id="nav-path" class="navpath">
     <ul>

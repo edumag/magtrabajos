@@ -1,14 +1,11 @@
 var a00059 =
 [
-    [ "_cscope", "a00059_aec15d787a8607260fffa9bebee212068.htm#aec15d787a8607260fffa9bebee212068", null ],
-    [ "mcs_cseditor", "a00059_a6136fb6cac75ed8a4e26d33bdcd19999.htm#a6136fb6cac75ed8a4e26d33bdcd19999", null ],
-    [ "mcs_csdir_codigo", "a00059_a800e210fd055e18c1701e647dbef9a37.htm#a800e210fd055e18c1701e647dbef9a37", null ],
-    [ "mcs_csexclude", "a00059_af473fd62ddcb1682378c77e9bf56a1bd.htm#af473fd62ddcb1682378c77e9bf56a1bd", null ],
-    [ "mcs_cspatron", "a00059_a4f3978ccf44e37d72bfd00f2fff8a853.htm#a4f3978ccf44e37d72bfd00f2fff8a853", null ],
-    [ "desc_mcs_cseditor", "a00059_a0958f19cac45929b63062f713af4f48e.htm#a0958f19cac45929b63062f713af4f48e", null ],
-    [ "desc_mcs_csdir_codigo", "a00059_a5e9be99d0e967df19845c7ea87ac3e09.htm#a5e9be99d0e967df19845c7ea87ac3e09", null ],
-    [ "desc_mcs_csexclude", "a00059_a5fe0ae83170b354741bdb8cf9038ab84.htm#a5fe0ae83170b354741bdb8cf9038ab84", null ],
-    [ "desc_mcs_cspatron", "a00059_ad67f0a8490c695af022f407e52652d45.htm#ad67f0a8490c695af022f407e52652d45", null ],
-    [ "conf", "a00059_ac1090b2b9d21e14d8651504351e308e1.htm#ac1090b2b9d21e14d8651504351e308e1", null ],
-    [ "_cscope", "a00059_a8b4adfdef36ace8c5bcab17a26bb6fbf.htm#a8b4adfdef36ace8c5bcab17a26bb6fbf", null ]
+    [ "caja", "a00059_a15120345ae8161a866c4a35819941f1d.htm#a15120345ae8161a866c4a35819941f1d", null ],
+    [ "if", "a00059_a19a783b8e24a04ddbb022dd9b9759734.htm#a19a783b8e24a04ddbb022dd9b9759734", null ],
+    [ "then", "a00059_a751ff7ed91d2e43008930137c9fa6925.htm#a751ff7ed91d2e43008930137c9fa6925", null ],
+    [ "total_bloqueados", "a00059_a3bed852093626ca7da81c6b09c79150a.htm#a3bed852093626ca7da81c6b09c79150a", null ],
+    [ "SALIDA", "a00059_a880a02c1d4c748b5e2e1838475610bda.htm#a880a02c1d4c748b5e2e1838475610bda", null ],
+    [ "elif", "a00059_a5095d01a9716e14bb0bb79396208ad84.htm#a5095d01a9716e14bb0bb79396208ad84", null ],
+    [ "else", "a00059_a0544c3fe466e421738dae463968b70ba.htm#a0544c3fe466e421738dae463968b70ba", null ],
+    [ "fi", "a00059_a2430242dc52b9fec75095457ac808899.htm#a2430242dc52b9fec75095457ac808899", null ]
 ];

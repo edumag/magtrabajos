@@ -16,7 +16,7 @@ $translator = array(
   'search_matches' => "Coincidencias:",
   'search' => "Buscar",
   'split_bar' => "<div id=\"side-nav\" class=\"ui-resizable side-nav-resizable\">\n  <div id=\"nav-tree\">\n    <div id=\"nav-tree-contents\">\n    </div>\n  </div>\n  <div id=\"splitbar\" style=\"-moz-user-select:none;\" \n       class=\"ui-resizable-handle\">\n  </div>\n</div>\n<script type=\"text/javascript\">\n  initNavTree('.htm','');\n</script>\n<div id=\"doc-content\">\n",
-  'logo' => "Generado el Martes, 5 de Noviembre de 2013 11:07:27 para magTrabajos por&#160;\n<a href=\"http://www.doxygen.org/index.html\">\n<img class=\"footer\" src=\"doxygen.png\" alt=\"doxygen\"/></a> 1.8.0 ",
+  'logo' => "Generado el Martes, 17 de Diciembre de 2013 10:38:09 para magTrabajos por&#160;\n<a href=\"http://www.doxygen.org/index.html\">\n<img class=\"footer\" src=\"doxygen.png\" alt=\"doxygen\"/></a> 1.8.0 ",
 );
 
 </script>
