@@ -3,14 +3,14 @@ var NAVTREE =
   [ "magTrabajos", "index.htm", [
     [ "magTrabajos", "index.htm", null ],
     [ "Manual", "a00006.htm", "a00006" ],
-    [ "Lista de tareas pendientes", "a00107.htm", null ],
-    [ "Lista de bugs", "a00108.htm", null ],
+    [ "Lista de tareas pendientes", "a00117.htm", null ],
+    [ "Lista de bugs", "a00118.htm", null ],
     [ "Módulos", "modules.htm", "modules" ],
     [ "Archivos", null, [
       [ "Lista de archivos", "files.htm", "files" ],
       [ "Miembros de los ficheros", "globals.htm", [
         [ "Todo", "globals.htm", "globals_dup" ],
-        [ "Funciones/Subprogramas", "globals_func.htm", "globals_func" ],
+        [ "Funciones/Subprogramas", "globals_func.htm", null ],
         [ "Variables", "globals_vars.htm", null ]
       ] ]
     ] ],

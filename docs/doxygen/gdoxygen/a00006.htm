@@ -36,7 +36,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">magTrabajos
-   &#160;<span id="projectnumber">1</span>
+   &#160;<span id="projectnumber">3.2</span>
    </div>
    
   </td>
@@ -97,21 +97,21 @@ Configuración</h2>
 <p>La configuración sigue una jerarquía desde la configuración global hasta la de cada proyecto individual.</p>
 <ul>
 <li>Primero cargamos $HOME/.magtrabajos/configuracion/*</li>
-<li>Después $HOME/.magtrabajos/proyectos/$proyecto/configuracion/*</li>
+<li>Después .magtrabajos/configuracion/*</li>
 </ul>
 <p>En cada una de estas carpetas puede añadirse configuración para el mismo magtrabajos o para alguno de sus componentes o plugins que utiliza.</p>
 <p>Ejemplo en buscar_codigo:</p>
 <div class="fragment"><pre class="fragment"><span class="preprocessor">## Si tenemos configuración de usuario la recogemos</span>
-<span class="preprocessor"></span>[[ -e <span class="stringliteral">&quot;$HOME/.magtrabajos/configuracion/$programa&quot;</span> ]] &amp;&amp; <a class="code" href="a00029_aff3eea2b216124fe42203c1a3f265a10.htm#aff3eea2b216124fe42203c1a3f265a10" title="Si no hemos incluido librería general la incluimos.">source</a> <span class="stringliteral">&quot;$HOME/.magtrabajos/configuracion/$programa&quot;</span>
+<span class="preprocessor"></span>[[ -e <span class="stringliteral">&quot;$HOME/.magtrabajos/configuracion/$programa&quot;</span> ]] &amp;&amp; <a class="code" href="a00030_aff3eea2b216124fe42203c1a3f265a10.htm#aff3eea2b216124fe42203c1a3f265a10" title="Si no hemos incluido librería general la incluimos.">source</a> <span class="stringliteral">&quot;$HOME/.magtrabajos/configuracion/$programa&quot;</span>
 
 <span class="preprocessor">## Si tenemos configuración de proyecto la recogemos</span>
-<span class="preprocessor">[[ -e &quot;$HOME/.magtrabajos/proyectos/$proyecto/configuracion/$programa&quot; ]] &amp;&amp; source &quot;$HOME/.magtrabajos/configuracion/$programa&quot;</span>
+<span class="preprocessor">[[ -e &quot;.magtrabajos/configuracion/$programa&quot; ]] &amp;&amp; source &quot;$HOME/.magtrabajos/configuracion/$programa&quot;</span>
 </pre></div><h2><a class="anchor" id="lanzadores"></a>
 Comandos externos</h2>
-<p>Si encontramos "$HOME/.magtrabajos/proyectos/$proyecto/lanzadores" el archivo lo añadimos al iniciar el programa. Para automatizar el lanzamiento de aplicaciones que abrimos al trabajar en el proyecto.</p>
+<p>Si encontramos ".magtrabajos/lanzadores" el archivo lo añadimos al iniciar el programa. Para automatizar el lanzamiento de aplicaciones que abrimos al trabajar en el proyecto.</p>
 <p>Ejemplos:</p>
 <div class="fragment"><pre class="fragment"><span class="preprocessor"># Si hay sesión de vim anterior la abrimos y la borramos </span>
-<span class="preprocessor"></span>[[ -e Session.vim ]] &amp;&amp; ( gvim -S Session.vim ; sleep 2<a class="code" href="a00060_a6fa0d43897114f3a0a0c1d80ebc641d1.htm#a6fa0d43897114f3a0a0c1d80ebc641d1" title="/;\/\/\/&lt;/g&#39; | \">s</a> ; rm -f Session.vim )
+<span class="preprocessor"></span>[[ -e Session.vim ]] &amp;&amp; ( gvim -S Session.vim ; sleep 2<a class="code" href="a00066_a6fa0d43897114f3a0a0c1d80ebc641d1.htm#a6fa0d43897114f3a0a0c1d80ebc641d1" title="/;\/\/\/&lt;/g&#39; | \">s</a> ; rm -f Session.vim )
 
 # Lanzamos firefox con pagina del <a class="code" href="a00017_ae5aec6f8522bff879437488ef941b584.htm#ae5aec6f8522bff879437488ef941b584" title="Si definimos un proyecto se recogerá la configuración del mismo.">proyecto</a> en local
 $mt_navegador $mt_web_local &amp;

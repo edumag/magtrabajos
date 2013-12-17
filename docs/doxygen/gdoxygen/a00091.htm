@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>magTrabajos: Referencia del Archivo registros</title>
+<title>magTrabajos: Referencia del Archivo permisos_apache</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -36,7 +36,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">magTrabajos
-   &#160;<span id="projectnumber">1</span>
+   &#160;<span id="projectnumber">3.2</span>
    </div>
    
   </td>
@@ -94,21 +94,30 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
 </script>
 <div id="doc-content">
 <div class="header">
+  <div class="summary">
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
-<div class="title">Referencia del Archivo registros</div>  </div>
+<div class="title">Referencia del Archivo permisos_apache</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Lanzar terminal con los registros.  
+<p>Cambiar permisos para los proyectos web, para que no den problemas.  
 <a href="#details">Más...</a></p>
+<table class="memberdecls">
+<tr><td colspan="2"><h2><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a41f55d102ea5687e95fb361019a12da4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00091_a41f55d102ea5687e95fb361019a12da4.htm#a41f55d102ea5687e95fb361019a12da4">usuario</a> = www-data</td></tr>
+<tr class="memdesc:a41f55d102ea5687e95fb361019a12da4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Identificador de usuario.  <a href="#a41f55d102ea5687e95fb361019a12da4"></a><br/></td></tr>
+<tr class="memitem:a014caf873c32b2da0ade84ca1d6a6625"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00091_a014caf873c32b2da0ade84ca1d6a6625.htm#a014caf873c32b2da0ade84ca1d6a6625">grupo</a> = $USER</td></tr>
+<tr class="memdesc:a014caf873c32b2da0ade84ca1d6a6625"><td class="mdescLeft">&#160;</td><td class="mdescRight">Identificador de apache.  <a href="#a014caf873c32b2da0ade84ca1d6a6625"></a><br/></td></tr>
+</table>
 <hr/><a name="details" id="details"></a><h2>Descripción detallada</h2>
-<div class="textblock"><p>Lanzar terminal con los registros. </p>
-<p>Para que funcione se debe configurar mysql con las siguientes instrucciones.</p>
-<h1>Here you can see queries with especially long duration</h1>
-<p>log_slow_queries = /var/log/mysql/mysql-slow.log long_query_time = 2 log-queries-not-using-indexes </p>
+<div class="textblock"><p>Cambiar permisos para los proyectos web, para que no den problemas. </p>
+<p>Hacer que el grupo de la carpeta del proyecto sea el nuestro usuario y el sueño apache, dar permisos de escritura al grupo</p>
+<p>Si el primer argumento que se pasa es --quitar en vez de dar permisos lo que hacemos es quitarlos para el grupo pero mantenemos los de apache </p>
 </div></div><!-- contents -->
 </div>
   <div id="nav-path" class="navpath">
     <ul>
-      <li class="navelem"><a class="el" href="a00091.htm">registros</a>      </li>
+      <li class="navelem"><a class="el" href="a00091.htm">permisos_apache</a>      </li>
 <!-- pie para magtrabajos -->
