@@ -132,7 +132,7 @@ filtrar=''
 
 fichero_log=""                                        ##< Fichero de registro
 dir_final=""                                          ##< Directorio final
-dir_tmp="${dir_tmp_servidor}magdoxygen/"                       ##< Si ejecutamos sobre archivos generamos en tmp
+dir_tmp="${dir_tmp_servidor}magdoxygen/"              ##< Si ejecutamos sobre archivos generamos en tmp
 
 [[ -e "$dir_tmp" ]] || mkdir "$dir_tmp"
 
@@ -214,8 +214,16 @@ function _doxygen() {
                fi
             fi
 
-            # $TERM -T Doxygen -e "doxygen $fich_doxygen 2> $registro " &
-            doxygen $fich_doxygen 2> $registro
+            # si estamos utilizando magcontrolversion buscamos versión de proyecto
+            local version="`magcontrolversion version`"
+            if [ "$version" != "" ] ; then
+               filtro="$filtro\n\nPROJECT_NUMBER=$version"
+               echo -e "$filtro" > "$dir_tmp/filtro_doxygen"
+               cat "$fich_doxygen" "$dir_tmp/filtro_doxygen" | doxygen - 2> $registro
+            else
+               doxygen $fich_doxygen 2> $registro
+            fi
+
             ;;
 
          ver)
@@ -414,7 +422,7 @@ function _doxygen() {
             local f=($archivos_afectados)
 
             if [ "$archivos_afectados" != "" ] ; then
-               abre_caja
+               abre_caja 'Archivos afectados'
                if [ ${#f[*]} -gt 5 ] ; then
                   linea_caja "" "${#f[*]} archivos seleccionados" $colDestacado
                else

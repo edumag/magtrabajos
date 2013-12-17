@@ -15,5 +15,5 @@ else
    echo 
    echo "Comando: $terminal '$comando_mc'"
    echo
-   eval "$terminal '$comando_mc'" 
+   eval "$terminal '$comando_mc'" &
 fi
