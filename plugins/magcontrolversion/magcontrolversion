@@ -529,6 +529,11 @@ function _subversion() {
             esac
             ;;
 
+         version) # Mostrar numero de versión
+            echo $version_actual
+            exit 
+            ;;
+
          *) # Lista de archivos afectados
             archivos_afectados=$(echo "$*")
             shift 

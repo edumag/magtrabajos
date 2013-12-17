@@ -4091,7 +4091,6 @@ function menuTareas(){
           echo
           eval $cmd
           eval "$mt_navegador $mt_archivo_html" &
-          #eval "firefox --new-window $mt_archivo_html &"
           ACCION=$ACCION_ANTERIOR
           ;;
 
