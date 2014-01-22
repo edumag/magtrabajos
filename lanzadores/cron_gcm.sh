@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## @file cron_gcm.sh
+## @brief Lanzar petición de cron sobre proyecto basado en GCM
+
 # configuración
 user="trabajosedu"
 pass="edutrabajos"
