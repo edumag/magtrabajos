@@ -1,0 +1,27 @@
+var a00076 =
+[
+    [ "while", "a00076_aa4777514710b7c970df77c113581616a.htm#aa4777514710b7c970df77c113581616a", null ],
+    [ "do", "a00076_a721c6ff80a6d3e4ad4ffa52a04c60085.htm#a721c6ff80a6d3e4ad4ffa52a04c60085", null ],
+    [ "in", "a00076_a6e9b21860ec45924cf8f02888ee127e3.htm#a6e9b21860ec45924cf8f02888ee127e3", null ],
+    [ "titulo", "a00076_a2f280f69b0c06b694cc557a7b6c67001.htm#a2f280f69b0c06b694cc557a7b6c67001", null ],
+    [ "shift", "a00076_ab3c44a76dd678c93affe68a1f8a980ab.htm#ab3c44a76dd678c93affe68a1f8a980ab", null ],
+    [ "pie", "a00076_a62cf2baea113875e4a1fdde379babaf2.htm#a62cf2baea113875e4a1fdde379babaf2", null ],
+    [ "plantilla", "a00076_a120255238d7f0b30bef7f62afb86a8cc.htm#a120255238d7f0b30bef7f62afb86a8cc", null ],
+    [ "break", "a00076_a55fb181fa078f0e474ef7b4ec59d807f.htm#a55fb181fa078f0e474ef7b4ec59d807f", null ],
+    [ "esac", "a00076_af4a02c0892d4bbbc0b12d045a0da1fe3.htm#af4a02c0892d4bbbc0b12d045a0da1fe3", null ],
+    [ "done", "a00076_ad604cff3eb5d475cdc9f8eb5ab570fee.htm#ad604cff3eb5d475cdc9f8eb5ab570fee", null ],
+    [ "datos", "a00076_a787c62d958d2baa5af126889bb25123a.htm#a787c62d958d2baa5af126889bb25123a", null ],
+    [ "seq", "a00076_afc7e870a7f4f872ab7a854eceb8c72f5.htm#afc7e870a7f4f872ab7a854eceb8c72f5", null ],
+    [ "archivo_final", "a00076_a6b4a44404c104a50879552a11f22fb87.htm#a6b4a44404c104a50879552a11f22fb87", null ],
+    [ "continue", "a00076_a5c0387baf452d822049c452121cd1d47.htm#a5c0387baf452d822049c452121cd1d47", null ],
+    [ "archivo_grafica", "a00076_ac223d96779c0d207c4e93189136a628f.htm#ac223d96779c0d207c4e93189136a628f", null ],
+    [ "comando", "a00076_a4f9ab02d7a66c0a6b5ce8400f5e5f9f5.htm#a4f9ab02d7a66c0a6b5ce8400f5e5f9f5", null ],
+    [ "archivo_plantilla", "a00076_a2ac3ce7c8c9e52549a197e978865e52f.htm#a2ac3ce7c8c9e52549a197e978865e52f", null ],
+    [ "if", "a00076_a72f72cff5be336b0b9715c3c2ad8a219.htm#a72f72cff5be336b0b9715c3c2ad8a219", null ],
+    [ "then", "a00076_a751ff7ed91d2e43008930137c9fa6925.htm#a751ff7ed91d2e43008930137c9fa6925", null ],
+    [ "exit", "a00076_a6733eb5f605d09eaede9845835d71c4e.htm#a6733eb5f605d09eaede9845835d71c4e", null ],
+    [ "fi", "a00076_a2430242dc52b9fec75095457ac808899.htm#a2430242dc52b9fec75095457ac808899", null ],
+    [ "$archivo_plantilla", "a00076_a76b24e36a44cb85ce4414c32a2128576.htm#a76b24e36a44cb85ce4414c32a2128576", null ],
+    [ "$comando", "a00076_a3ea889a2b70a09f04e2561e99b4a95eb.htm#a3ea889a2b70a09f04e2561e99b4a95eb", null ],
+    [ "$archivo_final", "a00076_ab8cb1e7d38996ec0e0b4abffa6af1ef9.htm#ab8cb1e7d38996ec0e0b4abffa6af1ef9", null ]
+];

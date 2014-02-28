@@ -36,7 +36,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">magTrabajos
-   &#160;<span id="projectnumber">3.2</span>
+   &#160;<span id="projectnumber">3.5</span>
    </div>
    
   </td>

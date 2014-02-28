@@ -1,10 +1,7 @@
 var a00115 =
 [
-    [ "default_ftptrabajo_server", "a00115_ga5fb5e4aa119ed6e0a0c24ba1ed01fbe6.htm#ga5fb5e4aa119ed6e0a0c24ba1ed01fbe6", null ],
-    [ "default_ftptrabajo_dir_remoto", "a00115_ga0c0d9dbacb43289f4c2aab3067e2ea30.htm#ga0c0d9dbacb43289f4c2aab3067e2ea30", null ],
-    [ "default_ftptrabajo_dir_local", "a00115_ga2adc02d76ea8feba11c5299b38f3c461.htm#ga2adc02d76ea8feba11c5299b38f3c461", null ],
-    [ "default_ftptrabajo_bloqueo_activado", "a00115_ga711ce8e0c9a58d22ce74338fb271444e.htm#ga711ce8e0c9a58d22ce74338fb271444e", null ],
-    [ "default_ftptrabajo_editor", "a00115_gafd2850f90e03d6d49fe1f7f563b05435.htm#gafd2850f90e03d6d49fe1f7f563b05435", null ],
-    [ "default_ftptrabajo_com_diff", "a00115_ga403e74ad03616066cf20acda1031673f.htm#ga403e74ad03616066cf20acda1031673f", null ],
-    [ "default_ftptrabajo_terminal", "a00115_ga3558a7fb74ce4f557f9883ee2eb1de33.htm#ga3558a7fb74ce4f557f9883ee2eb1de33", null ]
+    [ "buscar_codigo_formato_enlaces", "a00115_gab67ff4b7bc3e6c58f74aa54f1a56f107.htm#gab67ff4b7bc3e6c58f74aa54f1a56f107", null ],
+    [ "buscar_codigo_paginador", "a00115_ga5efb1d5bdfdfbb420038f0632e2661d9.htm#ga5efb1d5bdfdfbb420038f0632e2661d9", null ],
+    [ "buscar_codigo_exclude_dir", "a00115_ga3575bd91224761f3d3df6982ca4b17b7.htm#ga3575bd91224761f3d3df6982ca4b17b7", null ],
+    [ "buscar_codigo_exclude", "a00115_gaec0fd27f3529e15b1e8242ec1d3e6368.htm#gaec0fd27f3529e15b1e8242ec1d3e6368", null ]
 ];
