@@ -4961,7 +4961,7 @@ function movimientosRecientes() {
 
    SQL="SELECT CONCAT('-m ',m.id,'::', p.nombre,' ', t.nombre ,' ', m.nombre, '   ', max(ti.fechaFinal), ' ',e.nombre ) 
    FROM movimientos m, tiempos ti, proyectos p, tareas t , estados e
-   WHERE t.idProyecto=p.id AND t.id=m.idTarea AND m.id=ti.idMovimiento AND t.idEstado=e.id ORDER BY m.id 
+   WHERE t.idProyecto=p.id AND t.id=m.idTarea AND m.id=ti.idMovimiento AND t.idEstado=e.id  
    "
    if [ "$proyectoId" != "" ] ; then        # Si tenemos proyecto listamos los del proyecto solamente
       SQL="$SQL AND p.id=$proyectoId "
