@@ -169,7 +169,7 @@ function comprobar_dependencias() {
    SQL_PRO="SELECT CONCAT( p.nombre, '\t',  p.descripcion ) from proyectos p WHERE 1"
 
    # Movimiento simple
-   SQL_MOV="SELECT CONCAT(m.id, '\t',m.nombre, '\t', m.fechaInicio, '\t', m.fechaFinal, '\t', m.descripcion, '\t') FROM movimientos m WHERE 1 "
+   SQL_MOV="SELECT CONCAT(m.id, '\t',m.nombre, '\t', m.fechaInicio, '\t', m.fechaFinal, '\t', m.descripcion, '\t') FROM movimientos m WHERE 1 ORDER BY m.id "
 
    # Movimiento con fecha castellanizada
    SQL_MOV2="SELECT CONCAT(m.id, '\t', CONCAT(
@@ -188,7 +188,7 @@ function comprobar_dependencias() {
                                 WHEN 10 THEN 'Octubre'
                                 WHEN 11 THEN 'Noviembre'
                                 WHEN 12 THEN 'Diciembre'
-                           END ), '\t', m.nombre , '\t', m.descripcion ) FROM movimientos m WHERE 1 "
+                           END ), '\t', m.nombre , '\t', m.descripcion ) FROM movimientos m WHERE 1  ORDER BY m.id "
 
    # Tarea
    SQL_TAR="select t.id, t.nombre, t.presupuesto, t.euroshora, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, fechaPagado AS Pagado, t.prioridad  from tareas t, estados e WHERE t.idEstado=e.id "
@@ -4758,7 +4758,7 @@ function menuMovimientos() {
           ;;
       s|S) # Seleccionar movimiento
           # Si nomes tenim un moviment el selecionem directament
-          SQL="SELECT id FROM movimientos WHERE idTarea=$tareaId"
+          SQL="SELECT id FROM movimientos WHERE idTarea=$tareaId ORDER BY id"
           aSALIDA=($(ejecutarSQL "$SQL" "-N"))
           if [ ${#aSALIDA[*]} = 1 ] ; then
              movimientoId=${aSALIDA[0]}
@@ -4769,7 +4769,7 @@ function menuMovimientos() {
              mensajes " No hay movimientos"
 
           else
-             SQL="SELECT CONCAT(m.id, '\t', m.nombre) FROM movimientos m WHERE m.idTarea=$tareaId"
+             SQL="SELECT CONCAT(m.id, '\t', m.nombre) FROM movimientos m WHERE m.idTarea=$tareaId ORDER BY m.id "
              SALIDA=$(ejecutarSQL "$SQL" "-N")
              if [ "$SALIDA" = "" ] ; then
                 mensajes " No hay movimientos"
@@ -4961,7 +4961,7 @@ function movimientosRecientes() {
 
    SQL="SELECT CONCAT('-m ',m.id,'::', p.nombre,' ', t.nombre ,' ', m.nombre, '   ', max(ti.fechaFinal), ' ',e.nombre ) 
    FROM movimientos m, tiempos ti, proyectos p, tareas t , estados e
-   WHERE t.idProyecto=p.id AND t.id=m.idTarea AND m.id=ti.idMovimiento AND t.idEstado=e.id
+   WHERE t.idProyecto=p.id AND t.id=m.idTarea AND m.id=ti.idMovimiento AND t.idEstado=e.id ORDER BY m.id 
    "
    if [ "$proyectoId" != "" ] ; then        # Si tenemos proyecto listamos los del proyecto solamente
       SQL="$SQL AND p.id=$proyectoId "
