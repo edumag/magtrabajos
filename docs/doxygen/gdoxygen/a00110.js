@@ -1,19 +1,14 @@
 var a00110 =
 [
-    [ "Configuración para libash", "a00111.htm", "a00111" ],
-    [ "configuracion", "a00030.htm", null ],
-    [ "doxygen2help", "a00041.htm", null ],
-    [ "elegirArchivo", "a00049.htm", null ],
-    [ "listado", "a00060.htm", null ],
-    [ "mysql2rst", "a00088.htm", null ],
-    [ "pantalla", "a00089.htm", null ],
-    [ "source", "a00110_ga327a1717ff37e756c07052836823c39a.htm#ga327a1717ff37e756c07052836823c39a", null ],
-    [ "color", "a00110_gae28887b666238c40587d77cc5fb07500.htm#gae28887b666238c40587d77cc5fb07500", null ],
-    [ "mensajes", "a00110_ga2dc3828595bd67b107e6d4e8d1464c44.htm#ga2dc3828595bd67b107e6d4e8d1464c44", null ],
-    [ "tecla", "a00110_gabac1f6a2bc7d69c5fd4567b4ad41104b.htm#gabac1f6a2bc7d69c5fd4567b4ad41104b", null ],
-    [ "AHORA", "a00110_ga75e4e893b1711e299fe552e6ecf77dc5.htm#ga75e4e893b1711e299fe552e6ecf77dc5", null ],
-    [ "pasarMinHoras", "a00110_ga8fcb08f369bf879c037b8cc58afb3927.htm#ga8fcb08f369bf879c037b8cc58afb3927", null ],
-    [ "comandoExterno", "a00110_gac8b37fb9bfa7bec83174eedd44d0e2b4.htm#gac8b37fb9bfa7bec83174eedd44d0e2b4", null ],
-    [ "ejecutarComando", "a00110_ga73d1f850e70f66c869db2a2878befb42.htm#ga73d1f850e70f66c869db2a2878befb42", null ],
-    [ "libash_general_incluida", "a00110_ga5ee032259237843bc7c5ebb596792461.htm#ga5ee032259237843bc7c5ebb596792461", null ]
+    [ "help", "a00110_ac52549a2ad0673eacd480e5adb72cbea.htm#ac52549a2ad0673eacd480e5adb72cbea", null ],
+    [ "while", "a00110_a7bcde4a4e6f82e84b3a6c2180b58f50d.htm#a7bcde4a4e6f82e84b3a6c2180b58f50d", null ],
+    [ "do", "a00110_a721c6ff80a6d3e4ad4ffa52a04c60085.htm#a721c6ff80a6d3e4ad4ffa52a04c60085", null ],
+    [ "in", "a00110_a6e9b21860ec45924cf8f02888ee127e3.htm#a6e9b21860ec45924cf8f02888ee127e3", null ],
+    [ "help_magtestunit", "a00110_a4f2d673a06dd10cf72f5cd2a539af03f.htm#a4f2d673a06dd10cf72f5cd2a539af03f", null ],
+    [ "exit", "a00110_a6733eb5f605d09eaede9845835d71c4e.htm#a6733eb5f605d09eaede9845835d71c4e", null ],
+    [ "info_magtestunit", "a00110_ae3bd2948a8f03a1aa11ee9f2d6cb45ae.htm#ae3bd2948a8f03a1aa11ee9f2d6cb45ae", null ],
+    [ "comprobar_dependencias", "a00110_a2d46f2b0658e3f638b9e87bb8ec2f6aa.htm#a2d46f2b0658e3f638b9e87bb8ec2f6aa", null ],
+    [ "break", "a00110_a55fb181fa078f0e474ef7b4ec59d807f.htm#a55fb181fa078f0e474ef7b4ec59d807f", null ],
+    [ "esac", "a00110_af4a02c0892d4bbbc0b12d045a0da1fe3.htm#af4a02c0892d4bbbc0b12d045a0da1fe3", null ],
+    [ "done", "a00110_ad604cff3eb5d475cdc9f8eb5ab570fee.htm#ad604cff3eb5d475cdc9f8eb5ab570fee", null ]
 ];

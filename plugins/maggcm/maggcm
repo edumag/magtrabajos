@@ -1,0 +1,52 @@
+#!/bin/bash 
+
+## @file ftptrabajo
+##
+## @brief Programa de ftp para trabajar en grupo.
+## 
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+# Recoger configuración de magtrabajos
+source `dirname "$BASH_SOURCE"`/../../config
+
+# Configuración por defecto de ftptrabajo 
+configuracion_leer "${DIR_CONF_USUARIO}configuracion/ftptrabajo" "`dirname "$BASH_SOURCE"`/config.default" 'ftptrabajo' 
+
+# Si no tenemos consola volvemos a lanzarlo desde una.
+[[ `tty` ]] || ( ( exec ${TERM:-xterm} -e "$0 $* ; read" & ) ;  exit )
+
+## Activación de depuración (Cualquier valor la activa)
+DEV=${DEV:-}
+
+while [ -n "$1" ]; do
+
+   case $1 in
+
+      --proyecto|-p) shift 1 ; proyecto=$1 ; shift 1 ;;
+      -info) shift 1 ; info ; exit ;;
+      -h|-help|--help) shift 1 ; help ; exit ;;
+      --configurar) shift 1 ; comprobar_proyecto && configurar_proyecto ; exit ;; 
+      --menu) shift 1 ; accion=menu ;;
+      --sincronizar) shift 1 ; accion=sincronizar ;;
+      *) archivos[$na]="$1" ; shift 1 ; let na++ ;;
+
+   esac
+done
+
+if [ -n "$accion" ] ; then
+   echo "`date +"%A %d de %B del %Y"` $accion: $*" >> $REG
+   cmd="$accion $@"
+   [[ $DEV ]] && echo proyecto: $proyecto
+   [[ $DEV ]] && echo CMD: $cmd
+   eval "$cmd"
+else
+   echo
+   echo "Parametro no reconocido [$*]"
+   echo
+   help
+fi
+
+

@@ -1,6 +1,4 @@
 var a00054 =
 [
-    [ "echo", "a00054_ac4fd59c9ee95bff469a7cd55e16f0449.htm#ac4fd59c9ee95bff469a7cd55e16f0449", null ],
-    [ "develop", "a00054_a9f6bb638ccb71b80f461719790b63967.htm#a9f6bb638ccb71b80f461719790b63967", null ],
-    [ "conflictos", "a00054_ab86f912a44fa38280ba6754f39899a56.htm#ab86f912a44fa38280ba6754f39899a56", null ]
+    [ "informe_subversion", "a00054_a6d3ae61dc21c0a383441e3e0728bcbd5.htm#a6d3ae61dc21c0a383441e3e0728bcbd5", null ]
 ];

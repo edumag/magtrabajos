@@ -1,0 +1,24 @@
+##
+## @defgroup configuracion_ftptrabajo Configuración para ftptrabajo
+## @ingroup configuracion
+## @{
+
+
+   ## @var default_ftptrabajo_server
+   ## Servidor ftp
+
+   default_ftptrabajo_server="$mt_ftp"
+
+   ## @var default_ftptrabajo_dir_remoto
+   ## Directorio remoto
+
+   default_ftptrabajo_dir_remoto="$mt_ftp_directorio"
+
+
+
+   ## @var default_ftptrabajo_terminal
+   ## Terminal a utilizar
+   default_ftptrabajo_terminal="${mt_terminal:-xterm}"
+
+## @}
+

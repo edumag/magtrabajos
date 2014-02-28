@@ -1,11 +1,11 @@
 var a00059 =
 [
-    [ "caja", "a00059_a15120345ae8161a866c4a35819941f1d.htm#a15120345ae8161a866c4a35819941f1d", null ],
-    [ "if", "a00059_a19a783b8e24a04ddbb022dd9b9759734.htm#a19a783b8e24a04ddbb022dd9b9759734", null ],
+    [ "informacion_ip_IP", "a00059_a41472c52acfc1fc7f9f8e68557bb6238.htm#a41472c52acfc1fc7f9f8e68557bb6238", null ],
+    [ "informacion_ip_CMD", "a00059_aa82d043031b65c758dcb6891deee436f.htm#aa82d043031b65c758dcb6891deee436f", null ],
+    [ "if", "a00059_a838bf3decf72320908bf2ef899c4cd57.htm#a838bf3decf72320908bf2ef899c4cd57", null ],
     [ "then", "a00059_a751ff7ed91d2e43008930137c9fa6925.htm#a751ff7ed91d2e43008930137c9fa6925", null ],
-    [ "total_bloqueados", "a00059_a3bed852093626ca7da81c6b09c79150a.htm#a3bed852093626ca7da81c6b09c79150a", null ],
-    [ "SALIDA", "a00059_a880a02c1d4c748b5e2e1838475610bda.htm#a880a02c1d4c748b5e2e1838475610bda", null ],
-    [ "elif", "a00059_a5095d01a9716e14bb0bb79396208ad84.htm#a5095d01a9716e14bb0bb79396208ad84", null ],
-    [ "else", "a00059_a0544c3fe466e421738dae463968b70ba.htm#a0544c3fe466e421738dae463968b70ba", null ],
-    [ "fi", "a00059_a2430242dc52b9fec75095457ac808899.htm#a2430242dc52b9fec75095457ac808899", null ]
+    [ "echo", "a00059_ac4fd59c9ee95bff469a7cd55e16f0449.htm#ac4fd59c9ee95bff469a7cd55e16f0449", null ],
+    [ "IP", "a00059_adcfa80c284c01820c705204f5ebb4bb0.htm#adcfa80c284c01820c705204f5ebb4bb0", null ],
+    [ "fi", "a00059_a2430242dc52b9fec75095457ac808899.htm#a2430242dc52b9fec75095457ac808899", null ],
+    [ "$informacion_ip_IP", "a00059_a1cbd6e1a7d0339173bfcf5d71408f101.htm#a1cbd6e1a7d0339173bfcf5d71408f101", null ]
 ];

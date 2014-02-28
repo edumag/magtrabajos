@@ -3,8 +3,10 @@ var NAVTREE =
   [ "magTrabajos", "index.htm", [
     [ "magTrabajos", "index.htm", null ],
     [ "Manual", "a00006.htm", "a00006" ],
-    [ "Lista de tareas pendientes", "a00117.htm", null ],
-    [ "Lista de bugs", "a00118.htm", null ],
+    [ "readme", "a00007.htm", null ],
+    [ "de programación generado en bash", "a00008.htm", null ],
+    [ "Lista de tareas pendientes", "a00123.htm", null ],
+    [ "Lista de bugs", "a00124.htm", null ],
     [ "Módulos", "modules.htm", "modules" ],
     [ "Archivos", null, [
       [ "Lista de archivos", "files.htm", "files" ],
