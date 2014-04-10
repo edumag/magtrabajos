@@ -44,6 +44,16 @@
 ## Directorio destino
 DIR_MANUAL=/home/eduardo/Documentos/doc/programacion/programacionWeb/php/
 
+echo
+echo Directorio destino $DIR_MANUAL
+echo
+if [ ! -d "$DIR_MANUAL" ] ; then
+   mkdir -p "$DIR_MANUAL"
+   echo
+   echo Creamos directorio destino
+   echo
+fi
+
 dir_actual="`pwd`"
 [[ -d "$DIR_MANUAL" ]] || mkdir -p "$DIR_MANUAL"
 cd /tmp

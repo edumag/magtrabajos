@@ -1,0 +1,69 @@
+#!/bin/bash
+
+## @file
+## @brief Documentar css
+##
+## Podemos documentarnos sobre como generar la documentación desde 
+## http://jacobrask.github.io/styledocco/
+
+
+## Error
+function  error_documentar_css() { 
+   echo
+   echo uso: `basename $0` [url de css] [directorio final] [nombre de proyecto] 
+   echo
+   if [ ! -z "$1" ] ; then
+     echo
+     echo -e "$1"
+     echo
+   fi
+   exit 1
+}
+
+
+url_css=${1:-"${mt_url_servidor}/proyectos.css?debug=1"}
+destino=${2:-"docs/css/"}
+pro=${3:-$proyecto}
+titulo="Estilos de $pro"
+
+[[ -z $url_css  ]] && error_documentar_css "Debe definirse la url del archivo css"
+[[ -z $destino  ]] && error_documentar_css "Debe definirse el directorio final"
+[[ -z $pro      ]] && error_documentar_css "Debe definirse nombre de proyecto"
+
+echo
+echo url: $url_css
+echo destino: $destino
+echo proyecto: $pro
+echo
+
+if [ -e "$destino" ] ; then
+   echo
+   read -p "Borramos destino antes de regenerar documentación (s/n): " OPCION
+   echo
+   if [ "$OPCION" == "s" ] ; then rm -fr "$destino" ; fi
+fi
+
+lynx -source "$url_css" | grep -v 'acaba:'  | grep -v 'Eventos' | sed 's/Tema actual/# Tema/g' | sed 's/fichero:/# /' | sed '/^$/d'  > /tmp/$pro.css
+
+if [[ $? != 0 ]] ; then
+  echo
+  echo Error bajando recogiendo archivo css
+  echo
+  exit 1
+else
+  echo
+  echo Recogido archivo css $url_css
+  echo
+fi
+
+styledocco --verbose -n "$titulo" -o "$destino" --include /tmp/$pro.css /tmp/$pro.css
+
+if [[ $? != 0 ]] ; then
+  echo 
+  echo Error al ejecutar comando
+  echo
+else
+  echo
+  echo Documentación realizada en $destino
+  echo
+fi
