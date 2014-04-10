@@ -1,13 +1,11 @@
 var a00085 =
 [
-    [ "cmd", "a00085_adfc5ba7e22f5e4a6221c12a70503bef3.htm#adfc5ba7e22f5e4a6221c12a70503bef3", null ],
-    [ "if", "a00085_a379427ceef0438a052f708727a84d3ed.htm#a379427ceef0438a052f708727a84d3ed", null ],
+    [ "terminal", "a00085_ac8946d2a0583792b5f43ba0f6616ff84.htm#ac8946d2a0583792b5f43ba0f6616ff84", null ],
+    [ "comando_mc", "a00085_ab2f12fdb809cf3fd358ae9ba506c8a38.htm#ab2f12fdb809cf3fd358ae9ba506c8a38", null ],
     [ "then", "a00085_a751ff7ed91d2e43008930137c9fa6925.htm#a751ff7ed91d2e43008930137c9fa6925", null ],
-    [ "fi", "a00085_a2430242dc52b9fec75095457ac808899.htm#a2430242dc52b9fec75095457ac808899", null ],
-    [ "SQL", "a00085_ae06c74893e7defdf9732f636decfded8.htm#ae06c74893e7defdf9732f636decfded8", null ],
-    [ "ARCHIVOS", "a00085_a5e0a753fe93cffd304c51988213057c9.htm#a5e0a753fe93cffd304c51988213057c9", null ],
-    [ "elif", "a00085_afbe9608b166b5235dfd4fd5da8aa72fb.htm#afbe9608b166b5235dfd4fd5da8aa72fb", null ],
+    [ "echo", "a00085_ac4fd59c9ee95bff469a7cd55e16f0449.htm#ac4fd59c9ee95bff469a7cd55e16f0449", null ],
+    [ "proyecto", "a00085_af984162a9a8441a9d425202f616a5322.htm#af984162a9a8441a9d425202f616a5322", null ],
     [ "else", "a00085_a0544c3fe466e421738dae463968b70ba.htm#a0544c3fe466e421738dae463968b70ba", null ],
-    [ "comando", "a00085_a1b1ddf1146c5692022384155966e8ae1.htm#a1b1ddf1146c5692022384155966e8ae1", null ],
-    [ "$cmd", "a00085_a45a9178229ce446544e76b3cc74dda11.htm#a45a9178229ce446544e76b3cc74dda11", null ]
+    [ "Comando", "a00085_ab927863f0a9bc3ee335db82f2943bee1.htm#ab927863f0a9bc3ee335db82f2943bee1", null ],
+    [ "fi", "a00085_a3fa11fa81c32458a151c4aca3ce747ce.htm#a3fa11fa81c32458a151c4aca3ce747ce", null ]
 ];

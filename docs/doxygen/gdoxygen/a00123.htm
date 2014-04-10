@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>magTrabajos: Lista de tareas pendientes</title>
+<title>magTrabajos: Configuración para ftptrabajo</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -36,7 +36,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">magTrabajos
-   &#160;<span id="projectnumber">3.5</span>
+   &#160;<span id="projectnumber">3.6</span>
    </div>
    
   </td>
@@ -55,7 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.htm"><span>Página&#160;principal</span></a></li>
-      <li class="current"><a href="pages.htm"><span>Páginas&#160;relacionadas</span></a></li>
+      <li><a href="pages.htm"><span>Páginas&#160;relacionadas</span></a></li>
       <li><a href="modules.htm"><span>Módulos</span></a></li>
       <li><a href="files.htm"><span>Archivos</span></a></li>
       <li><a href="dirs.htm"><span>Directorios</span></a></li>
@@ -88,69 +88,31 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
 </script>
 <div id="doc-content">
 <div class="header">
+  <div class="summary">
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
-<div class="title">Lista de tareas pendientes </div>  </div>
-</div><!--header-->
+<div class="title">Configuración para ftptrabajo</div>  </div>
+<div class="ingroups"><a class="el" href="a00116.htm">Configuración</a></div></div><!--header-->
 <div class="contents">
-<div class="textblock"><dl class="reflist">
-<dt><a class="anchor" id="_todo000002"></a>Miembro <a class="el" href="a00116_gae28887b666238c40587d77cc5fb07500.htm#gae28887b666238c40587d77cc5fb07500">color</a>  ()</dt>
-<dd>Detectar si la terminal actual permite colores  </dd>
-<dt><a class="anchor" id="_todo000003"></a>Namespace <a class="el" href="a00113.htm">componentes</a>  </dt>
-<dd>Unir en una misma función generar_listado y generar_listado_fichero  </dd>
-<dt><a class="anchor" id="_todo000012"></a>Grupo <a class="el" href="a00114.htm">configuracion</a>  </dt>
-<dd>Aplicar este sistema a todos los sripts de magtrabajos </dd>
-<dt><a class="anchor" id="_todo000013"></a>Archivo <a class="el" href="a00035.htm">contrasenya</a>  </dt>
-<dd>Encriptar el archivo para más seguridad  </dd>
-<dt><a class="anchor" id="_todo000008"></a>Miembro <a class="el" href="a00118_ga7db7073ee0934328391a050787aeb6d6.htm#ga7db7073ee0934328391a050787aeb6d6">default_per_proyecto_pendiente_codigo</a>  </dt>
-<dd>y </dd>
-<dt><a class="anchor" id="_todo000001"></a>Archivo <a class="el" href="a00052.htm">elegirArchivo</a>  </dt>
-<dd>Si solo tenemos un archivo y el directorio es el de inicio, se selecciona directamente. </dd>
-<dt><a class="anchor" id="_todo000017"></a>Archivo <a class="el" href="a00055.htm">ftptrabajo</a>  </dt>
-<dd>Con sftp no borra los ficheros de bloqueo ya que no entiende delete y ftp no entiende rm </dd>
-<dt><a class="anchor" id="_todo000004"></a>Miembro <a class="el" href="a00063_aff734e4ecac5bc6ee36d39289e60b6fd.htm#aff734e4ecac5bc6ee36d39289e60b6fd">generar_listado</a>  ()</dt>
-<dd>Evitar que sean interpretadas la variables en el contenido que recibimos  </dd>
-<dt><a class="anchor" id="_todo000007"></a>Miembro <a class="el" href="a00072_abf00e9e8c4a5e60eaa4f493941fd8e2e.htm#abf00e9e8c4a5e60eaa4f493941fd8e2e">listado_tareas_totales</a>  ()</dt>
-<dd>Si no hay tareas no presentar nada  </dd>
-<dt><a class="anchor" id="_todo000018"></a>Archivo <a class="el" href="a00064.htm">magbackup</a>  </dt>
-<dd><p class="startdd">Si pasamos un archivo o directorio creamos archivo comprimido </p>
-<p>Copias para mysql </p>
-<p class="enddd">Copias para git </p>
-</dd>
-<dt><a class="anchor" id="_todo000019"></a>Archivo <a class="el" href="a00066.htm">magcontrolversion</a>  </dt>
-<dd><p class="startdd">Comprobar permisos de escritura para ahorrarnos problemas </p>
-<p class="enddd">Al ejecutar subversión permitir editar la descripción </p>
-</dd>
-<dt><a class="anchor" id="_todo000020"></a>Archivo <a class="el" href="a00068.htm">magcscope</a>  </dt>
-<dd>generar configuración al vuelo y para el proyecto </dd>
-<dt><a class="anchor" id="_todo000021"></a>Archivo <a class="el" href="a00069.htm">magdoxygen</a>  </dt>
-<dd>Configuración a sistema de magtrabajos </dd>
-<dt><a class="anchor" id="_todo000005"></a>Archivo <a class="el" href="a00070.htm">magexportar</a>  </dt>
-<dd><p class="startdd">Terminar script </p>
-<p class="enddd">Exportar: html,pdf,s5, excel </p>
-</dd>
-<dt><a class="anchor" id="_todo000014"></a>page <a class="el" href="index.htm">magTrabajos</a>  </dt>
-<dd><p class="startdd">Eliminar variables de configuración mt_archivo_html, mt_archivo_pdf, mt_archivo_cvs y dejarlo en un directorio </p>
-<p>Archivo con la información para desarrolladores. Enviar, Editar, recuperar </p>
-<p>Menú de notas Editar, exportar </p>
-<p>Una tarea en estado posible debe tener la prioridad a 0, una tarea con estado empezado debe tener la prioridad a 9 </p>
-<p>Crear un evento que compruebe buffers de vim abiertos antes de cerrar movimiento </p>
-<p>Acciones de plugins o complementos fuera de magtrabajos, pasarlo a eventos </p>
-<p class="enddd">Sistema de colores en la libreria general de libash para todos </p>
-</dd>
-<dt><a class="anchor" id="_todo000010"></a>Archivo <a class="el" href="a00082.htm">mail2rst</a>  </dt>
-<dd>Quitar cabecera de emails  </dd>
-<dt><a class="anchor" id="_todo000011"></a>Archivo <a class="el" href="a00084.htm">mDocumentos</a>  </dt>
-<dd><p class="startdd">Implementar la relación entre movimiento y adjuntos </p>
-<p class="enddd">Configurar comando que abre los documentos  </p>
-</dd>
-<dt><a class="anchor" id="_todo000006"></a>Miembro <a class="el" href="a00070_a629a894469ea6f00a65267fd8141d841.htm#a629a894469ea6f00a65267fd8141d841">menuExportar</a>  ()</dt>
-<dd><p class="startdd">Configurar carpeta destino para los archivos exportados </p>
-<p class="enddd">Buscar archivos con extensión .rst en la carpeta de proyecto y permitir seleccionar entre ellos, ahora e encuentran programadores.rst y pendiente.rst </p>
-</dd>
-<dt><a class="anchor" id="_todo000009"></a>Miembro <a class="el" href="a00075_acbacc2a772600a9c37aec0bb825c7187.htm#acbacc2a772600a9c37aec0bb825c7187">menuInformes</a>  ()</dt>
-<dd>colocar todo esto en una función a parte </dd>
-</dl>
-</div></div><!-- contents -->
+<table class="memberdecls">
+<tr><td colspan="2"><h2><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ga5fb5e4aa119ed6e0a0c24ba1ed01fbe6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00123_ga5fb5e4aa119ed6e0a0c24ba1ed01fbe6.htm#ga5fb5e4aa119ed6e0a0c24ba1ed01fbe6">default_ftptrabajo_server</a> = &quot;$mt_ftp&quot;</td></tr>
+<tr class="memdesc:ga5fb5e4aa119ed6e0a0c24ba1ed01fbe6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Servidor ftp.  <a href="#ga5fb5e4aa119ed6e0a0c24ba1ed01fbe6"></a><br/></td></tr>
+<tr class="memitem:ga0c0d9dbacb43289f4c2aab3067e2ea30"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00123_ga0c0d9dbacb43289f4c2aab3067e2ea30.htm#ga0c0d9dbacb43289f4c2aab3067e2ea30">default_ftptrabajo_dir_remoto</a> = &quot;$mt_ftp_directorio&quot;</td></tr>
+<tr class="memdesc:ga0c0d9dbacb43289f4c2aab3067e2ea30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Directorio remoto.  <a href="#ga0c0d9dbacb43289f4c2aab3067e2ea30"></a><br/></td></tr>
+<tr class="memitem:ga2adc02d76ea8feba11c5299b38f3c461"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00123_ga2adc02d76ea8feba11c5299b38f3c461.htm#ga2adc02d76ea8feba11c5299b38f3c461">default_ftptrabajo_dir_local</a> = &quot;${mt_dir_local:-`pwd`/}&quot;</td></tr>
+<tr class="memdesc:ga2adc02d76ea8feba11c5299b38f3c461"><td class="mdescLeft">&#160;</td><td class="mdescRight">Directorio local.  <a href="#ga2adc02d76ea8feba11c5299b38f3c461"></a><br/></td></tr>
+<tr class="memitem:ga711ce8e0c9a58d22ce74338fb271444e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00123_ga711ce8e0c9a58d22ce74338fb271444e.htm#ga711ce8e0c9a58d22ce74338fb271444e">default_ftptrabajo_bloqueo_activado</a> = &quot;no&quot;</td></tr>
+<tr class="memdesc:ga711ce8e0c9a58d22ce74338fb271444e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sistema de bloque de ficheros compatible con dreamweaver.  <a href="#ga711ce8e0c9a58d22ce74338fb271444e"></a><br/></td></tr>
+<tr class="memitem:gafd2850f90e03d6d49fe1f7f563b05435"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00123_gafd2850f90e03d6d49fe1f7f563b05435.htm#gafd2850f90e03d6d49fe1f7f563b05435">default_ftptrabajo_editor</a> = gvim</td></tr>
+<tr class="memdesc:gafd2850f90e03d6d49fe1f7f563b05435"><td class="mdescLeft">&#160;</td><td class="mdescRight">Editor.  <a href="#gafd2850f90e03d6d49fe1f7f563b05435"></a><br/></td></tr>
+<tr class="memitem:ga403e74ad03616066cf20acda1031673f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00123_ga403e74ad03616066cf20acda1031673f.htm#ga403e74ad03616066cf20acda1031673f">default_ftptrabajo_com_diff</a> = ${mt_comando_diff:-vimdiff}</td></tr>
+<tr class="memdesc:ga403e74ad03616066cf20acda1031673f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Comando para editar diferencias.  <a href="#ga403e74ad03616066cf20acda1031673f"></a><br/></td></tr>
+<tr class="memitem:ga3558a7fb74ce4f557f9883ee2eb1de33"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00123_ga3558a7fb74ce4f557f9883ee2eb1de33.htm#ga3558a7fb74ce4f557f9883ee2eb1de33">default_ftptrabajo_terminal</a> = &quot;${mt_terminal:-xterm}&quot;</td></tr>
+<tr class="memdesc:ga3558a7fb74ce4f557f9883ee2eb1de33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Terminal a utilizar.  <a href="#ga3558a7fb74ce4f557f9883ee2eb1de33"></a><br/></td></tr>
+</table>
+</div><!-- contents -->
 </div>
   <div id="nav-path" class="navpath">
     <ul>

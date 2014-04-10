@@ -1,0 +1,38 @@
+#!/bin/bash
+
+## @file
+## @brief Comprobar enlaces rotos
+
+## Error
+function  error_enlaces() { 
+   echo
+   echo uso: `basename $0` [url] [archivo final] 
+   echo
+   if [ ! -z "$1" ] ; then
+     echo
+     echo -e "$1"
+     echo
+   fi
+   exit 1
+}
+
+url=${1:-$mt_url_servidor}
+terminal=${mt_miniterminal:-$TERM}
+file=${2:-/tmp/enlaces_rotos.txt}
+
+[[ -z $url ]] && error_enlaces "Debe definirse la url de destino"
+
+cmd="wget --spider  --no-parent -r -o $file $url"
+
+echo
+echo url: $url
+echo
+echo comando: $cmd
+echo
+
+$cmd
+
+echo
+echo Archivo final: $file
+echo
+
