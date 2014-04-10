@@ -1,16 +1,13 @@
 var a00098 =
 [
-    [ "data", "a00098_a511ae0b1c13f95e5f08f1a0dd3da3d93.htm#a511ae0b1c13f95e5f08f1a0dd3da3d93", null ],
-    [ "echo", "a00098_ac4fd59c9ee95bff469a7cd55e16f0449.htm#ac4fd59c9ee95bff469a7cd55e16f0449", null ],
-    [ "__pad48__", "a00098_a48ad1f069485494ca4737386140b987e.htm#a48ad1f069485494ca4737386140b987e", null ],
-    [ "__pad49__", "a00098_a98f144bdf37e6898061be3fc348c40eb.htm#a98f144bdf37e6898061be3fc348c40eb", null ],
-    [ "__pad50__", "a00098_a1673e5b8677da4f9726afd2943279852.htm#a1673e5b8677da4f9726afd2943279852", null ],
-    [ "__pad51__", "a00098_acf6f44fba6e7726d7263c0793939a21a.htm#acf6f44fba6e7726d7263c0793939a21a", null ],
-    [ "__pad52__", "a00098_a0fe5251fba1de074a17ed9946001a908.htm#a0fe5251fba1de074a17ed9946001a908", null ],
-    [ "__pad53__", "a00098_a85ed2b517264d67aa9cf8f5fb0c1212f.htm#a85ed2b517264d67aa9cf8f5fb0c1212f", null ],
-    [ "__pad54__", "a00098_a1383960e57b7ad582c92b51dca6bc735.htm#a1383960e57b7ad582c92b51dca6bc735", null ],
-    [ "__pad55__", "a00098_aad8ee8d7ef82b47040844349be1990b0.htm#aad8ee8d7ef82b47040844349be1990b0", null ],
-    [ "__pad56__", "a00098_ac17b4709a85c0ff212401350fbf90f64.htm#ac17b4709a85c0ff212401350fbf90f64", null ],
-    [ "__pad57__", "a00098_a5c6ecfd2af4885aaf4e1f8a2d803f09b.htm#a5c6ecfd2af4885aaf4e1f8a2d803f09b", null ],
-    [ "$archivo_grafica", "a00098_a75896654ea1bc053d5d3cf6c9325caad.htm#a75896654ea1bc053d5d3cf6c9325caad", null ]
+    [ "if", "a00098_a1a766daa01302e3a8b99d3039afcc081.htm#a1a766daa01302e3a8b99d3039afcc081", null ],
+    [ "then", "a00098_a751ff7ed91d2e43008930137c9fa6925.htm#a751ff7ed91d2e43008930137c9fa6925", null ],
+    [ "shift", "a00098_ab3c44a76dd678c93affe68a1f8a980ab.htm#ab3c44a76dd678c93affe68a1f8a980ab", null ],
+    [ "accion_permisos", "a00098_a111cee20c50da11c37aa37f04b36342f.htm#a111cee20c50da11c37aa37f04b36342f", null ],
+    [ "fi", "a00098_a2430242dc52b9fec75095457ac808899.htm#a2430242dc52b9fec75095457ac808899", null ],
+    [ "destino", "a00098_a467017c0eacafcaed2939e930c562d0e.htm#a467017c0eacafcaed2939e930c562d0e", null ],
+    [ "usuario", "a00098_a41f55d102ea5687e95fb361019a12da4.htm#a41f55d102ea5687e95fb361019a12da4", null ],
+    [ "grupo", "a00098_a014caf873c32b2da0ade84ca1d6a6625.htm#a014caf873c32b2da0ade84ca1d6a6625", null ],
+    [ "$usuario", "a00098_a9934ee455e8236dfae4f16d588d5530e.htm#a9934ee455e8236dfae4f16d588d5530e", null ],
+    [ "else", "a00098_a0544c3fe466e421738dae463968b70ba.htm#a0544c3fe466e421738dae463968b70ba", null ]
 ];
