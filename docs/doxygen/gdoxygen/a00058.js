@@ -1,6 +1,25 @@
 var a00058 =
 [
-    [ "echo", "a00058_ac4fd59c9ee95bff469a7cd55e16f0449.htm#ac4fd59c9ee95bff469a7cd55e16f0449", null ],
-    [ "develop", "a00058_a9f6bb638ccb71b80f461719790b63967.htm#a9f6bb638ccb71b80f461719790b63967", null ],
-    [ "conflictos", "a00058_ab86f912a44fa38280ba6754f39899a56.htm#ab86f912a44fa38280ba6754f39899a56", null ]
+    [ "source", "a00118_ga327a1717ff37e756c07052836823c39a.htm#ga327a1717ff37e756c07052836823c39a", null ],
+    [ "log", "a00119_gae828aca6609f4ab584dc979e308ebb5b.htm#gae828aca6609f4ab584dc979e308ebb5b", null ],
+    [ "color", "a00118_gae28887b666238c40587d77cc5fb07500.htm#gae28887b666238c40587d77cc5fb07500", null ],
+    [ "mensajes", "a00118_ga2dc3828595bd67b107e6d4e8d1464c44.htm#ga2dc3828595bd67b107e6d4e8d1464c44", null ],
+    [ "tecla", "a00118_gabac1f6a2bc7d69c5fd4567b4ad41104b.htm#gabac1f6a2bc7d69c5fd4567b4ad41104b", null ],
+    [ "AHORA", "a00118_ga75e4e893b1711e299fe552e6ecf77dc5.htm#ga75e4e893b1711e299fe552e6ecf77dc5", null ],
+    [ "pasarMinHoras", "a00118_ga8fcb08f369bf879c037b8cc58afb3927.htm#ga8fcb08f369bf879c037b8cc58afb3927", null ],
+    [ "comandoExterno", "a00118_gac8b37fb9bfa7bec83174eedd44d0e2b4.htm#gac8b37fb9bfa7bec83174eedd44d0e2b4", null ],
+    [ "ejecutarComando", "a00118_ga73d1f850e70f66c869db2a2878befb42.htm#ga73d1f850e70f66c869db2a2878befb42", null ],
+    [ "libash_general_incluida", "a00118_ga5ee032259237843bc7c5ebb596792461.htm#ga5ee032259237843bc7c5ebb596792461", null ],
+    [ "conf_proyecto", "a00119_ga2dfda30ac703005dcee069a490945258.htm#ga2dfda30ac703005dcee069a490945258", null ],
+    [ "conf_magtrabajos", "a00119_gadc570a21b8ec640769e374f86128adc7.htm#gadc570a21b8ec640769e374f86128adc7", null ],
+    [ "conf", "a00119_gabd07cca8e4cbcf87da47e6e0d903ffa8.htm#gabd07cca8e4cbcf87da47e6e0d903ffa8", null ],
+    [ "if", "a00119_ga5333a88427957fc04d5329e16b2473d4.htm#ga5333a88427957fc04d5329e16b2473d4", null ],
+    [ "then", "a00119_ga751ff7ed91d2e43008930137c9fa6925.htm#ga751ff7ed91d2e43008930137c9fa6925", null ],
+    [ "configuración", "a00119_ga8ad64c07972ad3b12965f34e83687b17.htm#ga8ad64c07972ad3b12965f34e83687b17", null ],
+    [ "$conf_proyecto", "a00119_ga57dac10ee7318f9b6003bf5d187a0cfc.htm#ga57dac10ee7318f9b6003bf5d187a0cfc", null ],
+    [ "elif", "a00119_gaafebce8aca150e6b471e012fce237b0c.htm#gaafebce8aca150e6b471e012fce237b0c", null ],
+    [ "$conf_magtrabajos", "a00119_ga266517bb3607948f8bac8e98d9ed0c27.htm#ga266517bb3607948f8bac8e98d9ed0c27", null ],
+    [ "else", "a00119_ga0544c3fe466e421738dae463968b70ba.htm#ga0544c3fe466e421738dae463968b70ba", null ],
+    [ "$conf", "a00119_ga16d6e5d6ad621e4f9c73d4f8f297d56a.htm#ga16d6e5d6ad621e4f9c73d4f8f297d56a", null ],
+    [ "fi", "a00119_ga2430242dc52b9fec75095457ac808899.htm#ga2430242dc52b9fec75095457ac808899", null ]
 ];
