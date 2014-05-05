@@ -286,7 +286,7 @@ function listado_tareas_totales() {
    echo " Tareas                                                   Data Inici       Data Final       Total    "
    echo $LINEA 
    echo -e "$(echo -e $SALIDA | awk  -v RS='\nnn' -v FS='\t' '{ printf "%-50s  %15s  %15s %+15s\n",$1,$2,$3,$4 }')"
-   [[ "$total" != "" ]] && echo -e "$(echo -e "**$total**" | awk '{ printf "%-76s %+10s\n","**Total:**",$1 }')" 
+   [[ "$total" != "" ]] && echo -e "$(echo -e "**$total**" | awk '{ printf "%-76s %+36s\n","**Total:**",$1 }')" 
    echo $LINEA 
    }
 

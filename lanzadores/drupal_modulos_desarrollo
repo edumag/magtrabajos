@@ -1,0 +1,14 @@
+echo
+echo drush dl coder devel admin_menu
+echo
+drush dl coder devel admin_menu
+
+echo
+echo drush en coder coder_review devel devel_generate admin_devel admin_menu_toolbar admin_menu
+echo
+drush en coder coder_review devel devel_generate admin_devel admin_menu_toolbar admin_menu
+
+echo
+echo drush dis toolbar
+echo
+drush dis toolbar
