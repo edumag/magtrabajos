@@ -5,8 +5,8 @@ var NAVTREE =
     [ "Manual", "a00006.htm", "a00006" ],
     [ "readme", "a00007.htm", null ],
     [ "de programación generado en bash", "a00008.htm", null ],
-    [ "Lista de tareas pendientes", "a00125.htm", null ],
-    [ "Lista de bugs", "a00126.htm", null ],
+    [ "Lista de tareas pendientes", "a00126.htm", null ],
+    [ "Lista de bugs", "a00127.htm", null ],
     [ "Módulos", "modules.htm", "modules" ],
     [ "Archivos", null, [
       [ "Lista de archivos", "files.htm", "files" ],
