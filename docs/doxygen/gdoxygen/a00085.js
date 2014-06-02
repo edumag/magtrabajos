@@ -1,11 +1,14 @@
 var a00085 =
 [
-    [ "terminal", "a00085_ac8946d2a0583792b5f43ba0f6616ff84.htm#ac8946d2a0583792b5f43ba0f6616ff84", null ],
-    [ "comando_mc", "a00085_ab2f12fdb809cf3fd358ae9ba506c8a38.htm#ab2f12fdb809cf3fd358ae9ba506c8a38", null ],
+    [ "programa", "a00085_a85164071526f587167acbb63e7f97407.htm#a85164071526f587167acbb63e7f97407", null ],
+    [ "codificacion_salida", "a00085_a907c4ab55b91716abeb6a1e7ad171a91.htm#a907c4ab55b91716abeb6a1e7ad171a91", null ],
     [ "then", "a00085_a751ff7ed91d2e43008930137c9fa6925.htm#a751ff7ed91d2e43008930137c9fa6925", null ],
     [ "echo", "a00085_ac4fd59c9ee95bff469a7cd55e16f0449.htm#ac4fd59c9ee95bff469a7cd55e16f0449", null ],
-    [ "proyecto", "a00085_af984162a9a8441a9d425202f616a5322.htm#af984162a9a8441a9d425202f616a5322", null ],
-    [ "else", "a00085_a0544c3fe466e421738dae463968b70ba.htm#a0544c3fe466e421738dae463968b70ba", null ],
-    [ "Comando", "a00085_ab927863f0a9bc3ee335db82f2943bee1.htm#ab927863f0a9bc3ee335db82f2943bee1", null ],
-    [ "fi", "a00085_a3fa11fa81c32458a151c4aca3ce747ce.htm#a3fa11fa81c32458a151c4aca3ce747ce", null ]
+    [ "uso", "a00085_ab7462d6862fc6eec438108a043552550.htm#ab7462d6862fc6eec438108a043552550", null ],
+    [ "exit", "a00085_a6733eb5f605d09eaede9845835d71c4e.htm#a6733eb5f605d09eaede9845835d71c4e", null ],
+    [ "fi", "a00085_a2430242dc52b9fec75095457ac808899.htm#a2430242dc52b9fec75095457ac808899", null ],
+    [ "EMAIL", "a00085_a978cd363ec18c595d43b88becaf7c371.htm#a978cd363ec18c595d43b88becaf7c371", null ],
+    [ "$cmd", "a00085_a45a9178229ce446544e76b3cc74dda11.htm#a45a9178229ce446544e76b3cc74dda11", null ],
+    [ "if", "a00085_aae929efa05ba1d58729af1087691b50d.htm#aae929efa05ba1d58729af1087691b50d", null ],
+    [ "ejecutar", "a00085_a468c90798c8dc898276c12f0713e48b6.htm#a468c90798c8dc898276c12f0713e48b6", null ]
 ];
