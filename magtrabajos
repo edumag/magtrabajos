@@ -2850,17 +2850,32 @@ presentarTODOs() {
 
    [[ -z $sql ]] && ARCHIVOS='' || local ARCHIVOS=$(ejecutarSQL "$SQL" "-N")
 
-   cmd="buscar_codigo buscar '@todo|@bug' "
-   if [ "$mt_codificacion_codigo" != "" ] ; then
-      cmd="$cmd encoding_entrada $mt_codificacion_codigo"
-   fi
-   if [ "$per_informe_enlaces" = "SI" ] ; then
-      cmd="$cmd formato enlaces"
+   if [ `pwd` == "$DIR_PROYECTO" ] ; then
+
+     cmd="buscar_codigo buscar '@todo|@bug' "
+     if [ "$mt_codificacion_codigo" != "" ] ; then
+        cmd="$cmd encoding_entrada $mt_codificacion_codigo"
+     fi
+     if [ "$per_informe_enlaces" = "SI" ] ; then
+        cmd="$cmd formato enlaces"
+     else
+        cmd="$cmd formato rst"
+     fi
+     cmd="`echo $cmd $ARCHIVOS`"
+     log "$FUNCNAME" "Comando: $cmd"
+
    else
-      cmd="$cmd formato rst"
+
+     echo 
+     echo buscar_codigo
+     echo -------------
+     echo -e "`color colError`"
+     echo
+     echo El directorio de proyecto \[$DIR_PROYECTO\] es diferente al actual.
+     echo No busamos en código
+     echo
+     echo -e "`color`"
    fi
-   cmd="`echo $cmd $ARCHIVOS`"
-   log "$FUNCNAME" "Comando: $cmd"
 
    local SALIDA="`eval $cmd`"
 
@@ -3123,12 +3138,27 @@ function pendienteCodigo() {
 
    ## Presentar pendiente en código
 
-   # Código pendiente
-   SALIDA="$(buscar_codigo formato enlaces proyecto $proyecto)"
-   if [ "$SALIDA" != "" ] ; then
-      titulo_por_nivel "Código pendiente de $proyecto" | tee -a $TMP
-      echo -e "$SALIDA" | tee -a $TMP 
-      echo | tee -a $TMP
+   if [ `pwd` == "$DIR_PROYECTO" ] ; then
+
+     # Código pendiente
+     SALIDA="$(buscar_codigo formato enlaces proyecto $proyecto)"
+     if [ "$SALIDA" != "" ] ; then
+        titulo_por_nivel "Código pendiente de $proyecto" | tee -a $TMP
+        echo -e "$SALIDA" | tee -a $TMP 
+        echo | tee -a $TMP
+     fi
+
+   else
+
+     echo 
+     echo buscar_codigo
+     echo -------------
+     echo -e "`color colError`"
+     echo
+     echo El directorio de proyecto \[$DIR_PROYECTO\] es diferente al actual.
+     echo No busamos en código
+     echo
+     echo -e "`color`"
    fi
 
    }
@@ -3137,14 +3167,28 @@ function erroresCodigo() {
 
    ## Presentar errores de código
 
-   # Errores en código
-   SALIDA="$(buscar_codigo formato rst buscar '@bug')"
-   if [ "$SALIDA" != "" ] ; then
-      echo | tee -a $TMP
-      echo "Errores en código de $proyecto" | tee -a $TMP
-      echo "Errores en código de $proyecto" | sed 's/./=/g' | tee -a $TMP
-      echo | tee -a $TMP
-      echo -e "$SALIDA" | tee -a $TMP 
+   if [ `pwd` == "$DIR_PROYECTO" ] ; then
+
+     # Errores en código
+     SALIDA="$(buscar_codigo formato rst buscar '@bug')"
+     if [ "$SALIDA" != "" ] ; then
+        echo | tee -a $TMP
+        echo "Errores en código de $proyecto" | tee -a $TMP
+        echo "Errores en código de $proyecto" | sed 's/./=/g' | tee -a $TMP
+        echo | tee -a $TMP
+        echo -e "$SALIDA" | tee -a $TMP 
+     fi
+   else
+
+     echo 
+     echo buscar_codigo
+     echo -------------
+     echo -e "`color colError`"
+     echo
+     echo El directorio de proyecto \[$DIR_PROYECTO\] es diferente al actual.
+     echo No busamos en código
+     echo
+     echo -e "`color`"
    fi
    }
 
