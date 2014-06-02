@@ -1,6 +1,6 @@
 var modules =
 [
-    [ "Configuración", "a00116.htm", "a00116" ],
-    [ "Librerías para bash", "a00118.htm", "a00118" ],
-    [ "Configuración magbackup", "a00124.htm", "a00124" ]
+    [ "Configuración", "a00117.htm", "a00117" ],
+    [ "Librerías para bash", "a00119.htm", "a00119" ],
+    [ "Configuración magbackup", "a00125.htm", "a00125" ]
 ];

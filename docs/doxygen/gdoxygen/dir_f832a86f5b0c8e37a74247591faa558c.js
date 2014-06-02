@@ -8,9 +8,9 @@ var dir_f832a86f5b0c8e37a74247591faa558c =
     [ "contrasenya", "a00036.htm", null ],
     [ "cron_gcm.sh", "a00038.htm", null ],
     [ "documentar_css", "a00041.htm", null ],
-    [ "informacion_ip", "a00061.htm", null ],
-    [ "permisos_apache", "a00098.htm", null ],
-    [ "terminal", "a00111.htm", null ],
-    [ "ultimos_archivos_modificados", "a00112.htm", null ],
-    [ "xdebug_conmutador", "a00114.htm", null ]
+    [ "informacion_ip", "a00062.htm", null ],
+    [ "permisos_apache", "a00099.htm", null ],
+    [ "terminal", "a00112.htm", null ],
+    [ "ultimos_archivos_modificados", "a00113.htm", null ],
+    [ "xdebug_conmutador", "a00115.htm", null ]
 ];

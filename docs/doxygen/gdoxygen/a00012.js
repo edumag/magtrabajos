@@ -2,9 +2,11 @@ var a00012 =
 [
     [ "afectados", "a00012_aee7c3fb09642db0518d3512a762c9753.htm#aee7c3fb09642db0518d3512a762c9753", null ],
     [ "echo", "a00012_ac4fd59c9ee95bff469a7cd55e16f0449.htm#ac4fd59c9ee95bff469a7cd55e16f0449", null ],
-    [ "cmd", "a00012_adfc5ba7e22f5e4a6221c12a70503bef3.htm#adfc5ba7e22f5e4a6221c12a70503bef3", null ],
-    [ "if", "a00012_a8e20c800203be451f5db265a1cb537a1.htm#a8e20c800203be451f5db265a1cb537a1", null ],
+    [ "if", "a00012_ac24d861a7bf7d2b88005c14bbf37b392.htm#ac24d861a7bf7d2b88005c14bbf37b392", null ],
     [ "then", "a00012_a751ff7ed91d2e43008930137c9fa6925.htm#a751ff7ed91d2e43008930137c9fa6925", null ],
+    [ "salimos", "a00012_a4b30ad34041e410712182c0ddcfda297.htm#a4b30ad34041e410712182c0ddcfda297", null ],
+    [ "else", "a00012_a0544c3fe466e421738dae463968b70ba.htm#a0544c3fe466e421738dae463968b70ba", null ],
+    [ "cmd", "a00012_adfc5ba7e22f5e4a6221c12a70503bef3.htm#adfc5ba7e22f5e4a6221c12a70503bef3", null ],
     [ "fi", "a00012_a2430242dc52b9fec75095457ac808899.htm#a2430242dc52b9fec75095457ac808899", null ],
     [ "SQL", "a00012_ae06c74893e7defdf9732f636decfded8.htm#ae06c74893e7defdf9732f636decfded8", null ],
     [ "ARCHIVOSs", "a00012_a343bc8572ae41b776bf399710dd36710.htm#a343bc8572ae41b776bf399710dd36710", null ],
@@ -18,6 +20,5 @@ var a00012 =
     [ "interrunpir_evento", "a00012_ace9c0a97404d7f5398350623a76e0afb.htm#ace9c0a97404d7f5398350623a76e0afb", null ],
     [ "e", "a00012_a08a4415e9d594ff960030b921d42b91e.htm#a08a4415e9d594ff960030b921d42b91e", null ],
     [ "esac", "a00012_af4a02c0892d4bbbc0b12d045a0da1fe3.htm#af4a02c0892d4bbbc0b12d045a0da1fe3", null ],
-    [ "else", "a00012_a0544c3fe466e421738dae463968b70ba.htm#a0544c3fe466e421738dae463968b70ba", null ],
     [ "pendientes", "a00012_a61277c2a51b82d2df5dcc70145ce47db.htm#a61277c2a51b82d2df5dcc70145ce47db", null ]
 ];
