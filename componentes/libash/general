@@ -263,7 +263,7 @@ function comandoExterno(){
    ## Ejecutar comando externo en $mt_miniterminal
 
    echo $*
-   CMD="$mt_miniterminal -e \"$*  ; echo ; read -n 1 -p 'Presione una tecla para salir:'\""
+   CMD="$mt_terminal -e \"$*  ; echo ; read -n 1 -p 'Presione una tecla para salir:'\""
    ejecutarComando "$CMD"
 
    }
