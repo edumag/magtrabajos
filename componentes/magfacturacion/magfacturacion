@@ -204,14 +204,17 @@ function menuFacturacion() {
          read -p "fechaPagado:____" FECHA_PAGADO ; [[ "$FECHA_PAGADO" = 'c' ]] && return
          read -p "Total:__________" TOTAL ; [[ "$TOTAL" = 'c' ]] && return
 
-         SQL="UPDATE facturas SET comentario='${COMENTARIO:-$dComentario}', fechaFactura='${FECHA_FACTURA:-$dFechaFactura}', fechaPagado='${FECHA_PAGADO:-$dFechaPagado}', Total='${TOTAL:-$dTotal}' WHERE id=$facturaId"
+         FECHA_PAGADO=${FECHA_PAGADO:-$dFechaPagado}
+
+         SQL="UPDATE facturas SET comentario='${COMENTARIO:-$dComentario}', fechaFactura='${FECHA_FACTURA:-$dFechaFactura}', fechaPagado='${FECHA_PAGADO}', Total='${TOTAL:-$dTotal}' WHERE id=$facturaId"
          log $FUNCNAME 'Modificando factura'
          ejecutarSQL "$SQL"
 
          # si hay fecha de pago se pone el estado de las tareas a pagadas
-         if [ "$FECHA_PAGADO" != "" ] AND [ "$FECHA_PAGADO" != 'NULL' ] AND [ "$FECHA_PAGADO" != '0000-00-00' ] ; then
+         if [ "$FECHA_PAGADO" != "" ] && [ "$FECHA_PAGADO" != 'NULL' ] && [ "$FECHA_PAGADO" != '0000-00-00' ] ; then
             SQL="UPDATE tareas SET idEstado=5 WHERE idFactura=$facturaId"
             log "$FUNCNAME" "Añadimos estado pagado a tareas de factura $facturaId"
+            mensajes 'Añadimos estado "pagado" a tareas de factura'
             ejecutarSQL "$SQL"
          fi
 
