@@ -37,7 +37,7 @@ function menuFacturacion() {
    linea_caja ' [P]endientes         ' '        Facturas pendientes de pago'
    linea_caja ' [Ú]ltimos movimientos' '        Últimos movimientos'
    linea_caja ' [A]ñadir tarea a factura'
-   linea_caja ' [L]istar facturas y pagos' ' Listado de facturas y sus pagos'
+   linea_caja ' [L]istar últimos pagos' ' Listado de pagos y sus facturas'
 
    cierra_caja
 
@@ -861,44 +861,6 @@ function lista_facturas_pagos() {
    done
 
    pendiente_facturas
-   exit
-
-   echo                                     | tee -a $TMP
-   echo 'Listado de pagos'                  | tee -a $TMP
-   echo 'Listado de pagos' | sed 's/./-/g'  | tee -a $TMP
-   echo                                     | tee -a $TMP
-   ejecutarMysql2rst "$sql" | tee -a "$TMP"
-   # end
-
-   sql="
-   SELECT f.id AS factura_id, f.comentario, 
-      f.fechaFactura, f.fechaPagado, f.Total,
-      pagado, fecha
-      FROM facturas f
-      LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id
-      WHERE idProyecto=$proyectoId"
-
-   echo                                                | tee -a $TMP
-   echo 'Listado de facturas y pagos'                  | tee -a $TMP
-   echo 'Listado de facturas y pagos' | sed 's/./-/g'  | tee -a $TMP
-   echo                                                | tee -a $TMP
-   ejecutarMysql2rst "$sql" | tee -a "$TMP"
-
-   sql="
-      SELECT f.id AS factura_id, f.comentario, 
-      f.fechaFactura, f.fechaPagado, f.Total,
-      sum(pagado) AS total_pagado
-      FROM facturas f
-      LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id
-      WHERE idProyecto=$proyectoId
-      GROUP BY f.id
-      "
-
-   echo                                                | tee -a $TMP
-   echo 'Totales pagado por factura'                   | tee -a $TMP
-   echo 'Totales pagado por factura'  | sed 's/./-/g'  | tee -a $TMP
-   echo                                                | tee -a $TMP
-   ejecutarMysql2rst "$sql" | tee -a "$TMP"
 
    }
 
