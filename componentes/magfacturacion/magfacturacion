@@ -222,6 +222,7 @@ function menuFacturacion() {
          ;;
 
       p|P)  # Listado de facturas pendientes de pago
+         [[ -e "$TMP" ]] && rm "$TMP"
          pendiente_facturas
           read -n 1 -s
           ;;
@@ -683,7 +684,7 @@ function ultimosMovimientos() {
    echo 'Movimientos'
    echo '-----------'
    echo
-   SQL='SELECT rfp.id, f.comentario AS Factura, f.fechaFactura AS \`Fecha factura\`, rfp.fecha AS \`Fecha pagado\`, rfp.pagado AS Pagado FROM rFacturasPagos rfp LEFT JOIN facturas f ON f.id=rfp.idFactura WHERE f.idProyecto='$proyectoId' ORDER BY rfp.id desc LIMIT 5'
+   SQL='SELECT rfp.id, f.comentario AS Factura, f.fechaFactura AS \`Fecha factura\`, rfp.fecha AS \`Fecha pagado\`, rfp.pagado AS Pagado FROM rFacturasPagos rfp LEFT JOIN facturas f ON f.id=rfp.idFactura WHERE f.idProyecto='$proyectoId' ORDER BY rfp.id desc LIMIT 10'
    ejecutarMysql2rst "$SQL"
 
 }
@@ -770,17 +771,17 @@ function pendiente_facturas(){
       return
    fi
 
-   echo 
-   titulo_por_nivel "Facturas pendientes en $proyecto" 
-   echo ":fecha: $HOY"
-   echo 
+   echo                                                 | tee -a "$TMP"
+   titulo_por_nivel "Facturas pendientes en $proyecto"  | tee -a "$TMP"
+   echo ":fecha: $HOY"                                  | tee -a "$TMP"
+   echo                                                 | tee -a "$TMP"
 
    # ejecutarMysql2rst "$SQL $SQL_WHERE $SQL_GROUP" 
 
-   echo -e "$salida" | awk '{ printf "**Factura:%s**\n\n| Fecha factura: %s\n| Total: %s\n| Pagado: %s\n| Pendiente: %s\n\n\n",$1,$2,$4,$5,$6, $7 }'
+   echo -e "$salida" | awk '{ printf "**Factura:%s**\n\n| Fecha factura: %s\n| Total: %s\n| Pagado: %s\n| Pendiente: %s\n\n\n",$1,$2,$4,$5,$6, $7 }' | tee -a "$TMP"
 
    SALIDA="*Total pendiente:* `ejecutarSQL \"$SQL_TOTAL\" '-N'`"
-   echo $SALIDA
+   echo $SALIDA | tee -a "$TMP"
    echo
 
    }
@@ -818,6 +819,56 @@ function actualizarTotalFactura() {
 ## Listado de facturas y sus pagos
 
 function lista_facturas_pagos() {
+
+   [[ -e "$TMP" ]] && rm "$TMP"
+
+   echo                                           | tee -a $TMP
+   echo Listado de últimos pagos                  | tee -a $TMP
+   echo Listado de últimos pagos | sed 's/./=/g'  | tee -a $TMP
+   echo                                           | tee -a $TMP
+
+   # SELECT rfp.fecha, sum(rfp.pagado) AS Pagado, rfp.descripcion
+   local sql="
+   SELECT CONCAT(rfp.fecha, '@',sum(rfp.pagado))
+      FROM facturas f
+      LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id
+      WHERE idProyecto=$proyectoId
+      GROUP BY rfp.fecha
+      ORDER BY rfp.id desc
+      LIMIT 10
+      "
+   local salida=$(ejecutarSQL "$sql" "-N")
+   for linea in $salida ; do
+     local fecha=$(echo -e $linea | cut -d'@' -f 1)
+     local total=$(echo -e $linea | cut -d'@' -f 2)
+     echo                                                | tee -a $TMP
+     echo Abonado: $total Fecha: $fecha                  | tee -a $TMP
+     echo Abonado: $total Fecha: $fecha | sed 's/./-/g'  | tee -a $TMP
+     echo                                                | tee -a $TMP
+     local sql_factura="
+     SELECT f.id AS factura_id, f.comentario, 
+        f.fechaFactura, f.fechaPagado, f.Total 
+        FROM facturas f 
+        LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id 
+        WHERE rfp.fecha=\\\"$fecha\\\"
+        "
+
+     echo                                        | tee -a $TMP
+     echo 'Listado de facturas'                  | tee -a $TMP
+     echo 'Listado de facturas' | sed 's/./_/g'  | tee -a $TMP
+     echo                                        | tee -a $TMP
+     ejecutarMysql2rst "$sql_factura"            | tee -a $TMP
+   done
+
+   pendiente_facturas
+   exit
+
+   echo                                     | tee -a $TMP
+   echo 'Listado de pagos'                  | tee -a $TMP
+   echo 'Listado de pagos' | sed 's/./-/g'  | tee -a $TMP
+   echo                                     | tee -a $TMP
+   ejecutarMysql2rst "$sql" | tee -a "$TMP"
+   # end
 
    sql="
    SELECT f.id AS factura_id, f.comentario, 
