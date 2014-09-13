@@ -27,7 +27,7 @@
    ## @var default_mt_rst2pdf
    ## Comando para convertir de rst a text, por defecto: rst2newlatex --output-encoding-error-handler=replace
 
-   default_mt_rst2pdf="rst2pdf --output-encoding-error-handler=replace "
+   default_mt_rst2pdf="rst2pdf "
 
    ## @var default_mt_pdflatex
    ## Comando para convertir de text a pdf

@@ -17,5 +17,18 @@ if [ "$informacion_ip_IP" = "" ] ; then
 fi
 
 if [ "$informacion_ip_IP" != "" ] ; then
-   $informacion_ip_CMD -t "$informacion_ip_IP"
+
+  echo
+  echo Información geográfica
+  echo
+  echo curl ipinfo.io/$informacion_ip_IP
+  echo
+  curl ipinfo.io/$informacion_ip_IP
+
+  echo
+  echo Automater.py
+  echo
+  echo $informacion_ip_CMD -t $informacion_ip_IP
+  echo
+  $informacion_ip_CMD -t "$informacion_ip_IP"
 fi

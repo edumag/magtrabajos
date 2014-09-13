@@ -56,7 +56,7 @@ proyecto=''
 comando=''
 
 ## carpeta destino
-## Podemos seleccionar una carpeta donde buscar para limitar la busqueda
+## Podemos seleccionar una carpeta donde buscar para limitar la búsqueda
 
 carpeta_busqueda=""
 
