@@ -5,6 +5,11 @@
 ##
 ## Podemos documentarnos sobre como generar la documentación desde 
 ## http://jacobrask.github.io/styledocco/
+##
+## Instalar:
+##
+## sudo apt-get install npm
+## npm install -fg styledocco
 
 
 ## Error
@@ -26,15 +31,15 @@ destino=${2:-"docs/css/"}
 pro=${3:-$proyecto}
 titulo="Estilos de $pro"
 
-[[ -z $url_css  ]] && error_documentar_css "Debe definirse la url del archivo css"
-[[ -z $destino  ]] && error_documentar_css "Debe definirse el directorio final"
-[[ -z $pro      ]] && error_documentar_css "Debe definirse nombre de proyecto"
-
 echo
 echo url: $url_css
 echo destino: $destino
 echo proyecto: $pro
 echo
+
+[[ -z $url_css  ]] && error_documentar_css "Debe definirse la url del archivo css"
+[[ -z $destino  ]] && error_documentar_css "Debe definirse el directorio final"
+[[ -z $pro      ]] && error_documentar_css "Debe definirse nombre de proyecto"
 
 if [ -e "$destino" ] ; then
    echo

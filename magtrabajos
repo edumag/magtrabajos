@@ -4235,8 +4235,10 @@ function menuComandos(){
    echo Ejecutamos ${cs[$OPCION]}
 
    # Si es una extensión añadimos contenido sino lanzamos comando
+   # @todo revisar si cargar los lanzadores va bien en todos los casos.
    if [ "`echo ${cs[$OPCION] } | grep 'extension'`" = "" ] ; then
-      ${cs[$OPCION]}
+      # ${cs[$OPCION]}
+      . ${cs[$OPCION]}
    else
       . ${cs[$OPCION]}
    fi
