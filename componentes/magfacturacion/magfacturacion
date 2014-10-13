@@ -847,7 +847,7 @@ function lista_facturas_pagos() {
      echo                                                | tee -a $TMP
      local sql_factura="
      SELECT f.id AS factura_id, f.comentario, 
-        f.fechaFactura, f.fechaPagado, f.Total 
+        f.fechaFactura, f.fechaPagado, f.Total AS \\\"Total Factura\\\", rfp.pagado AS Pagado 
         FROM facturas f 
         LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id 
         WHERE rfp.fecha=\\\"$fecha\\\"
