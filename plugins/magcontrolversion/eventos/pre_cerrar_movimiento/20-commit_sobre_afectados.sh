@@ -15,7 +15,7 @@ if [ "`plugin_activado magcontrolversion`" != "" ] ; then
 
    if [ "$movimientoId" != "" ] ; then                                         # Control de versiones sobre movimiento
 
-      echo "Control de versiones sobre movimiento"
+     echo "Control de versiones sobre movimiento ($movimientoId)"
       echo
       SQL="SELECT r.nombre FROM movimientos m, rMovimientoArchivos r
       WHERE m.id=r.idMovimiento AND m.id=$movimientoId
@@ -24,7 +24,11 @@ if [ "`plugin_activado magcontrolversion`" != "" ] ; then
       ARCHIVOSs=$(echo "$ARCHIVOSs" | sort | uniq )
 
       if [ "$ARCHIVOSs" != "" ] ; then                                          # Sacar descripción
-         informe_subversion
+        SQL="SELECT m.nombre FROM movimientos m
+        WHERE m.id=$movimientoId
+        "
+        local titulo=$(ejecutarSQL "$SQL" "-N" )
+        echo $titulo > $TMP
       fi
 
       echo -e "`color colAviso`"

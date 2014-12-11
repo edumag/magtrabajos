@@ -229,7 +229,8 @@ function rst2email() {
             ;;
 
          thunderbird)
-            mozilla-thunderbird "mailto:$para_mail?subject=$concepto_mail&body=`cat $origen`" &
+           contenido="$(cat $2)"
+           thunderbird "mailto:$para_mail?subject=$concepto_mail&body='$(echo -e "$contenido" | sed s/\'/\"/g )'" &
             ;;
 
          sendmail)
@@ -264,7 +265,7 @@ function rst2email() {
 
             --b1_81e56f5bd9aeea2c7184723f0e76b08a--
             "
-            #cmd="mozilla-thunderbird \"mailto:jaume07@totbisbal.com?subject=$tarea&body=$(protegerTexto "`cat $mt_archivo_html`")\""
+            #cmd="thunderbird \"mailto:jaume07@totbisbal.com?subject=$tarea&body=$(protegerTexto "`cat $mt_archivo_html`")\""
             cmd="evolution \"mailto:$para_mail?subject=$concepto_mail&body=${html1}${body}$html2\"" 
             echo $cmd && eval "$cmd"
             ;;
@@ -276,7 +277,7 @@ function rst2email() {
             ;;
 
          thunderbird)
-            mozilla-thunderbird "mailto:$para_mail?subject=$concepto_mail&body=`cat $origen`" &
+            thunderbird "mailto:$para_mail?subject=$concepto_mail&body=`cat $origen`" &
             ;;
 
          sendmail)
