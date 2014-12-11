@@ -2850,7 +2850,7 @@ presentarTODOs() {
 
    [[ -z $sql ]] && ARCHIVOS='' || local ARCHIVOS=$(ejecutarSQL "$SQL" "-N")
 
-   if [ `pwd` == "$DIR_PROYECTO" ] ; then
+   if [ "`pwd`/" == "$DIR_PROYECTO" ] || [ `pwd` == "$DIR_PROYECTO" ] ; then
 
      cmd="buscar_codigo buscar '@todo|@bug' "
      if [ "$mt_codificacion_codigo" != "" ] ; then
@@ -3138,7 +3138,7 @@ function pendienteCodigo() {
 
    ## Presentar pendiente en código
 
-   if [ `pwd` == "$DIR_PROYECTO" ] ; then
+   if [ "`pwd`/" == "$DIR_PROYECTO" ] || [ `pwd` == "$DIR_PROYECTO" ] ; then
 
      # Código pendiente
      SALIDA="$(buscar_codigo formato enlaces proyecto $proyecto)"
@@ -3167,7 +3167,7 @@ function erroresCodigo() {
 
    ## Presentar errores de código
 
-   if [ `pwd` == "$DIR_PROYECTO" ] ; then
+   if [ "`pwd`/" == "$DIR_PROYECTO" ] || [ `pwd` == "$DIR_PROYECTO" ] ; then
 
      # Errores en código
      SALIDA="$(buscar_codigo formato rst buscar '@bug')"
@@ -4235,8 +4235,10 @@ function menuComandos(){
    echo Ejecutamos ${cs[$OPCION]}
 
    # Si es una extensión añadimos contenido sino lanzamos comando
+   # @todo revisar si cargar los lanzadores va bien en todos los casos.
    if [ "`echo ${cs[$OPCION] } | grep 'extension'`" = "" ] ; then
-      ${cs[$OPCION]}
+      # ${cs[$OPCION]}
+      . ${cs[$OPCION]}
    else
       . ${cs[$OPCION]}
    fi

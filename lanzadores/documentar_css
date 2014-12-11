@@ -5,6 +5,12 @@
 ##
 ## Podemos documentarnos sobre como generar la documentación desde 
 ## http://jacobrask.github.io/styledocco/
+##
+## Instalar:
+##
+## sudo apt-get install nodejs nodejs-legacy
+## sudo apt-get install npm
+## npm install -fg styledocco
 
 
 ## Error
@@ -26,15 +32,15 @@ destino=${2:-"docs/css/"}
 pro=${3:-$proyecto}
 titulo="Estilos de $pro"
 
-[[ -z $url_css  ]] && error_documentar_css "Debe definirse la url del archivo css"
-[[ -z $destino  ]] && error_documentar_css "Debe definirse el directorio final"
-[[ -z $pro      ]] && error_documentar_css "Debe definirse nombre de proyecto"
-
 echo
 echo url: $url_css
 echo destino: $destino
 echo proyecto: $pro
 echo
+
+[[ -z $url_css  ]] && error_documentar_css "Debe definirse la url del archivo css"
+[[ -z $destino  ]] && error_documentar_css "Debe definirse el directorio final"
+[[ -z $pro      ]] && error_documentar_css "Debe definirse nombre de proyecto"
 
 if [ -e "$destino" ] ; then
    echo
@@ -42,6 +48,11 @@ if [ -e "$destino" ] ; then
    echo
    if [ "$OPCION" == "s" ] ; then rm -fr "$destino" ; fi
 fi
+
+cmd="lynx -source \"$url_css\" | grep -v 'acaba:'  | grep -v 'Eventos' | sed 's/Tema actual/# Tema/g' | sed 's/fichero:/# /' | sed '/^$/d'  > /tmp/$pro.css"
+echo
+echo Comando: $cmd
+echo
 
 lynx -source "$url_css" | grep -v 'acaba:'  | grep -v 'Eventos' | sed 's/Tema actual/# Tema/g' | sed 's/fichero:/# /' | sed '/^$/d'  > /tmp/$pro.css
 
@@ -56,6 +67,11 @@ else
   echo
 fi
 
+cmd="styledocco --verbose -n \"$titulo\" -o \"$destino\" --include /tmp/$pro.css /tmp/$pro.css"
+echo
+echo Comando: $cmd
+echo
+
 styledocco --verbose -n "$titulo" -o "$destino" --include /tmp/$pro.css /tmp/$pro.css
 
 if [[ $? != 0 ]] ; then
@@ -67,3 +83,5 @@ else
   echo Documentación realizada en $destino
   echo
 fi
+
+tecla

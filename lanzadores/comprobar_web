@@ -33,3 +33,8 @@ then
    echo "ERROR: ($status) $url"
    exit $status
 fi
+
+echo
+echo Verificada: $url 
+echo
+tecla

@@ -56,4 +56,12 @@ while [ -n "$1" ] ; do
 
 done
 
+echo
+echo Buscar archivos módificados por minutos.
+echo
+echo find ./ -type f -mmin -290
+echo
+echo Buscar las últimas 24 horas
+echo find ./ -type f -mtime 0 | grep -v '.swp' | grep -v 'log/' | grep -v '.svn' | sed 's/\.\///' | sed 's/^\.//'
+echo
 find ./ -type f -mtime 0 | grep -v '.swp' | grep -v 'log/' | grep -v '.svn' | sed 's/\.\///' | sed 's/^\.//' 
