@@ -13,9 +13,9 @@
 [[ `tty` ]] || ( ( exec ${TERM:-xterm} -e "$0 $* ; read" & ) ;  exit )
 
 autor='Eduardo Magrané'
-mail='eduardo.mamedu.com'
+mail='edu.lesolivex.com'
 licencia='GNU/GPL 3.0'
-web='http://www.mamedu.com'
+web='http://www.lesolivex.com'
 prog=`basename $0`
 version='0.1'
 

@@ -5,9 +5,9 @@
 ## 
 ## @author   Eduardo Magrané
 ## @internal
-##       web  http://www.mamedu.com
+##       web  http://www.lesolivex.com
 ##
-##      mail  eduardo.mamedu.com
+##      mail  edu.lesolivex.com
 ##
 ##   Created  13/03/11
 ##
@@ -441,7 +441,7 @@ function generarFactura() {
 
    #echo "--no-xml-declaration" > $TMP
 
-   tituloFactura="MamEdu"
+   tituloFactura="lesolivex"
    echo
    echo $tituloFactura | sed s/./=/g
    echo $tituloFactura

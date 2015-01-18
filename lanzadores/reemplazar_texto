@@ -1,1 +1,7 @@
-/usr/bin/regexxer
+#!/bin/bash
+
+## @file
+## @brief Reemplazar texto.
+
+/usr/bin/regexxer &
+
