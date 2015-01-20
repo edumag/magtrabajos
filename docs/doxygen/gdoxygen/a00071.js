@@ -1,14 +1,10 @@
 var a00071 =
 [
-    [ "_cscope", "a00071_aec15d787a8607260fffa9bebee212068.htm#aec15d787a8607260fffa9bebee212068", null ],
-    [ "mcs_cseditor", "a00071_a6136fb6cac75ed8a4e26d33bdcd19999.htm#a6136fb6cac75ed8a4e26d33bdcd19999", null ],
-    [ "mcs_csdir_codigo", "a00071_a800e210fd055e18c1701e647dbef9a37.htm#a800e210fd055e18c1701e647dbef9a37", null ],
-    [ "mcs_csexclude", "a00071_af473fd62ddcb1682378c77e9bf56a1bd.htm#af473fd62ddcb1682378c77e9bf56a1bd", null ],
-    [ "mcs_cspatron", "a00071_a4f3978ccf44e37d72bfd00f2fff8a853.htm#a4f3978ccf44e37d72bfd00f2fff8a853", null ],
-    [ "desc_mcs_cseditor", "a00071_a0958f19cac45929b63062f713af4f48e.htm#a0958f19cac45929b63062f713af4f48e", null ],
-    [ "desc_mcs_csdir_codigo", "a00071_a5e9be99d0e967df19845c7ea87ac3e09.htm#a5e9be99d0e967df19845c7ea87ac3e09", null ],
-    [ "desc_mcs_csexclude", "a00071_a5fe0ae83170b354741bdb8cf9038ab84.htm#a5fe0ae83170b354741bdb8cf9038ab84", null ],
-    [ "desc_mcs_cspatron", "a00071_ad67f0a8490c695af022f407e52652d45.htm#ad67f0a8490c695af022f407e52652d45", null ],
-    [ "conf", "a00071_ac1090b2b9d21e14d8651504351e308e1.htm#ac1090b2b9d21e14d8651504351e308e1", null ],
-    [ "_cscope", "a00071_a8b4adfdef36ace8c5bcab17a26bb6fbf.htm#a8b4adfdef36ace8c5bcab17a26bb6fbf", null ]
+    [ "_subversion", "a00071.htm#a3b307099fd82ff993b042a2dbe3f7189", null ],
+    [ "texto", "a00071.htm#a1b5fcae959cd624afdc1ab5c57ab4a66", null ],
+    [ "archivos_afectados", "a00071.htm#a1b01204ce3f5226f936d91ec0a2baf45", null ],
+    [ "movimiento", "a00071.htm#ad9fd34f3ff356d543143778ab48b4cbc", null ],
+    [ "motor", "a00071.htm#aaa74c6f43aee11387f4087fa00526d85", null ],
+    [ "rama_actual", "a00071.htm#a39c512298a6f1be01b1dd50883b2a238", null ],
+    [ "LIBS", "a00071.htm#afbd06cbb64c0a0bb1563e4d613e104fd", null ]
 ];

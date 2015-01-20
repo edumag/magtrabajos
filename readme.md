@@ -4,4 +4,4 @@ IDE de programación generado en bash
 
 Documentación:
 
-http://lesolivex.com/gcm/File/es/Proyectos/MagTrabajos/gdoxygen/index.htm
+http://lesolivex.com/dox/magtrabajos/doxygen/html/index.htm

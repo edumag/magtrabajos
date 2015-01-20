@@ -3,16 +3,17 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.6"/>
 <title>magTrabajos: magTrabajos</title>
-
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<link href="doxygen.css" rel="stylesheet" type="text/css" />
-<link href="navtree.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="resize.js"></script>
 <script type="text/javascript" src="navtree.js"></script>
 <script type="text/javascript">
   $(document).ready(initResizable);
+  $(window).load(resizeHeight);
 </script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/search.js"></script>
@@ -22,33 +23,25 @@
   });
 </script>
 <link rel="search" href="search-opensearch.php?v=opensearch.xml" type="application/opensearchdescription+xml" title="magTrabajos"/>
-
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-<div id="top"><!-- do not remove this div! -->
-
-
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
 <div id="titlearea">
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr style="height: 56px;">
-  
-  
   <td style="padding-left: 0.5em;">
    <div id="projectname">magTrabajos
-   &#160;<span id="projectnumber">3.7</span>
+   &#160;<span id="projectnumber">3.9</span>
    </div>
-   
   </td>
-  
-  
-  
  </tr>
  </tbody>
 </table>
 </div>
-
-<!-- Generado por Doxygen 1.8.0 -->
+<!-- end header part -->
+<!-- Generado por Doxygen 1.8.6 -->
 <script type="text/javascript">
 var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
 </script>
@@ -58,7 +51,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
       <li><a href="pages.htm"><span>Páginas&#160;relacionadas</span></a></li>
       <li><a href="modules.htm"><span>Módulos</span></a></li>
       <li><a href="files.htm"><span>Archivos</span></a></li>
-      <li><a href="dirs.htm"><span>Directorios</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
           <div class="left">
@@ -73,10 +65,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
       </li>
     </ul>
   </div>
-</div>
+</div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
     <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
     </div>
   </div>
   <div id="splitbar" style="-moz-user-select:none;" 
@@ -84,7 +77,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
   </div>
 </div>
 <script type="text/javascript">
-  initNavTree('index.htm','');
+$(document).ready(function(){initNavTree('index.htm','');});
 </script>
 <div id="doc-content">
 <div class="header">
@@ -93,60 +86,63 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>Conjunto de scripts realizados en bash para facilitar y agilizar la programación desde linux.</p>
-<div class="fragment"><pre class="fragment">- Administración de tareas
-- control de tiempo de trabajo
-- facturación
-- Control de versiones con subversión
-- Informes varios
-- Búsquedas en código
-- ftp con control de bloqueo.
-- etc...</pre></div><p> Dependencias: gvim, mysql, pdflatex, python-docutils iconv colrm</p>
+<ul>
+<li>Administración de tareas</li>
+<li>control de tiempo de trabajo</li>
+<li>facturación</li>
+<li>Control de versiones con subversión</li>
+<li>Informes varios</li>
+<li>Búsquedas en código</li>
+<li>ftp con control de bloqueo.</li>
+<li>etc...</li>
+</ul>
+<p>Dependencias: gvim, mysql, pdflatex, python-docutils iconv colrm</p>
 <p>Sugerencias: lftp, svn, cscope, doxygen mailtextbody</p>
 <p>Uso: magtrabajos [opciones]</p>
 <p>Sin opciones muestra menú de proyectos</p>
 <p>Opciones: </p>
 <pre> 
- --menu                                         Presentar menú
- --configurar                                   Configurar proyecto
- --adjuntar                                     Adjuntar documento externo
- --dependencias                                 Comprobar dependencias.
- --proyecto|-p                                  Proyecto.
- --tarea|-t                                     Tarea.
- --movimiento|-m                                Movimiento.
- --añadir-archivo|-a                            Añadir archivos afectados a un movimiento
- --nuevo|-n                                     Nuevo proyecto, tarea o movimiento.
- --movimientos-abiertos|-ma                     Ver movimientos que estan abiertos.
- --tiempos-abiertos|-ta                         Buscar tiempos abiertos
- --accion [Accion]                              Seleccionamos una acción a realizar 
- --listar-acciones                              Presentar lista de posibles acciones
- --factura [Nun Factura]                        Seleccionaremos tareas por la factura
- --seleccionar-factura                          Listar facturas para seleccionar
- --consulta                                     Indicamos que solo queremos hacer una comprobación, esto hará que nos 
-                                                salga la información por pantalla.
- --editar-archivos                              Editar archivos afectados de movimiento, necesita el movimiento 
- --seleccionar-tareas '[criterio] [parametro]'  Seleccionar tareas por diferentes criterios
- --informe                                      Tipo de informe
- --listar-informes                              Listar los posibles informes
- --exportar [Formato] [Archivo rst]             Si no se indica formato muestra menú, formatos posibles:
-                                                [H]tml,[E]mail,Email h[t]ml,[P]df,[l]ess,[I]mprimir,[c]sv
-                                                Si no se indica archivo rst se recoge el temporal con el último 
-                                                informe realizado
- --editar | -e                                  Editar archivos
- --estado-subversion                            Presentar estado de subversion de proyecto
- --archivos                                     imprimir lista de archivos para poder ser procesada con otro comando, ejemplo: 
- --borrar_archivo_lista_afectados               Borrar archivos afectados de un movimiento, sino se especifican archivos nos permite seleccionar
-                                                magtrabajos -m 1343 --archivos | xargs ls -l
- --nueva-tarea-email                            Crear tarea nueva desde un archivo de email pasado como argumento.
- --lanzar                                       Nos presenta listados para permitirnos seleccionar por diferentes 
-                                                criterios, últimos movimientos, etc...</pre><pre>--terminal                                     Lanza una terminal con magtrabajos y los parametros a continuación de --terminal
- --sesiones_abiertas|-sa                        Comprobar si tenemos sesiones abiertas, magtrabajos -sa ; echo $? devolverá 0 en caso de no haya o 1 si hay
- --listar-plugins                               Lista de puglins instalados
- --log                                          Ver registro del programa
- --help|-h                                      Esta misma ayuda
- --help-configuracion                           Presentar configuración
- --help-seleccionar-tareas                      Presentar ayuda para la selección de tareas
- --depurar                                      Muestra por pantalla mucha información sobre el programa, por defecto no
- </pre><dl class="todo"><dt><b><a class="el" href="a00126.htm#_todo000014">Tareas pendientes:</a></b></dt><dd><p class="startdd">Eliminar variables de configuración mt_archivo_html, mt_archivo_pdf, mt_archivo_cvs y dejarlo en un directorio </p>
+--menu                                         Presentar menú
+--configurar                                   Configurar proyecto
+--adjuntar                                     Adjuntar documento externo
+--dependencias                                 Comprobar dependencias.
+--proyecto|-p                                  Proyecto.
+--tarea|-t                                     Tarea.
+--movimiento|-m                                Movimiento.
+--añadir-archivo|-a                            Añadir archivos afectados a un movimiento
+--nuevo|-n                                     Nuevo proyecto, tarea o movimiento.
+--movimientos-abiertos|-ma                     Ver movimientos que estan abiertos.
+--tiempos-abiertos|-ta                         Buscar tiempos abiertos
+--accion [Accion]                              Seleccionamos una acción a realizar 
+--listar-acciones                              Presentar lista de posibles acciones
+--factura [Nun Factura]                        Seleccionaremos tareas por la factura
+--seleccionar-factura                          Listar facturas para seleccionar
+--consulta                                     Indicamos que solo queremos hacer una comprobación, esto hará que nos 
+                                               salga la información por pantalla.
+--editar-archivos                              Editar archivos afectados de movimiento, necesita el movimiento 
+--seleccionar-tareas '[criterio] [parametro]'  Seleccionar tareas por diferentes criterios
+--informe                                      Tipo de informe
+--listar-informes                              Listar los posibles informes
+--exportar [Formato] [Archivo rst]             Si no se indica formato muestra menú, formatos posibles:
+                                               [H]tml,[E]mail,Email h[t]ml,[P]df,[l]ess,[I]mprimir,[c]sv
+                                               Si no se indica archivo rst se recoge el temporal con el último 
+                                               informe realizado
+--editar | -e                                  Editar archivos
+--estado-subversion                            Presentar estado de subversion de proyecto
+--archivos                                     imprimir lista de archivos para poder ser procesada con otro comando, ejemplo: 
+--borrar_archivo_lista_afectados               Borrar archivos afectados de un movimiento, sino se especifican archivos nos permite seleccionar
+                                               magtrabajos -m 1343 --archivos | xargs ls -l
+--nueva-tarea-email                            Crear tarea nueva desde un archivo de email pasado como argumento.
+--lanzar                                       Nos presenta listados para permitirnos seleccionar por diferentes 
+                                               criterios, últimos movimientos, etc...</pre><pre>--terminal                                     Lanza una terminal con magtrabajos y los parametros a continuación de --terminal
+--sesiones_abiertas|-sa                        Comprobar si tenemos sesiones abiertas, magtrabajos -sa ; echo $? devolverá 0 en caso de no haya o 1 si hay
+--listar-plugins                               Lista de puglins instalados
+--log                                          Ver registro del programa
+--help|-h                                      Esta misma ayuda
+--help-configuracion                           Presentar configuración
+--help-seleccionar-tareas                      Presentar ayuda para la selección de tareas
+--depurar                                      Muestra por pantalla mucha información sobre el programa, por defecto no
+</pre><dl class="todo"><dt><b><a class="el" href="a00126.htm#_todo000014">Tareas pendientes:</a></b></dt><dd><p class="startdd">Eliminar variables de configuración mt_archivo_html, mt_archivo_pdf, mt_archivo_cvs y dejarlo en un directorio </p>
 <p>Archivo con la información para desarrolladores. Enviar, Editar, recuperar </p>
 <p>Menú de notas Editar, exportar </p>
 <p>Una tarea en estado posible debe tener la prioridad a 0, una tarea con estado empezado debe tener la prioridad a 9 </p>
@@ -154,16 +150,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
 <p>Acciones de plugins o complementos fuera de magtrabajos, pasarlo a eventos </p>
 <p class="enddd">Sistema de colores en la libreria general de libash para todos</p>
 </dd></dl>
-<dl class="section author"><dt>Autor:</dt><dd>Eduardo Magrané </dd></dl>
+<dl class="section author"><dt>Autor</dt><dd>Eduardo Magrané </dd></dl>
 <p>web <a href="http://www.lesolivex.com">http://www.lesolivex.com</a></p>
 <p>mail edu.lesolivex.com</p>
 <p>Created 13/03/11</p>
 <p>Revision SVN </p>
-<dl class="section rcs"><dt>Id:</b></dt><dd></dd></dl>
+<dl class="section rcs"><dt>Id:</dt><dd></dd></dl>
 <p>Copyright Copyright (c) 2011, Eduardo Magrané</p>
 <p>This source code is released for free distribution under the terms of the GNU General Public License as published by the Free Software Foundation. </p>
 </div></div><!-- contents -->
-</div>
-  <div id="nav-path" class="navpath">
-    <ul>
+</div><!-- doc-content -->
 <!-- pie para magtrabajos -->

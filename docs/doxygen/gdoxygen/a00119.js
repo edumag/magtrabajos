@@ -1,12 +1,12 @@
 var a00119 =
 [
     [ "Configuración para libash", "a00120.htm", "a00120" ],
-    [ "configuracion", "a00034.htm", null ],
-    [ "doxygen2help", "a00046.htm", null ],
-    [ "elegirArchivo", "a00055.htm", null ],
-    [ "listado", "a00066.htm", null ],
-    [ "mysql2rst", "a00096.htm", null ],
-    [ "pantalla", "a00097.htm", null ],
+    [ "configuracion", "a00040.htm", null ],
+    [ "doxygen2help", "a00050.htm", null ],
+    [ "elegirArchivo", "a00057.htm", null ],
+    [ "listado", "a00068.htm", null ],
+    [ "mysql2rst", "a00097.htm", null ],
+    [ "pantalla", "a00098.htm", null ],
     [ "source", "a00119_ga327a1717ff37e756c07052836823c39a.htm#ga327a1717ff37e756c07052836823c39a", null ],
     [ "color", "a00119_gae28887b666238c40587d77cc5fb07500.htm#gae28887b666238c40587d77cc5fb07500", null ],
     [ "mensajes", "a00119_ga2dc3828595bd67b107e6d4e8d1464c44.htm#ga2dc3828595bd67b107e6d4e8d1464c44", null ],
