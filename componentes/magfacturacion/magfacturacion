@@ -771,7 +771,7 @@ function pendiente_facturas(){
    SQL_WHERE=" WHERE f.fechaPagado IS NULL OR f.fechaPagado = '' OR f.fechaPagado = '0000-00-00' AND f.idProyecto=$proyectoId"
 
    SQL="SELECT DISTINCT
-     f.id, f.fechaFactura AS \\\`Fecha Factura\\\`
+     f.idProyecto, f.numfact, f.fechaFactura AS \\\`Fecha Factura\\\`
      ,f.fechaPagado AS \\\`Fecha pago\\\`, f.Total AS \\\`Total factura\\\`, sum(rfp.pagado) AS Pagado, TRUNCATE(f.Total - sum(if(rfp.pagado,rfp.pagado,0)),2) as Pendiente
      FROM facturas f LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id"
 
@@ -799,7 +799,7 @@ function pendiente_facturas(){
 
    # ejecutarMysql2rst "$SQL $SQL_WHERE $SQL_GROUP" 
 
-   echo -e "$salida" | awk '{ printf "**Factura:%s**\n\n| Fecha factura: %s\n| Total: %s\n| Pagado: %s\n| Pendiente: %s\n\n\n",$1,$2,$4,$5,$6, $7 }' | tee -a "$TMP"
+   echo -e "$salida" | awk '{ printf "**Factura:%04d-%04d**\n\n| Fecha factura: %s\n| Total: %s\n| Pagado: %s\n| Pendiente: %s\n\n\n",$1,$2,$4,$5,$6,$7,$8 }' | tee -a "$TMP"
 
    SALIDA="*Total pendiente:* `ejecutarSQL \"$SQL_TOTAL\" '-N'`"
    echo $SALIDA | tee -a "$TMP"
