@@ -5255,7 +5255,25 @@ if [ -z $proyectoId ] ; then
    carpeta_actual="`basename "$(pwd)"`"
    sql="SELECT id FROM proyectos WHERE nombre = '$carpeta_actual'";
    id=`ejecutarSQL "$sql" "-N"`
-   mensajes "ID de proyecto: $id"
+   if [ "$id" == "" ] ; then
+     # Miramos en archivo de configuración.
+     if [ -e ".magtrabajos/configuracion/magtrabajos" ] ; then
+       source ".magtrabajos/configuracion/magtrabajos"
+       if [ "$proyecto" != "" ] ; then
+         sql="SELECT id FROM proyectos WHERE nombre = '$proyecto'";
+         id=`ejecutarSQL "$sql" "-N"`
+       else
+         mensajes "No hay definido un nombre de proyecto, ni tampoco coincide el nombre de la carpeta actual con ninguno"
+       fi
+     else
+       mensajes "No tenemos archivo de configuración"
+     fi
+   fi
+   if [ "$id" == "" ] ; then
+     mensajes "No se pudo determinar proyecto actual"
+   else
+     mensajes "ID de proyecto: $id"
+   fi
    [[ $DEV ]] && echo "ID de proyecto: $id"
    if [ ! -z $id ] ; then
       definirProyecto -p $id
