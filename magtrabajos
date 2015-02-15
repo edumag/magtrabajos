@@ -169,7 +169,7 @@ function comprobar_dependencias() {
    SQL_PRO="SELECT CONCAT( p.nombre, '\t',  p.descripcion ) from proyectos p WHERE 1"
 
    # Movimiento simple
-   SQL_MOV="SELECT CONCAT(m.id, '\t',m.nombre, '\t', m.fechaInicio, '\t', m.fechaFinal, '\t', m.descripcion, '\t') FROM movimientos m WHERE 1 ORDER BY m.id "
+   SQL_MOV="SELECT CONCAT(m.id, '\t',m.nombre, '\t', m.fechaInicio, '\t', m.fechaFinal, '\t', m.descripcion, '\t') FROM movimientos m WHERE 1  "
 
    # Movimiento con fecha castellanizada
    SQL_MOV2="SELECT CONCAT(m.id, '\t', CONCAT(
@@ -2517,6 +2517,9 @@ function borrar(){
 
    elif [ "$movimientoId" != '' ] ; then                                                    # No tenemos nada seleccionado
       log "$FUNCNAME" "Movimiento: $movimientoId"
+      echo
+      echo Borrando movimiento $movimientoId
+      echo
       presentarCabeceraMovimiento txt
       echo ""
       read -p "Eliminar movimiento (s/n): " OPCION
