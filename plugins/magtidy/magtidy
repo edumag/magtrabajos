@@ -1,0 +1,244 @@
+#!/bin/bash 
+
+## @file magtidy
+## @brief Interface para tidy
+##
+## magtidy nos permite validar un archivo html.
+##
+## Uso: magtidy [opción] [archivos seleccionados]
+##
+## Opciones:
+## <pre>
+## ejecutar                 Ejecutar tidy sobre directorio actual
+## verErrores               Ver fichero de errores
+## configurar               Configurar
+## errores2vim              Enviar lista de errores a vim
+## filtrar                  Generamos filtro que nos permite documentar los script de bash
+## conf [fich]              Fichero de configuración
+## menu                     Menú
+## </pre>
+##
+## @todo Pasamos acciones a funciones, determinamos la acción que se pide y los archivos
+##       afectados.
+##
+## @author   Eduardo Magrané
+## @internal
+##       web  http://www.lesolivex.com
+##
+##      mail  edu.lesolivex.com
+##
+##   Created  13/03/11
+##
+##  Revision  SVN $Id: $
+##
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+# configuración
+DIR_TMP="/tmp/"
+
+## Recoger configuración de magtrabajos
+source "`dirname "$BASH_SOURCE"`/../../config"
+
+md_navegador="${md_navegador:-firefox}"            ##< Navegador web a  utilizar
+md_terminal=${md_terminal:-$TERM}}                 ##< Terminal para lanzar comandos, por defecto $TERM
+
+desc_md_navegador='Navegador web a utilizar'
+desc_md_terminal='Terminal para lanzar comandos'
+
+archivos_afectados=''                                 ##< Archivos afectados, para poder actuar sobre archivos seleccionados
+debug=false                                           ##< Si hacemos debug o no
+con_proyecto=false                                    ##< Si tenemos proyecto propio o no. 
+
+# Variables internas.
+
+dir_tmp="${DIR_TMP}magtidy/"              ##< Si ejecutamos sobre archivos generamos en tmp
+registro=${dir_tmp}errores_tidy.vim               ##< Registro de la aplicación con formato para vim
+comando_tidy="tidy -w 100 -i -quiet --language es --gnu-emacs yes -f $registro "
+filtro_registro=' | grep -v "missing <!DOCTYPE>" | grep -v "inserting implicit <body>" | grep -v "inserting missing 'title'"'
+fichero_log="${dir_tmp}tidy.log"                                        ##< Fichero de registro
+salida="${dir_tmp}salida.html"                                          ##< Directorio final
+fich_tidy=$fich_tidy_temporal                   ##< @todo Fichero de configuración de tidy del proyecto
+
+[[ -e "$dir_tmp" ]] || mkdir -p "$dir_tmp"
+
+# incluir librerías
+[[ -z "$libash_general_incluida" ]] && source "$(dirname "$BASH_SOURCE")/../../componentes/libash/general" 
+
+## @var magtidy_accion
+## Acción a realizar.
+
+magtidy_accion=
+
+## Manejar parámetros que nos pasan
+
+function _tidy() {
+
+   while [ -n "$1" ] ; do
+
+      case "$1" in
+         
+         -h|-help|--help|help) tidy2help "$0" ; exit ;;
+
+         conf) fich_tidy="$2" ; shift 2 ;;
+
+         debug) shift 1 ; debug=true ;;
+
+         ejecutar)
+            [[ -e "$fichero_log" ]] && rm "$fichero_log"
+            [[ -e "$salida" ]] && rm "$salida"
+            [[ -e "$registro" ]] && rm "$registro"
+            [[ -e "$registro-all" ]] && rm "$registro-all"
+            [[ -e "$registro-filtro" ]] && rm "$registro-filtro"
+            shift 1
+            for f in ${archivos_afectados[*]} ; do
+              echo
+              echo comando: $comando_tidy $f
+              echo
+              $comando_tidy $archivos_afectados 2>> $fichero_log >> $salida
+              cat $registro >> $registro-all
+            done
+            if [ -e "$fichero_log" ] ; then
+              echo
+              cat $fichero_log
+            fi
+
+            # filtramos registro
+            cmd="cat $registro-all $filtro_registro"
+            eval "$cmd" > $registro-filtro
+            mv $registro-filtro $registro
+
+
+            ;;
+
+         verErrores) 
+            shift 1
+            echo Fichero de registro: $registro
+            less $registro
+             ;;
+
+         errores2vim)
+
+            shift 1
+            if [ "`vim --serverlist | grep -i $nombre_proyecto`" != "" ] ; then
+               cmd="gvim --servername $nombre_proyecto --remote-send '<C-\><C-N>:cfile $registro<CR>:copen<CR>'"
+            else
+               local -a servidores_vim=(`vim --serverlist`)
+               echo ${servidores_vim[0]}
+               if [ ${#servidores_vim[*]} -gt 1 ] ; then
+                  echo
+                  echo 'Hay más de un servidor de vim disponible, selecciona uno'
+                  echo
+                  for x in `seq 0 $((${#servidores_vim[*]}-1))` ; do
+                     echo "$x) ${servidores_vim[$x]}"
+                  done
+                  echo
+                  read OPCION
+                  [[ "$OPCION" = "" ]] && return
+                  servername=${servidores_vim[$OPCION]}
+               else
+                  servername=${servidores_vim[*]}
+                  if [ "$servername" == "" ] ; then
+                    echo servername: $servername
+                    servername="NEW"
+                    gvim --servername $servername  
+                  fi
+               fi
+               cmd="gvim --servername $servername --remote-send '<C-\><C-N>:cfile $registro<CR>:copen<CR>'"
+            fi
+            echo comando: $cmd
+            eval $cmd
+            ;;
+
+          ver)
+            shift 1
+            less "$salida"
+            ;;
+         menu) shift 1
+
+            [[ "$*" != "" ]] && archivos_afectados=$(echo "$*")
+
+            if [ -d "${archivos_afectados[*]}" ] ; then
+              archivos_afectados=$(find ${archivos_afectados[*]} -type f -name '*html')
+            fi
+
+            echo
+            clear
+            caja magtidy
+
+            local f=($archivos_afectados)
+
+            if [ "$archivos_afectados" != "" ] ; then
+               abre_caja 'Archivos afectados'
+               if [ ${#f[*]} -gt 5 ] ; then
+                  linea_caja "" "${#f[*]} archivos seleccionados" $colDestacado
+               else
+                  for a in $archivos_afectados ; do
+                     linea_caja "- $a"
+                  done
+               fi
+               cierra_caja
+            fi
+
+             abre_caja 'Sobre proyecto'
+             linea_caja '[E]jecutar' '[V]er resultado' 
+             cierra_caja
+
+            if [ -e $registro ] ; then
+               abre_caja 'Otros'
+               linea_caja 'Ver e[r]rores' '[I]ncluir lista de errores a vim'
+               cierra_caja
+            fi
+
+                             
+            if [ "$debug" = "true" ] ; then
+               echo
+               echo Debug
+               echo -----
+               echo
+               echo "Archivo de configuración: $fich_tidy"
+               echo "Fichero de registro:      $fichero_log"
+               echo "Directorio destino:       $dir_final"
+               echo "Navegador:                $md_navegador"
+               echo "Terminal:                 $md_terminal" 
+               echo "Formato de registro:      $formato_registro" 
+               echo "filtrar archivos:         $filtrar_archivos"  
+               echo "Comando filtrado:         $comando_filtrado"
+               echo "Proyecto propio:          $con_proyecto"
+               echo
+            fi
+
+            read -n 1 -s -p 'Opción: ' OPCION
+            case $OPCION in
+               e|E) _tidy ejecutar ;;
+               c|C) _tidy configurar ;;
+               o|O) _tidy configurar_con_gvim ;;
+               r|R) _tidy verErrores ;;
+               i|I) _tidy errores2vim ;;
+               v|V) _tidy ver ;;
+               *) return ;;
+            esac
+            _tidy menu
+            ;;
+         *) # Lista de archivos afectados
+            archivos_afectados=$(echo "$*")
+            if [ -d "${archivos_afectados[*]}" ] ; then
+              archivos_afectados=$(find ${archivos_afectados[*]} -type f -name '*html')
+            fi
+            shift
+            ;;
+
+
+      esac
+
+   done
+
+}
+
+if [ "$1" == "" ] ; then
+  _tidy menu `find -type f -name '*html'`
+else 
+  _tidy $*
+fi
