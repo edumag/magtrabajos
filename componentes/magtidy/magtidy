@@ -10,16 +10,12 @@
 ## Opciones:
 ## <pre>
 ## ejecutar                 Ejecutar tidy sobre directorio actual
+## ver                      Mostrar salida generada por tidy.
 ## verErrores               Ver fichero de errores
-## configurar               Configurar
 ## errores2vim              Enviar lista de errores a vim
-## filtrar                  Generamos filtro que nos permite documentar los script de bash
-## conf [fich]              Fichero de configuración
+## debug                    Depurar script.
 ## menu                     Menú
 ## </pre>
-##
-## @todo Pasamos acciones a funciones, determinamos la acción que se pide y los archivos
-##       afectados.
 ##
 ## @author   Eduardo Magrané
 ## @internal
@@ -36,11 +32,12 @@
 ## This source code is released for free distribution under the terms of the
 ## GNU General Public License as published by the Free Software Foundation.
 
-# configuración
-DIR_TMP="/tmp/"
+DIR_TMP=${DIR_TMP:-"/tmp/"}
 
 ## Recoger configuración de magtrabajos
 source "`dirname "$BASH_SOURCE"`/../../config"
+
+# Variables internas.
 
 md_navegador="${md_navegador:-firefox}"            ##< Navegador web a  utilizar
 md_terminal=${md_terminal:-$TERM}}                 ##< Terminal para lanzar comandos, por defecto $TERM
@@ -52,190 +49,185 @@ archivos_afectados=''                                 ##< Archivos afectados, pa
 debug=false                                           ##< Si hacemos debug o no
 con_proyecto=false                                    ##< Si tenemos proyecto propio o no. 
 
-# Variables internas.
+# Configuración por defecto. 
+fcd="`dirname "$BASH_SOURCE"`/config.default"
+if [ ! -e "$fcd" ] ; then
+  echo
+  echo "No se encontro archivo de configuraciónpor defecto [$fcd]"
+  exit 1
+fi
+configuracion_leer ".magtrabajos/configuracion/magtidy" "`dirname "$BASH_SOURCE"`/config.default" 'magtidy_' 
+#configuracion_ver 'magtidy_' "`dirname "$BASH_SOURCE"`/config.default"
 
-dir_tmp="${DIR_TMP}magtidy/"              ##< Si ejecutamos sobre archivos generamos en tmp
-registro=${dir_tmp}errores_tidy.vim               ##< Registro de la aplicación con formato para vim
-comando_tidy="tidy -w 100 -i -quiet --language es --gnu-emacs yes -f $registro "
-filtro_registro=' | grep -v "missing <!DOCTYPE>" | grep -v "inserting implicit <body>" | grep -v "inserting missing 'title'"'
-fichero_log="${dir_tmp}tidy.log"                                        ##< Fichero de registro
-salida="${dir_tmp}salida.html"                                          ##< Directorio final
-fich_tidy=$fich_tidy_temporal                   ##< @todo Fichero de configuración de tidy del proyecto
-
-[[ -e "$dir_tmp" ]] || mkdir -p "$dir_tmp"
+[[ -e "$magtidy_dir_tmp" ]] || mkdir -p "$magtidy_dir_tmp"
 
 # incluir librerías
 [[ -z "$libash_general_incluida" ]] && source "$(dirname "$BASH_SOURCE")/../../componentes/libash/general" 
 
-## @var magtidy_accion
-## Acción a realizar.
+## Ejecutar
 
-magtidy_accion=
+function ejecutar_magtidy() {
+
+  [[ -e "$magtidy_fichero_log" ]] && rm "$magtidy_fichero_log"
+  [[ -e "$magtidy_salida" ]] && rm "$magtidy_salida"
+  [[ -e "$magtidy_registro" ]] && rm "$magtidy_registro"
+  [[ -e "$magtidy_registro-all" ]] && rm "$magtidy_registro-all"
+  [[ -e "$magtidy_registro-filtro" ]] && rm "$magtidy_registro-filtro"
+  shift 1
+  for f in ${archivos_afectados[*]} ; do
+    $magtidy_comando $archivos_afectados 2>> $magtidy_fichero_log >> $magtidy_salida
+    cat $magtidy_registro >> $magtidy_registro-all
+  done
+  if [ -e "$magtidy_fichero_log" ] ; then
+    cat $magtidy_fichero_log
+  fi
+
+  # filtramos magtidy_registro
+  cmd="cat $magtidy_registro-all $magtidy_filtro_registro"
+  eval "$cmd" > $magtidy_registro-filtro
+  mv $magtidy_registro-filtro $magtidy_registro
+
+}
+
+## Menú
+
+function menu_magtidy() {
+
+  echo
+  clear
+  caja magtidy
+
+  local f=($archivos_afectados)
+
+  if [ "$archivos_afectados" != "" ] ; then
+     abre_caja 'Archivos afectados'
+     if [ ${#f[*]} -gt 5 ] ; then
+        linea_caja "" "${#f[*]} archivos seleccionados" $colDestacado
+     else
+        for a in $archivos_afectados ; do
+           linea_caja "- $a"
+        done
+     fi
+     cierra_caja
+  fi
+
+   abre_caja 'Sobre proyecto'
+   linea_caja '[E]jecutar' '[V]er resultado' 
+   cierra_caja
+
+  if [ -e $magtidy_registro ] ; then
+     abre_caja 'Otros'
+     linea_caja 'Ver e[r]rores' '[I]ncluir lista de errores a vim'
+     cierra_caja
+  fi
+
+                   
+  if [ "$debug" = "true" ] ; then
+     echo
+     echo Debug
+     echo -----
+     echo
+     echo "Fichero de registro:      $magtidy_fichero_log"
+     echo "Directorio destino:       $dir_final"
+     echo "Navegador:                $md_navegador"
+     echo "Terminal:                 $md_terminal" 
+     echo "Formato de registro:      $formato_registro" 
+     echo "Comando filtrado:         $comando_filtrado"
+     echo "Proyecto propio:          $con_proyecto"
+     echo
+  fi
+
+  read -n 1 -s -p 'Opción: ' OPCION
+  case $OPCION in
+     e|E) ejecutar_magtidy ;;
+     r|R) _tidy verErrores ;;
+     i|I) _tidy errores2vim ;;
+     v|V) _tidy ver ;;
+     *) return ;;
+  esac
+  menu_magtidy
+}
+
+## Errores a vim
+
+function errores2vim_magtidy() {
+  if [ "`vim --serverlist | grep -i $nombre_proyecto`" != "" ] ; then
+     cmd="gvim --servername $nombre_proyecto --remote-send '<C-\><C-N>:cfile $magtidy_registro<CR>:copen<CR>'"
+  else
+     local -a servidores_vim=(`vim --serverlist`)
+     echo ${servidores_vim[0]}
+     if [ ${#servidores_vim[*]} -gt 1 ] ; then
+        echo
+        echo 'Hay más de un servidor de vim disponible, selecciona uno'
+        echo
+        for x in `seq 0 $((${#servidores_vim[*]}-1))` ; do
+           echo "$x) ${servidores_vim[$x]}"
+        done
+        echo
+        read OPCION
+        [[ "$OPCION" = "" ]] && return
+        servername=${servidores_vim[$OPCION]}
+     else
+        servername=${servidores_vim[*]}
+        if [ "$servername" == "" ] ; then
+          echo servername: $servername
+          servername="NEW"
+          gvim --servername $servername  
+        fi
+     fi
+     cmd="gvim --servername $servername --remote-send '<C-\><C-N>:cfile $magtidy_registro<CR>:copen<CR>'"
+  fi
+  echo comando: $cmd
+  eval $cmd
+}
 
 ## Manejar parámetros que nos pasan
 
 function _tidy() {
 
-   while [ -n "$1" ] ; do
+accion_magtidy=
+formato_salida_magtidy=
 
-      case "$1" in
-         
-         -h|-help|--help|help) tidy2help "$0" ; exit ;;
+while [ -n "$1" ] ; do
 
-         conf) fich_tidy="$2" ; shift 2 ;;
+  case "$1" in
 
-         debug) shift 1 ; debug=true ;;
+    -h|-help|--help|help) doxygen2help "$0" ; exit ;;
+    debug) shift 1 ; debug=true ;;
+    ejecutar) shift 1; accion_magtidy=ejecutar_magtidy ;;
+    ver) shift 1 ; less "$magtidy_salida" ;;
+    menu) shift 1 ; menu_magtidy ;;
+    html) shift 1 ; formato_salida_magtidy='html';;
+    vim) shift 1 ; formato_salida_magtidy='vim';;
+    errores2vim) shift 1; errores2vim_magtidy ;;
+    verErrores) 
+      shift 1
+      echo Fichero de registro: $magtidy_registro
+      less $magtidy_registro
+      ;;
+    *) # Lista de archivos afectados
+      archivos_afectados=$(echo "$*")
+      if [ -d "${archivos_afectados[*]}" ] ; then
+        archivos_afectados=$(find ${archivos_afectados[*]} -type f -name '*html')
+      fi
+      shift
+      ;;
 
-         ejecutar)
-            [[ -e "$fichero_log" ]] && rm "$fichero_log"
-            [[ -e "$salida" ]] && rm "$salida"
-            [[ -e "$registro" ]] && rm "$registro"
-            [[ -e "$registro-all" ]] && rm "$registro-all"
-            [[ -e "$registro-filtro" ]] && rm "$registro-filtro"
-            shift 1
-            for f in ${archivos_afectados[*]} ; do
-              echo
-              echo comando: $comando_tidy $f
-              echo
-              $comando_tidy $archivos_afectados 2>> $fichero_log >> $salida
-              cat $registro >> $registro-all
-            done
-            if [ -e "$fichero_log" ] ; then
-              echo
-              cat $fichero_log
-            fi
-
-            # filtramos registro
-            cmd="cat $registro-all $filtro_registro"
-            eval "$cmd" > $registro-filtro
-            mv $registro-filtro $registro
-
-
-            ;;
-
-         verErrores) 
-            shift 1
-            echo Fichero de registro: $registro
-            less $registro
-             ;;
-
-         errores2vim)
-
-            shift 1
-            if [ "`vim --serverlist | grep -i $nombre_proyecto`" != "" ] ; then
-               cmd="gvim --servername $nombre_proyecto --remote-send '<C-\><C-N>:cfile $registro<CR>:copen<CR>'"
-            else
-               local -a servidores_vim=(`vim --serverlist`)
-               echo ${servidores_vim[0]}
-               if [ ${#servidores_vim[*]} -gt 1 ] ; then
-                  echo
-                  echo 'Hay más de un servidor de vim disponible, selecciona uno'
-                  echo
-                  for x in `seq 0 $((${#servidores_vim[*]}-1))` ; do
-                     echo "$x) ${servidores_vim[$x]}"
-                  done
-                  echo
-                  read OPCION
-                  [[ "$OPCION" = "" ]] && return
-                  servername=${servidores_vim[$OPCION]}
-               else
-                  servername=${servidores_vim[*]}
-                  if [ "$servername" == "" ] ; then
-                    echo servername: $servername
-                    servername="NEW"
-                    gvim --servername $servername  
-                  fi
-               fi
-               cmd="gvim --servername $servername --remote-send '<C-\><C-N>:cfile $registro<CR>:copen<CR>'"
-            fi
-            echo comando: $cmd
-            eval $cmd
-            ;;
-
-          ver)
-            shift 1
-            less "$salida"
-            ;;
-         menu) shift 1
-
-            [[ "$*" != "" ]] && archivos_afectados=$(echo "$*")
-
-            if [ -d "${archivos_afectados[*]}" ] ; then
-              archivos_afectados=$(find ${archivos_afectados[*]} -type f -name '*html')
-            fi
-
-            echo
-            clear
-            caja magtidy
-
-            local f=($archivos_afectados)
-
-            if [ "$archivos_afectados" != "" ] ; then
-               abre_caja 'Archivos afectados'
-               if [ ${#f[*]} -gt 5 ] ; then
-                  linea_caja "" "${#f[*]} archivos seleccionados" $colDestacado
-               else
-                  for a in $archivos_afectados ; do
-                     linea_caja "- $a"
-                  done
-               fi
-               cierra_caja
-            fi
-
-             abre_caja 'Sobre proyecto'
-             linea_caja '[E]jecutar' '[V]er resultado' 
-             cierra_caja
-
-            if [ -e $registro ] ; then
-               abre_caja 'Otros'
-               linea_caja 'Ver e[r]rores' '[I]ncluir lista de errores a vim'
-               cierra_caja
-            fi
-
-                             
-            if [ "$debug" = "true" ] ; then
-               echo
-               echo Debug
-               echo -----
-               echo
-               echo "Archivo de configuración: $fich_tidy"
-               echo "Fichero de registro:      $fichero_log"
-               echo "Directorio destino:       $dir_final"
-               echo "Navegador:                $md_navegador"
-               echo "Terminal:                 $md_terminal" 
-               echo "Formato de registro:      $formato_registro" 
-               echo "filtrar archivos:         $filtrar_archivos"  
-               echo "Comando filtrado:         $comando_filtrado"
-               echo "Proyecto propio:          $con_proyecto"
-               echo
-            fi
-
-            read -n 1 -s -p 'Opción: ' OPCION
-            case $OPCION in
-               e|E) _tidy ejecutar ;;
-               c|C) _tidy configurar ;;
-               o|O) _tidy configurar_con_gvim ;;
-               r|R) _tidy verErrores ;;
-               i|I) _tidy errores2vim ;;
-               v|V) _tidy ver ;;
-               *) return ;;
-            esac
-            _tidy menu
-            ;;
-         *) # Lista de archivos afectados
-            archivos_afectados=$(echo "$*")
-            if [ -d "${archivos_afectados[*]}" ] ; then
-              archivos_afectados=$(find ${archivos_afectados[*]} -type f -name '*html')
-            fi
-            shift
-            ;;
-
-
-      esac
+   esac
 
    done
 
-}
+   if [ "$accion_magtidy" != "" ] ; then
+     $accion_magtidy
+   fi
+   if [ "$formato_salida_magtidy" != "" ] ; then
+     case "$formato_salida_magtidy" in
+       html) cat "$magtidy_salida" ; exit ;;
+       vim) cat "$magtidy_registro" ; exit ;;
+       *) echo "Formato no soportado" ; exit 1 ;;
+      esac
+   fi
+ }
 
 if [ "$1" == "" ] ; then
   _tidy menu `find -type f -name '*html'`
