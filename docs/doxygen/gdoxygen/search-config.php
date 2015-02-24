@@ -15,8 +15,8 @@ $translator = array(
   ),
   'search_matches' => "Coincidencias:",
   'search' => "Buscar",
-  'split_bar' => "<div id=\"side-nav\" class=\"ui-resizable side-nav-resizable\">\n  <div id=\"nav-tree\">\n    <div id=\"nav-tree-contents\">\n    </div>\n  </div>\n  <div id=\"splitbar\" style=\"-moz-user-select:none;\" \n       class=\"ui-resizable-handle\">\n  </div>\n</div>\n<script type=\"text/javascript\">\n  initNavTree('.htm','');\n</script>\n<div id=\"doc-content\">\n",
-  'logo' => "Generado el Lunes, 2 de Junio de 2014 11:44:15 para magTrabajos por&#160;\n<a href=\"http://www.doxygen.org/index.html\">\n<img class=\"footer\" src=\"doxygen.png\" alt=\"doxygen\"/></a> 1.8.0 ",
+  'split_bar' => "<div id=\"side-nav\" class=\"ui-resizable side-nav-resizable\">\n  <div id=\"nav-tree\">\n    <div id=\"nav-tree-contents\">\n      <div id=\"nav-sync\" class=\"sync\"></div>\n    </div>\n  </div>\n  <div id=\"splitbar\" style=\"-moz-user-select:none;\" \n       class=\"ui-resizable-handle\">\n  </div>\n</div>\n<script type=\"text/javascript\">\n$(document).ready(function(){initNavTree('search.htm','');});\n</script>\n<div id=\"doc-content\">\n",
+  'logo' => "Generado el Martes, 20 de Enero de 2015 20:12:04 para magTrabajos por&#160;\n<a href=\"http://www.doxygen.org/index.html\">\n<img class=\"footer\" src=\"doxygen.png\" alt=\"doxygen\"/></a> 1.8.6 ",
 );
 
 </script>

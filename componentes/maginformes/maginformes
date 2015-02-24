@@ -17,7 +17,7 @@ source `dirname "$BASH_SOURCE"`/../../config
 perfil_actual='default'                                             ##< Perfil por defecto
 dir_perfiles="`dirname "$BASH_SOURCE"`/perfiles/"                   ##< Directorio de perfiles predefinidos
 dir_perfiles_usuario="${DIR_CONF_USUARIO}perfiles/"                 ##< Directorio de perfiles de usuario
-[[ $proyecto ]] && dir_perfiles_proyecto="./magtrabajos/perfiles/"  ##< Directorio de perfiles de proyecto
+dir_perfiles_proyecto=".magtrabajos/perfiles/"  ##< Directorio de perfiles de proyecto
 
 # Si no tenemos los directorios creados los creamos
 [[ -d "$dir_perfiles_usuario" ]] || mkdir "$dir_perfiles_usuario"

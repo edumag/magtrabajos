@@ -3,16 +3,17 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>magTrabajos: Referencia del Archivo actualizarManualPhp</title>
-
+<meta name="generator" content="Doxygen 1.8.6"/>
+<title>magTrabajos: Referencia del Archivo 08-buscar_en_codigo_todo_bugs.sh</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<link href="doxygen.css" rel="stylesheet" type="text/css" />
-<link href="navtree.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="resize.js"></script>
 <script type="text/javascript" src="navtree.js"></script>
 <script type="text/javascript">
   $(document).ready(initResizable);
+  $(window).load(resizeHeight);
 </script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/search.js"></script>
@@ -22,33 +23,25 @@
   });
 </script>
 <link rel="search" href="search-opensearch.php?v=opensearch.xml" type="application/opensearchdescription+xml" title="magTrabajos"/>
-
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-<div id="top"><!-- do not remove this div! -->
-
-
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
 <div id="titlearea">
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr style="height: 56px;">
-  
-  
   <td style="padding-left: 0.5em;">
    <div id="projectname">magTrabajos
-   &#160;<span id="projectnumber">3.7</span>
+   &#160;<span id="projectnumber">3.9</span>
    </div>
-   
   </td>
-  
-  
-  
  </tr>
  </tbody>
 </table>
 </div>
-
-<!-- Generado por Doxygen 1.8.0 -->
+<!-- end header part -->
+<!-- Generado por Doxygen 1.8.6 -->
 <script type="text/javascript">
 var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
 </script>
@@ -58,7 +51,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
       <li><a href="pages.htm"><span>Páginas&#160;relacionadas</span></a></li>
       <li><a href="modules.htm"><span>Módulos</span></a></li>
       <li class="current"><a href="files.htm"><span>Archivos</span></a></li>
-      <li><a href="dirs.htm"><span>Directorios</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
           <div class="left">
@@ -79,10 +71,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
       <li><a href="globals.htm"><span>Miembros&#160;de&#160;los&#160;ficheros</span></a></li>
     </ul>
   </div>
-</div>
+</div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
     <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
     </div>
   </div>
   <div id="splitbar" style="-moz-user-select:none;" 
@@ -90,61 +83,26 @@ var searchBox = new SearchBox("searchBox", "search",false,'Buscar');
   </div>
 </div>
 <script type="text/javascript">
-  initNavTree('a00018.htm','');
+$(document).ready(function(){initNavTree('a00018.htm','');});
 </script>
 <div id="doc-content">
 <div class="header">
-  <div class="summary">
-<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
-<div class="title">Referencia del Archivo actualizarManualPhp</div>  </div>
+<div class="title">Referencia del Archivo 08-buscar_en_codigo_todo_bugs.sh</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Actualizar manual de PHP.  
+<p>Buscamos lista de tareas pendientes y bugs dentro de los archivos afectados por el movimiento.  
 <a href="#details">Más...</a></p>
-<table class="memberdecls">
-<tr><td colspan="2"><h2><a name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a65458deba5d5a255314d85647aff0ff0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="a00018_a65458deba5d5a255314d85647aff0ff0.htm#a65458deba5d5a255314d85647aff0ff0">DIR_MANUAL</a> = /home/eduardo/Documentos/doc/programacion/programacionWeb/php/</td></tr>
-<tr class="memdesc:a65458deba5d5a255314d85647aff0ff0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Directorio destino.  <a href="#a65458deba5d5a255314d85647aff0ff0"></a><br/></td></tr>
-</table>
-<hr/><a name="details" id="details"></a><h2>Descripción detallada</h2>
-<div class="textblock"><p>Actualizar manual de PHP. </p>
-<p>El manual de php es utilizado por vim para mostrarnos la documentación de las funciones. Es importante que coincida el directorio donde se actualiza el manual con el que tiene vim configurado.</p>
-<p>Para que funcione en vim añadimos las siguientes lineas en el ~/.vimrc : </p>
-<div class="fragment"><pre class="fragment"> &lt;pre&gt;
- <span class="stringliteral">&quot; Asigna phpman para manejar las &#39;man pages&#39;</span>
-<span class="stringliteral"> setlocal keywordprg=phpman</span>
-<span class="stringliteral"> &quot;</span> Asigna Ctrl-K para ver un hint sobre la sintaxis de la función.
- nnoremap &lt;C-K&gt; :call PhpMan()&lt;CR&gt;
- inoremap &lt;C-K&gt; &lt;Esc&gt;:call PhpMan()&lt;CR&gt;a
- nnoremap &lt;S-K&gt; :call PhpManHint()&lt;CR&gt;
- <span class="stringliteral">&quot; Función para emular man con el manual de PHP</span>
-<span class="stringliteral"> function PhpMan()</span>
-<span class="stringliteral">    let func = substitute(expand(&#39;&lt;cword&gt;&#39;), &#39;_&#39;, &#39;-&#39;, &#39;g&#39;)</span>
-<span class="stringliteral">    &quot;</span>let file = <span class="stringliteral">&#39;/usr/share/Documentos/doc/phpdoc/html/function.&#39;</span> . func . <span class="stringliteral">&#39;.html&#39;</span>
-    let file = <span class="stringliteral">&#39;/home/eduardo/Documentos/doc/programacion/programacionWeb/php/html/function.&#39;</span> . func . <span class="stringliteral">&#39;.html&#39;</span>
-    exe <span class="stringliteral">&#39;!/usr/bin/firefox &#39;</span> . file . <span class="stringliteral">&#39; &amp;&#39;</span> 
- endfunction
- <span class="stringliteral">&quot; Función para dar un hint sobre la sintaxis de una función de PHP.</span>
-<span class="stringliteral"> function PhpManHint()</span>
-<span class="stringliteral">     let func = substitute(expand(&#39;&lt;cword&gt;&#39;), &#39;_&#39;, &#39;-&#39;, &#39;g&#39;)</span>
-<span class="stringliteral">     let file = &#39;/home/eduardo/Documents/doc/programacion/programacionWeb/php/html/function.&#39; . func . &#39;.html&#39;</span>
-<span class="stringliteral">     let hint = system(&#39;links -dump &#39; . file . &#39; 2&gt;&amp;1 |egrep -A2 -m1 &quot;</span>Descri<span class="stringliteral">&quot; |tail -n1 |cut -b 4-&#39;)</span>
-<span class="stringliteral">     let hint = strpart(hint, 0, stridx(hint, &quot;</span>\n<span class="stringliteral">&quot;))</span>
-<span class="stringliteral">     if hint != &#39;&#39;</span>
-<span class="stringliteral">    echo hint</span>
-<span class="stringliteral">     else</span>
-<span class="stringliteral">    echohl WarningMsg</span>
-<span class="stringliteral">    echomsg &#39;No se encuentra la función &quot;</span><span class="stringliteral">&#39; . func . &#39;</span><span class="stringliteral">&quot;!&#39;</span>
-<span class="stringliteral">    echohl None</span>
-<span class="stringliteral">     endif</span>
-<span class="stringliteral"> endfunction</span>
-<span class="stringliteral"> &lt;/pre&gt;</span>
-</pre></div> </div></div><!-- contents -->
-</div>
-  <div id="nav-path" class="navpath">
-    <ul>
-      <li class="navelem"><a class="el" href="a00018.htm">actualizarManualPhp</a>      </li>
+<a name="details" id="details"></a><h2 class="groupheader">Descripción detallada</h2>
+<div class="textblock"><p>Buscamos lista de tareas pendientes y bugs dentro de los archivos afectados por el movimiento. </p>
+<p>En caso de encontrar alguna, la mostramos y preguntamos que se desea hacer:</p>
+<ul>
+<li>continuar</li>
+<li>cancelar</li>
+<li>editar archivo donde se encuentra la tarea</li>
+</ul>
+<p>Si se selecciona editar, se vuelve a buscar en código para repetir el proceso. </p>
+</div></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- pie para magtrabajos -->

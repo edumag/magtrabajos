@@ -277,9 +277,9 @@ function listado_tareas_totales() {
       IF (t.presupuesto>0,t.presupuesto + (t.compensacion),       
       ROUND(t.euroshora * (sum(UNIX_TIMESTAMP(ti.fechaFinal)- UNIX_TIMESTAMP(ti.fechaInicio))/60)/60,2) + 	(t.compensacion) ) total
             FROM tareas t, tiempos ti, movimientos m       
-      WHERE m.idTarea=t.id AND ti.idMovimiento=m.id AND t.idProyecto=$proyectoId $CONDICION_TOTAL_TAREAS  GROUP BY t.id
+      WHERE m.idTarea=t.id AND ti.idMovimiento=m.id AND t.idProyecto=$proyectoId $CONDICION_TOTAL_TAREAS GROUP BY t.id 
    "
-   SQL="SELECT CONCAT( tarea, '\t', fechaInicio, '\t',  fechaFinal, '\t',  sum(total)), '\nnn' FROM ($SUBSQL) AS subsql GROUP BY tarea"
+   SQL="SELECT CONCAT( tarea, '\t', fechaInicio, '\t',  fechaFinal, '\t',  sum(total)), '\nnn' FROM ($SUBSQL) AS subsql GROUP BY tarea ORDER BY fechaInicio"
 
    LINEA="====================================================== ================ ================ ==============="
    # [ $DEV ] && echo -e "\nSQL::$SQL"
@@ -412,14 +412,20 @@ function nueva_factura() {
        return
     fi
 
+    # Crear código de factura.
+    sql="SELECT count(id) FROM facturas WHERE idProyecto=$proyectoId"
+    numfact=$(ejecutarSQL "$sql" "-N")
+    numfact=$(($numfact+1))
     clear
     echo
     echo '+---------------+'
     echo '| Nueva factura |'
     echo '+---------------+'
     echo
+    echo Numero: $proyectoId - $numfact
+    echo
     read -p "Comentario: " COMENTARIO
-    SQL="INSERT INTO facturas (fechaFactura, comentario, idProyecto, fechaPagado) VALUES ('`AHORA`', '`protegerTexto $COMENTARIO`', $proyectoId, '0000-00-00')"
+    SQL="INSERT INTO facturas (numfact, fechaFactura, comentario, idProyecto, fechaPagado) VALUES ($numfact, '`AHORA`', '`protegerTexto $COMENTARIO`', $proyectoId, '0000-00-00')"
     ejecutarSQL "$SQL"
     # obtenemos ultimo id de factura
     facturaId=$(ejecutarSQL "SELECT id FROM facturas order by id desc limit 1" "-N")
@@ -441,22 +447,26 @@ function generarFactura() {
 
    #echo "--no-xml-declaration" > $TMP
 
-   tituloFactura="lesolivex"
+   tituloFactura="lesOlivex"
+   subtituloFactura="Serveis informàtics"
    echo
    echo $tituloFactura | sed s/./=/g
    echo $tituloFactura
    echo $tituloFactura | sed s/./=/g
+   echo
+   echo $subtituloFactura
+   echo $subtituloFactura | sed s/./=/g
    echo " "
 
    # Recogemos datos de factura si estamos imprimiendo una factura
    if [ "$facturaId" != "" ] ; then
       log $FUNCNAME 'Datos de factura'
-      SQL="SELECT CONCAT( 'id_factura=',id,' ; fechaFactura=', fechaFactura) from facturas where id=$facturaId"
+      SQL="SELECT CONCAT( 'numfact=',numfact,';id_factura=',id,' ; fechaFactura=', fechaFactura) from facturas where id=$facturaId"
       SALIDA=$(ejecutarSQL "$SQL" "-N")
       eval "$SALIDA"
       echo " "
-      echo ":Factura: $id_factura"
-      echo ":Fecha: $fechaFactura"
+      printf "\n**Factura:** %04d-%04d" $proyectoId $numfact
+      echo -e "\n**Fecha** $fechaFactura"
    
    fi
 
@@ -465,18 +475,27 @@ function generarFactura() {
    # local linea='============================================= ==================================================='
    local linea="\n+----------------------------------------+----------------------------------------+"
 
+   # Dividimos descripción de proyecto por lineas
+   SQL="SELECT descripcion from proyectos where id=$proyectoId"
+   linea1=$(ejecutarSQL "$SQL" "-N" | awk -v FS="\r" '{print $1 }' | sed 's/\\n//g' | iconv -f utf8 -t  ascii//translit )
+   linea2=$(ejecutarSQL "$SQL" "-N" | awk -v FS="\r" '{print $2 }' | sed 's/\\n//g' | iconv -f utf8 -t  ascii//translit )
+   linea3=$(ejecutarSQL "$SQL" "-N" | awk -v FS="\r" '{print $3 }' | sed 's/\\n//g' | iconv -f utf8 -t  ascii//translit )
+   linea4=$(ejecutarSQL "$SQL" "-N" | awk -v FS="\r" '{print $4 }' | sed 's/\\n//g' | iconv -f utf8 -t  ascii//translit )
+   linea5=$(ejecutarSQL "$SQL" "-N" | awk -v FS="\r" '{print $5 }' | sed 's/\\n//g' | iconv -f utf8 -t  ascii//translit )
+
+
    echo -en $linea
-   printf "\n|%-40s|%40s|" "EDUARDO MAGRANE SANCHEZ" "CLIENTE $proyecto"
-   printf "\n|%-40s|%40s|" "" ""
-   printf "\n|%-40s|%40s|" "CIF/NIF 46135489-L" ""
-   printf "\n|%-40s|%40s|" "" ""
-   printf "\n|%-40s|%40s|" "Plaza de Ros i Reig N9" ""
-   printf "\n|%-40s|%40s|" "" ""
-   printf "\n|%-40s|%40s|" "Les Olives - Garrigoles" ""
-   printf "\n|%-40s|%40s|" "" ""
-   printf "\n|%-40s|%40s|" "17466 GIRONA" ""
-   printf "\n|%-40s|%40s|" "" ""
-   printf "\n|%-40s|%40s|" "TEL 972768281" ""
+   printf "\n|%-40s|%-40s|" "Eduardo Magrane Sanchez" "Para: **$proyecto**"
+   printf "\n|%-40s|%-40s|" "" ""
+   printf "\n|%-40s|%-40s|" "CIF/NIF 46135489-L" "$linea1"
+   printf "\n|%-40s|%-40s|" "" ""
+   printf "\n|%-40s|%-40s|" "Plaza de Ros i Reig N9" "$linea2"
+   printf "\n|%-40s|%-40s|" "" ""
+   printf "\n|%-40s|%-40s|" "Les Olives - Garrigoles" "$linea3"
+   printf "\n|%-40s|%-40s|" "" ""
+   printf "\n|%-40s|%-40s|" "17466 GIRONA" "$linea4"
+   printf "\n|%-40s|%-40s|" "" ""
+   printf "\n|%-40s|%-40s|" "TEL 972768281" "$linea5"
    echo -e $linea
    echo " "
    
@@ -709,13 +728,14 @@ function facturaMovimientos() {
 
 function presentarDatosFactura() {
 
+    # dnumfact=$(ejecutarSQL "select numfact from facturas where id=$facturaId" "-N")
     # dComentario=$(ejecutarSQL "select comentario from facturas where id=$facturaId" "-N")
     # dFechaFactura=$(ejecutarSQL "select fechaFactura from facturas where id=$facturaId" "-N")
     # dFechaPagado=$(ejecutarSQL "select fechaPagado from facturas where id=$facturaId" "-N")
     # dTotal=$(ejecutarSQL "select Total from facturas where id=$facturaId" "-N")
    
     sql='SELECT '
-    sql="$sql CONCAT('dComentario=\'',f.comentario,'\'; dFechaFactura=',f.fechaFactura,'; dFechaPagado=',f.fechaPagado,'; dTotal=',f.Total,'; pagado=',if (sum(rfp.pagado),sum(rfp.pagado),0),';') FROM facturas f"
+    sql="$sql CONCAT('dnumfact=',numfact,';dComentario=\'',f.comentario,'\'; dFechaFactura=',f.fechaFactura,'; dFechaPagado=',f.fechaPagado,'; dTotal=',f.Total,'; pagado=',if (sum(rfp.pagado),sum(rfp.pagado),0),';') FROM facturas f"
     sql="$sql LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id"
     sql="$sql WHERE f.id=$facturaId"
     sql="$sql GROUP BY f.id"
@@ -730,7 +750,8 @@ function presentarDatosFactura() {
     tareasIds=($(ejecutarSQL "$SQL" "-N"))
     movimientoId=''
 
-    linea_caja "| Id:_________________$facturaId"
+    # linea_caja "| Id:_________________$facturaId"
+    linea_caja "| Num:________________$dnumfact"
     linea_caja "| Comentario:_________$dComentario"
     linea_caja "| Fecha de factura:___$dFechaFactura"
     linea_caja "| Fecha pagado:_______$dFechaPagado"
@@ -750,7 +771,7 @@ function pendiente_facturas(){
    SQL_WHERE=" WHERE f.fechaPagado IS NULL OR f.fechaPagado = '' OR f.fechaPagado = '0000-00-00' AND f.idProyecto=$proyectoId"
 
    SQL="SELECT DISTINCT
-     f.id, f.fechaFactura AS \\\`Fecha Factura\\\`
+     f.idProyecto, f.numfact, f.fechaFactura AS \\\`Fecha Factura\\\`
      ,f.fechaPagado AS \\\`Fecha pago\\\`, f.Total AS \\\`Total factura\\\`, sum(rfp.pagado) AS Pagado, TRUNCATE(f.Total - sum(if(rfp.pagado,rfp.pagado,0)),2) as Pendiente
      FROM facturas f LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id"
 
@@ -778,7 +799,7 @@ function pendiente_facturas(){
 
    # ejecutarMysql2rst "$SQL $SQL_WHERE $SQL_GROUP" 
 
-   echo -e "$salida" | awk '{ printf "**Factura:%s**\n\n| Fecha factura: %s\n| Total: %s\n| Pagado: %s\n| Pendiente: %s\n\n\n",$1,$2,$4,$5,$6, $7 }' | tee -a "$TMP"
+   echo -e "$salida" | awk '{ printf "**Factura:%04d-%04d**\n\n| Fecha factura: %s\n| Total: %s\n| Pagado: %s\n| Pendiente: %s\n\n\n",$1,$2,$3,$5,$6,$7,$8 }' | tee -a "$TMP"
 
    SALIDA="*Total pendiente:* `ejecutarSQL \"$SQL_TOTAL\" '-N'`"
    echo $SALIDA | tee -a "$TMP"
@@ -835,7 +856,7 @@ function lista_facturas_pagos() {
       WHERE idProyecto=$proyectoId
       GROUP BY rfp.fecha
       ORDER BY rfp.id desc
-      LIMIT 10
+      LIMIT 4
       "
    local salida=$(ejecutarSQL "$sql" "-N")
    for linea in $salida ; do
@@ -846,17 +867,17 @@ function lista_facturas_pagos() {
      echo Abonado: $total Fecha: $fecha | sed 's/./-/g'  | tee -a $TMP
      echo                                                | tee -a $TMP
      local sql_factura="
-     SELECT f.id AS factura_id, f.comentario, 
+     SELECT f.id AS 'ID', f.numfact AS 'NF', f.comentario, 
         f.fechaFactura, f.fechaPagado, f.Total AS \\\"Total Factura\\\", rfp.pagado AS Pagado 
         FROM facturas f 
         LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id 
         WHERE rfp.fecha=\\\"$fecha\\\"
         "
 
-     echo                                        | tee -a $TMP
-     echo 'Listado de facturas'                  | tee -a $TMP
-     echo 'Listado de facturas' | sed 's/./_/g'  | tee -a $TMP
-     echo                                        | tee -a $TMP
+     # echo                                        | tee -a $TMP
+     # echo 'Listado de facturas'                  | tee -a $TMP
+     # echo 'Listado de facturas' | sed 's/./_/g'  | tee -a $TMP
+     # echo                                        | tee -a $TMP
      ejecutarMysql2rst "$sql_factura"            | tee -a $TMP
    done
 

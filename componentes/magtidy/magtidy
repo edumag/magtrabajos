@@ -1,0 +1,236 @@
+#!/bin/bash 
+
+## @file magtidy
+## @brief Interface para tidy
+##
+## magtidy nos permite validar un archivo html.
+##
+## Uso: magtidy [opción] [archivos seleccionados]
+##
+## Opciones:
+## <pre>
+## ejecutar                 Ejecutar tidy sobre directorio actual
+## ver                      Mostrar salida generada por tidy.
+## verErrores               Ver fichero de errores
+## errores2vim              Enviar lista de errores a vim
+## debug                    Depurar script.
+## menu                     Menú
+## </pre>
+##
+## @author   Eduardo Magrané
+## @internal
+##       web  http://www.lesolivex.com
+##
+##      mail  edu.lesolivex.com
+##
+##   Created  13/03/11
+##
+##  Revision  SVN $Id: $
+##
+## Copyright  Copyright (c) 2011, Eduardo Magrané
+## 
+## This source code is released for free distribution under the terms of the
+## GNU General Public License as published by the Free Software Foundation.
+
+DIR_TMP=${DIR_TMP:-"/tmp/"}
+
+## Recoger configuración de magtrabajos
+source "`dirname "$BASH_SOURCE"`/../../config"
+
+# Variables internas.
+
+md_navegador="${md_navegador:-firefox}"            ##< Navegador web a  utilizar
+md_terminal=${md_terminal:-$TERM}}                 ##< Terminal para lanzar comandos, por defecto $TERM
+
+desc_md_navegador='Navegador web a utilizar'
+desc_md_terminal='Terminal para lanzar comandos'
+
+archivos_afectados=''                                 ##< Archivos afectados, para poder actuar sobre archivos seleccionados
+debug=false                                           ##< Si hacemos debug o no
+con_proyecto=false                                    ##< Si tenemos proyecto propio o no. 
+
+# Configuración por defecto. 
+fcd="`dirname "$BASH_SOURCE"`/config.default"
+if [ ! -e "$fcd" ] ; then
+  echo
+  echo "No se encontro archivo de configuraciónpor defecto [$fcd]"
+  exit 1
+fi
+configuracion_leer ".magtrabajos/configuracion/magtidy" "`dirname "$BASH_SOURCE"`/config.default" 'magtidy_' 
+#configuracion_ver 'magtidy_' "`dirname "$BASH_SOURCE"`/config.default"
+
+[[ -e "$magtidy_dir_tmp" ]] || mkdir -p "$magtidy_dir_tmp"
+
+# incluir librerías
+[[ -z "$libash_general_incluida" ]] && source "$(dirname "$BASH_SOURCE")/../../componentes/libash/general" 
+
+## Ejecutar
+
+function ejecutar_magtidy() {
+
+  [[ -e "$magtidy_fichero_log" ]] && rm "$magtidy_fichero_log"
+  [[ -e "$magtidy_salida" ]] && rm "$magtidy_salida"
+  [[ -e "$magtidy_registro" ]] && rm "$magtidy_registro"
+  [[ -e "$magtidy_registro-all" ]] && rm "$magtidy_registro-all"
+  [[ -e "$magtidy_registro-filtro" ]] && rm "$magtidy_registro-filtro"
+  shift 1
+  for f in ${archivos_afectados[*]} ; do
+    $magtidy_comando $archivos_afectados 2>> $magtidy_fichero_log >> $magtidy_salida
+    cat $magtidy_registro >> $magtidy_registro-all
+  done
+  if [ -e "$magtidy_fichero_log" ] ; then
+    cat $magtidy_fichero_log
+  fi
+
+  # filtramos magtidy_registro
+  cmd="cat $magtidy_registro-all $magtidy_filtro_registro"
+  eval "$cmd" > $magtidy_registro-filtro
+  mv $magtidy_registro-filtro $magtidy_registro
+
+}
+
+## Menú
+
+function menu_magtidy() {
+
+  echo
+  clear
+  caja magtidy
+
+  local f=($archivos_afectados)
+
+  if [ "$archivos_afectados" != "" ] ; then
+     abre_caja 'Archivos afectados'
+     if [ ${#f[*]} -gt 5 ] ; then
+        linea_caja "" "${#f[*]} archivos seleccionados" $colDestacado
+     else
+        for a in $archivos_afectados ; do
+           linea_caja "- $a"
+        done
+     fi
+     cierra_caja
+  fi
+
+   abre_caja 'Sobre proyecto'
+   linea_caja '[E]jecutar' '[V]er resultado' 
+   cierra_caja
+
+  if [ -e $magtidy_registro ] ; then
+     abre_caja 'Otros'
+     linea_caja 'Ver e[r]rores' '[I]ncluir lista de errores a vim'
+     cierra_caja
+  fi
+
+                   
+  if [ "$debug" = "true" ] ; then
+     echo
+     echo Debug
+     echo -----
+     echo
+     echo "Fichero de registro:      $magtidy_fichero_log"
+     echo "Directorio destino:       $dir_final"
+     echo "Navegador:                $md_navegador"
+     echo "Terminal:                 $md_terminal" 
+     echo "Formato de registro:      $formato_registro" 
+     echo "Comando filtrado:         $comando_filtrado"
+     echo "Proyecto propio:          $con_proyecto"
+     echo
+  fi
+
+  read -n 1 -s -p 'Opción: ' OPCION
+  case $OPCION in
+     e|E) ejecutar_magtidy ;;
+     r|R) _tidy verErrores ;;
+     i|I) _tidy errores2vim ;;
+     v|V) _tidy ver ;;
+     *) return ;;
+  esac
+  menu_magtidy
+}
+
+## Errores a vim
+
+function errores2vim_magtidy() {
+  if [ "`vim --serverlist | grep -i $nombre_proyecto`" != "" ] ; then
+     cmd="gvim --servername $nombre_proyecto --remote-send '<C-\><C-N>:cfile $magtidy_registro<CR>:copen<CR>'"
+  else
+     local -a servidores_vim=(`vim --serverlist`)
+     echo ${servidores_vim[0]}
+     if [ ${#servidores_vim[*]} -gt 1 ] ; then
+        echo
+        echo 'Hay más de un servidor de vim disponible, selecciona uno'
+        echo
+        for x in `seq 0 $((${#servidores_vim[*]}-1))` ; do
+           echo "$x) ${servidores_vim[$x]}"
+        done
+        echo
+        read OPCION
+        [[ "$OPCION" = "" ]] && return
+        servername=${servidores_vim[$OPCION]}
+     else
+        servername=${servidores_vim[*]}
+        if [ "$servername" == "" ] ; then
+          echo servername: $servername
+          servername="NEW"
+          gvim --servername $servername  
+        fi
+     fi
+     cmd="gvim --servername $servername --remote-send '<C-\><C-N>:cfile $magtidy_registro<CR>:copen<CR>'"
+  fi
+  echo comando: $cmd
+  eval $cmd
+}
+
+## Manejar parámetros que nos pasan
+
+function _tidy() {
+
+accion_magtidy=
+formato_salida_magtidy=
+
+while [ -n "$1" ] ; do
+
+  case "$1" in
+
+    -h|-help|--help|help) doxygen2help "$0" ; exit ;;
+    debug) shift 1 ; debug=true ;;
+    ejecutar) shift 1; accion_magtidy=ejecutar_magtidy ;;
+    ver) shift 1 ; less "$magtidy_salida" ;;
+    menu) shift 1 ; menu_magtidy ;;
+    html) shift 1 ; formato_salida_magtidy='html';;
+    vim) shift 1 ; formato_salida_magtidy='vim';;
+    errores2vim) shift 1; errores2vim_magtidy ;;
+    verErrores) 
+      shift 1
+      echo Fichero de registro: $magtidy_registro
+      less $magtidy_registro
+      ;;
+    *) # Lista de archivos afectados
+      archivos_afectados=$(echo "$*")
+      if [ -d "${archivos_afectados[*]}" ] ; then
+        archivos_afectados=$(find ${archivos_afectados[*]} -type f -name '*html')
+      fi
+      shift
+      ;;
+
+   esac
+
+   done
+
+   if [ "$accion_magtidy" != "" ] ; then
+     $accion_magtidy
+   fi
+   if [ "$formato_salida_magtidy" != "" ] ; then
+     case "$formato_salida_magtidy" in
+       html) cat "$magtidy_salida" ; exit ;;
+       vim) cat "$magtidy_registro" ; exit ;;
+       *) echo "Formato no soportado" ; exit 1 ;;
+      esac
+   fi
+ }
+
+if [ "$1" == "" ] ; then
+  _tidy menu `find -type f -name '*html'`
+else 
+  _tidy $*
+fi

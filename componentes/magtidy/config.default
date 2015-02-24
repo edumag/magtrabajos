@@ -1,0 +1,37 @@
+## @file
+## @brief Configuración por defecto para magtidy
+
+## @defgroup configuracion_magtidy Configuración de magtidy por defecto
+##
+## Colocamos prefijo 'default_' ha las variables para ser reconocibles
+##
+## @ingroup configuracion
+##
+## @{
+
+  ## @var deafult_magtidy_dir_tmp
+  ## Directorio temporal para magtidy.
+  default_magtidy_dir_tmp="${DIR_TMP}magtidy/"
+
+  ## @var default_magtidy_registro
+  ## Registro de la aplicación con formato para vim.
+  default_magtidy_registro=${default_magtidy_dir_tmp}errores_tidy.vim
+
+  ## @var default_magtidy_fichero_log
+  ## Fichero de registro.
+  default_magtidy_fichero_log="${default_magtidy_dir_tmp}tidy.log"
+
+  ## @var default_magtidy_filtro_registro
+  ## Filtro para la salida del registro.
+  default_magtidy_filtro_registro=' | grep -v "missing <!DOCTYPE>" | grep -v "inserting implicit <body>" | grep -v "inserting missing 'title'"'
+
+  ## @var default_magtidy_comando
+  ## Comando a ejecutar.
+  default_magtidy_comando="tidy -w 100 -i -quiet --language es --gnu-emacs yes -f $default_magtidy_registro "
+
+  ## @var default_magtidy_salida
+  ## Archivo con salida html generada por tidy.
+  default_magtidy_salida="${default_magtidy_dir_tmp}magtidy_salida.html"
+
+
+## @}

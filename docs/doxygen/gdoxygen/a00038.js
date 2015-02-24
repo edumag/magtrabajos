@@ -1,13 +1,10 @@
 var a00038 =
 [
-    [ "user", "a00038_a5cc32e366c87c4cb49e4309b75f57d64.htm#a5cc32e366c87c4cb49e4309b75f57d64", null ],
-    [ "pass", "a00038_a078bbb4bf0f7117fb131ec45f15b5b87.htm#a078bbb4bf0f7117fb131ec45f15b5b87", null ],
-    [ "url", "a00038_afcd5a3e84f2adb7f83fa6c99911f31e4.htm#afcd5a3e84f2adb7f83fa6c99911f31e4", null ],
-    [ "url_registro", "a00038_a039df1925b9c024a3b89ebcd49f4089f.htm#a039df1925b9c024a3b89ebcd49f4089f", null ],
-    [ "url_destino", "a00038_a1e6d87a84ec2ef9ec622d94150979086.htm#a1e6d87a84ec2ef9ec622d94150979086", null ],
-    [ "file_cookie", "a00038_aeec4a8b6408efdf9db06106d5e680e2f.htm#aeec4a8b6408efdf9db06106d5e680e2f", null ],
-    [ "user_agent", "a00038_ac1b27022e729d81b2b33590aea822188.htm#ac1b27022e729d81b2b33590aea822188", null ],
-    [ "file_registro", "a00038_a04f562e059c21ddde1fa2138c9466fba.htm#a04f562e059c21ddde1fa2138c9466fba", null ],
-    [ "file_destino", "a00038_af93d768e7f9b1246e7ee475773741aa3.htm#af93d768e7f9b1246e7ee475773741aa3", null ],
-    [ "time", "a00038_ae4d0df622b989ccaa9c25b9560a59e0a.htm#ae4d0df622b989ccaa9c25b9560a59e0a", null ]
+    [ "default_ftptrabajo_server", "a00038.htm#ga5fb5e4aa119ed6e0a0c24ba1ed01fbe6", null ],
+    [ "default_ftptrabajo_dir_remoto", "a00038.htm#ga0c0d9dbacb43289f4c2aab3067e2ea30", null ],
+    [ "default_ftptrabajo_dir_local", "a00038.htm#ga2adc02d76ea8feba11c5299b38f3c461", null ],
+    [ "default_ftptrabajo_bloqueo_activado", "a00038.htm#ga711ce8e0c9a58d22ce74338fb271444e", null ],
+    [ "default_ftptrabajo_editor", "a00038.htm#gafd2850f90e03d6d49fe1f7f563b05435", null ],
+    [ "default_ftptrabajo_com_diff", "a00038.htm#ga403e74ad03616066cf20acda1031673f", null ],
+    [ "default_ftptrabajo_terminal", "a00038.htm#ga3558a7fb74ce4f557f9883ee2eb1de33", null ]
 ];

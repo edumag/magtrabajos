@@ -268,11 +268,12 @@ function generar_listado_fichero() {
          [[ "$columna" = '' ]] && break ;
 
          conta_columna=$conta_columna+1
-         cmd="lista_${conta_lista}[$conta_columna]='$(echo $columna | sed s/\"/\\\"/g)'"
+         cmd="lista_${conta_lista}[$conta_columna]=\"$(echo $columna | sed s/\"/\\\\\"/g)\""
          [[ ${#columna} -gt ${lonMax[$conta_columna]} ]] && lonMax[$conta_columna]=${#columna}
          [[ $conta_columna = 1 ]] && elementos[${#elementos[*]}]="$(echo $columna | sed s/\"/\\\"/g)"
-         #echo $cmd
-         eval $cmd
+         ## Falla si hay una comilla simple
+         # echo "$cmd"
+         eval "$cmd"
          [[ $? != 0 ]] && echo -e "\n\nERROR:: con comando: \n$cmd\n\n"
 
       done
