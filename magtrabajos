@@ -225,12 +225,14 @@ function comprobar_dependencias() {
    SQL_TOTAL_FROM='FROM tareas t LEFT JOIN movimientos m ON m.idTarea=t.id LEFT JOIN tiempos ti ON ti.idMovimiento=m.id '
 
    # Tareas seleccionar
-   SQL_TAR_SELECCIONAR="SELECT t.id, t.nombre, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, t.prioridad, t.idFactura
+   SQL_TAR_SELECCIONAR="SELECT t.id, t.nombre, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, t.prioridad, t.idFactura, g.nombre
       ,$SQL_TOTAL
       FROM tareas t 
       LEFT JOIN movimientos m ON m.idTarea=t.id 
       LEFT JOIN tiempos ti    ON ti.idMovimiento=m.id 
       LEFT JOIN estados e     ON t.idEstado=e.id
+      LEFT JOIN r_grupos_tareas rgt ON rgt.tarea_id=t.id
+      LEFT JOIN grupos_tareas g ON g.id=rgt.grupo_id
       WHERE 1"
 
    # Agrupar por tareas
@@ -249,6 +251,7 @@ function comprobar_dependencias() {
    tiempoId=""                               # Tiempo actual
    proyectoId=""                             # Proyecto actual
    tareaId=''                                # Id de tarea
+   grupoId=''                                # Id de grupo de tareas
    movimientoId=''                           # Id de movimiento
    movimiento=''                             # Nombre del movimiento
    CONDICION=""                              # Condición slq
@@ -678,7 +681,7 @@ function crearProyecto(){
    read -p "Descripción: " DESCRIPCION
    read -p "Directorio local: " DIR_LOCAL
 
-   SQL="INSERT INTO proyectos (nombre, descripcion, dirLocal) VALUES ('$NOMBRE','$DESCRIPCION', '$DIR_LOCAL')"
+   SQL="INSERT INTO proyectos (nombre, descripcion, dirLocal) VALUES ('$NOMBRE','`protegerTexto $DESCRIPCION`', '$DIR_LOCAL')"
    ejecutarSQL "$SQL"
 
 }
@@ -3778,17 +3781,7 @@ function menu(){
    if [ "$CONDICION" = "" ] ; then CONDICION=" AND t.idProyecto=$proyectoId " ; fi
 
    # Generamos condición en base a las tareas seleccionadas
-   CONDICION="AND ("
-   conta=0
-   for x in ${tareasIds[*]} ; do
-    conta=$((conta+1))
-    if [ $conta = ${#tareasIds[*]} ] ; then
-      CONDICION="$CONDICION t.id=$x "
-    else
-      CONDICION="$CONDICION t.id=$x OR "
-    fi
-   done
-   CONDICION="$CONDICION )"
+   tareas2condicion
 
    # Si tenemos movimiento seleccionado presentamos menú para archivos
    if [ "$movimientoId" != "" ] ; then
@@ -3801,6 +3794,7 @@ function menu(){
 
    linea_caja 'Pro[y]ectos' '[I]nformes' 
    linea_caja '[T]areas' 'E[x]portar'
+   linea_caja 'Gr[u]pos' ''
    linea_caja '[M]ovimmientos' '[N]otas' 
    linea_caja '[F]acturacion' '[C]onfigurar'
    linea_caja '[H]erramientas' 'Archivo para pro[g]ramadores'
@@ -3839,7 +3833,7 @@ function menu(){
       v|V) movimientosAbiertos ;;
       t|T) menuTareas ;;
       m|M) menuMovimientos ;;
-      #e|E) comenzar ;;
+      u|U) menuGrupo ;;
       p|P) contador -p ;;
       s|S) contador -s ;;
       f|F) menuFacturacion ;;
@@ -4084,6 +4078,7 @@ function menuTareas(){
    linea_caja "[I]nformes" "Modifica[r] fechas"
    linea_caja "[B]orrar" "[L]istar"
    linea_caja "N[u]eva tarea desde email" "Cambiar [t]area de proyecto"
+   linea_caja "Añadir a [G]rupo" ""
    cierra_caja
 
    read -n 1 -s OPCION
@@ -4112,7 +4107,7 @@ function menuTareas(){
       u|U) anyadirTareaEmail ;;
       s|S)
          seleccionarTareas -menu
-         echo -e "\nFormato:\n\nNombre\tEstado\tFecha de inicio\tFecha final\tPrioridad\tFactura\tTotal\n" 
+         echo -e "\nFormato:\n\nNombre\tEstado\tFecha de inicio\tFecha final\tPrioridad\tFactura\tGrupo\tTotal\n" 
          sql="$SQL_TAR_SELECCIONAR $CONDICION $SQL_TAR_GROUP ORDER BY t.fechaInicio"
          ejecutarSQL "$sql" "-N -B --raw" > ${DIR_TMP}listado
          pedirTarea
@@ -4173,6 +4168,8 @@ function menuTareas(){
           mensajes " Tarea(s) deseleccionada(s)"
           ;;
 
+      g|G) grupoId= ; menuGrupo 'a' ;;
+
       *) # Sin definir. Devolvemos la selección anterior si no se modifico por algo
          if [ "$movimientoId" = "" ] && [ "$movimientoId_anterior" != "" ] ; then
             definirProyecto -m $movimientoId_anterior
@@ -4184,6 +4181,154 @@ function menuTareas(){
    if [ "$movimientoId" = "" ] && [ "$movimientoId_anterior" != "" ] ; then
       definirProyecto -m $movimientoId_anterior
    fi
+
+}
+
+## Menú para grupos de tareas
+##
+## @todo listar grupos
+## @todo Añadir nuevo grupo
+## @todo Añadir tarea a grupo.
+
+function menuGrupo(){
+
+   log $FUNCNAME "$*"
+
+   pantalla
+   encabezado
+
+   local nombre_grupo
+
+   if [ "$grupoId" != "" ] ; then
+     nombre_grupo=`ejecutarSQL "SELECT nombre FROM grupos_tareas WHERE id=$grupoId" "-N"`
+     sql="SELECT tarea_id FROM r_grupos_tareas WHERE grupo_id=$grupoId"
+     tareasIds=($(ejecutarSQL "$sql" "-N"))
+     tareas2condicion
+   fi
+
+   clear
+   caja "Grupos de tareas"
+   
+   if [ "$1" != '' ] ; then
+     OPCION=$1
+   else
+
+     if [ "$grupoId" != "" ] ; then
+       abre_caja "$nombre_grupo (${#tareasIds[*]})"
+       linea_caja "[A]ñadir tareas a grupo" "[D]eseleccionar"
+       linea_caja "[Q]uitar de grupo" "[M]odificar"
+       cierra_caja
+     fi
+     abre_caja
+     linea_caja "[N]ueva" "[S]eleccionar"
+     cierra_caja
+
+     # Si tenim missatge el presentem
+     mensajes -get
+
+     read -n 1 -s OPCION
+
+   fi
+
+   case $OPCION in
+
+     m|M)
+       read -p "Nombre: ($nombre_grupo): " nombre_grupo
+       read -p "Descripción: " descripcion
+       sql="UPDATE grupos_tareas 
+       SET nombre='$nombre_grupo',
+       descripcion='$descripcion'
+       WHERE id=$grupoId
+       ;"
+       ejecutarSQL "$sql"
+       mensajes "Grupo modificado"
+       menuGrupo
+       ;;
+
+     q|Q) # Quitar tareas de grupo
+
+      sql="$SQL_TAR_SELECCIONAR $CONDICION $SQL_TAR_GROUP ORDER BY t.fechaInicio"
+      ejecutarSQL "$sql" "-N -B --raw" > ${DIR_TMP}listado
+      resultado_listado=''
+      generar_listado_fichero -t 'Seleccionar tareas a quitar' -o
+      [[ "$resultado_listado" = "" ]] && return
+      limpiar_variables
+       echo Tareas: $resultado_listado
+       for x in $resultado_listado ; do
+         # Borramos relaciones de tareas con otros grupos
+         SQL="DELETE FROM r_grupos_tareas WHERE tarea_id=$x"
+         ejecutarSQL "$SQL"
+       done
+      menuGrupo
+       ;;
+
+      n|N) # Nuevo grupo.
+
+        echo
+        read -p "Nombre del grupo: " nombre_grupo
+        read -p "Descripción: " descripcion_grupo
+        if [ "$nombre_grupo" != "" ] ; then
+          sql="INSERT INTO grupos_tareas ( nombre, descripcion, idProyecto ) VALUES ( '$nombre_grupo', '$descripcion_grupo', $proyectoId)";
+          ejecutarSQL "$sql"
+          mensajes "Grupo nuevo $nombre_grupo"
+        fi
+        ;;
+
+      a|A) # Añadir a grupo
+
+        if [ "$grupoId" == "" ] ; then
+          menuGrupo 's' 'volver'
+        fi
+
+       ejecutarSQL "$SQL_TAR $CONDICION"
+       echo
+       read -p "Añadir tareas a grupo (s/n): " OPCION
+       if [ "$OPCION" == "s" ] ; then
+         tareasIds=$(ejecutarSQL "SELECT t.id FROM tareas t WHERE 1 $CONDICION" "-N")
+         echo
+         echo Tareas: $tareasIds
+         for x in $tareasIds ; do
+           # Borramos relaciones de tareas con otros grupos
+           SQL="DELETE FROM r_grupos_tareas WHERE tarea_id=$x"
+           ejecutarSQL "$SQL"
+           SQL="INSERT INTO r_grupos_tareas (grupo_id, tarea_id) 
+            VALUES ($grupoId, $x);"
+           ejecutarSQL "$SQL"
+           mensajes " Tarea [$x] a grupo [$grupoId]"
+         done
+       fi
+
+        ;;
+      s|S)
+        echo
+        echo Seleccionar grupo
+        echo
+        sql="SELECT id, nombre, descripcion FROM grupos_tareas WHERE idProyecto=$proyectoId"
+
+        ejecutarSQL "$sql" "-N -B --raw" > ${DIR_TMP}listado
+        resultado_listado=''
+        generar_listado_fichero -t 'Seleccionar grupo' -o --ocultar-ayuda
+
+        [[ "$resultado_listado" = "" ]] && return
+
+        limpiar_variables
+
+        grupoId=($resultado_listado)
+        echo
+        echo Tareas en grupo
+        echo
+        sql="SELECT tarea_id FROM r_grupos_tareas WHERE grupo_id=$grupoId"
+        tareasIds=($(ejecutarSQL "$sql" "-N"))
+        mensajes "tareas: ${tareasIds[*]}"
+        [[ "$2" == 'volver' ]] && return
+        menuGrupo
+        ;;
+      d|D)
+        grupoId=
+        ;;
+      *) return ;;
+
+   esac
 
 }
 
@@ -4930,6 +5075,23 @@ function subirArchivos(){
 }
 
 # FUNCIONES VARIAS
+
+## Generamos CONDICION con las tareasIds
+
+function tareas2condicion() {
+
+   CONDICION="AND ("
+   conta=0
+   for x in ${tareasIds[*]} ; do
+    conta=$((conta+1))
+    if [ $conta = ${#tareasIds[*]} ] ; then
+      CONDICION="$CONDICION t.id=$x "
+    else
+      CONDICION="$CONDICION t.id=$x OR "
+    fi
+   done
+   CONDICION="$CONDICION )"
+}
 
 ## Lanzador
 ## Lanzamos magtrabajos preguntando que se desea abrir
