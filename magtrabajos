@@ -2692,7 +2692,7 @@ function presentarReadme() {
 
    local titulo_incluido=0
    for file in $SALIDA ; do
-      if [ "`basename $file`" == "readme.dox" ] ; then
+      if [ "`basename $file`" == "readme.dox" ] && [ -f "$file" ] ; then
 
          if [ "$titulo_incluido" = 0 ] ; then
             titulo_por_nivel "Documentación interna en $nombre" | tee -a $TMP
@@ -3396,15 +3396,17 @@ function presentarTotalTareasGeneral() {
       tiempoTotal=`pasarMinHoras ${totalTodoMinutos:-0}`
       euros_hora=$(echo "scale=2 ; (${total:-0}/${totalTodoMinutos:-0})*60" | bc -l)
 
-      echo -e "\n\n===============================    =========" | tee -a $TMP
+      titulo_por_nivel "Total general" | tee -a "$TMP"
+
+      echo -e "\n\n===============================    ===============" | tee -a $TMP
       echo   "Totales" | tee -a $TMP
-      echo   "===============================    =========" | tee -a $TMP
-      printf "Tiempo total                        %8s \n" $tiempoTotal | tee -a $TMP
+      echo   "===============================    ===============" | tee -a $TMP
+      printf "Tiempo total (H:M)                 %8s\n" $tiempoTotal | tee -a $TMP
       ##[[ "$totalEurosSinPre" != "0" ]] && printf "Total en trabajos sueltos          %8s€ \n" ${totalEurosSinPre} | tee -a $TMP
       ##[[ "$totalEurosPre" != "0" ]] && printf "Total en presupuestos acabados     %8s€ \n" ${totalEurosPre} | tee -a $TMP
       printf "Euros / hora                       %8s€ \n" ${euros_hora-0} | tee -a $TMP
       printf "Total global                       %8s€ \n" ${total} | tee -a $TMP
-      echo   "===============================    =========" | tee -a $TMP
+      echo   "===============================    ===============" | tee -a $TMP
       echo "" | tee -a $TMP
 
    fi
@@ -4297,8 +4299,8 @@ function menuGrupo(){
            mensajes " Tarea [$x] a grupo [$grupoId]"
          done
        fi
+       ;;
 
-        ;;
       s|S)
         echo
         echo Seleccionar grupo
