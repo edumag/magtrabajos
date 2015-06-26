@@ -127,11 +127,12 @@ function exportar() {
            ;;
       csv|c) ACCION=csv ; comenzar ;;
       html|h) # exportar a html
-           if [ "$consulta" == 1 ] ; then
-              cmd="cat "$origen" | grep -v 'trabajos -t' | $mt_rst2html --stylesheet-path='' | sed -e 's/\&quot\;/_/g'  > ${DIR_TMP}trabajos.html"
-           else
-              cmd="cat "$origen" | grep -v 'trabajos -t' | $mt_rst2html | sed -e 's/\&quot\;/_/g'  > ${DIR_TMP}trabajos.html"
-           fi
+           # if [ "$consulta" == 1 ] ; then
+           #    cmd="cat "$origen" | grep -v 'trabajos -t' | $mt_rst2html --stylesheet-path='' | sed -e 's/\&quot\;/_/g'  > ${DIR_TMP}trabajos.html"
+           # else
+           #    cmd="cat "$origen" | grep -v 'trabajos -t' | $mt_rst2html | sed -e 's/\&quot\;/_/g'  > ${DIR_TMP}trabajos.html"
+           # fi
+           cmd="cat "$origen" | grep -v 'trabajos -t' | $mt_rst2html > ${DIR_TMP}trabajos.html"
            #eval $cmd 2> ${DIR_TMP}rst2html.err
            if [ $consulta = 0 ] ; then
               ejecutarComando "$cmd" 2> ${DIR_TMP}rst2html.err

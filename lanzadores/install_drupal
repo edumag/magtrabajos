@@ -1,0 +1,191 @@
+#!/bin/bash
+
+## @file
+## @brief Instalación automática de drupal
+##
+## Debemos tener un archivo de configuración con las variables definidas.
+
+file_config="${HOME}/.install_drupal.conf"
+
+## Configuración
+
+NOMBRE_PROYECTO=
+USUARIO_MYSQL=
+PASS_MYSQL=
+USUARIO_DRUPAL=
+USUARIO_PROYECTO=
+PASS_PROYECTO=
+EMAIL=
+DIR_SERVIDOR=
+USUARIO_APACHE=
+
+if [ -f "$file_config" ] ; then
+  source "$file_config"
+else
+
+  echo
+  echo No se encontro archvio de configuración
+  echo
+  exit
+
+fi
+
+echo
+echo Nos vamos a $DIR_SERVIDOR
+echo
+
+if [ "$1" != "" ] ; then
+   NOMBRE_PROYECTO=$1
+fi
+
+if [ -z $USUARIO_MYSQL    ] || \
+   [ -z $PASS_MYSQL       ] || \
+   [ -z $NOMBRE_PROYECTO  ] || \
+   [ -z $USUARIO_DRUPAL   ] || \
+   [ -z $USUARIO_PROYECTO ] || \
+   [ -z $PASS_PROYECTO    ] || \
+   [ -z $EMAIL            ] || \
+   [ -z $DIR_SERVIDOR     ] ; then
+
+  echo
+  echo Falta completar la configuración, mira el código fuente para realizarla
+  echo
+  exit
+
+fi
+
+cd "$DIR_SERVIDOR"
+[[ $? != 0 ]] && exit;
+
+# DIR_PROYECTO_OLD="${DIR_SERVIDOR}${NOMBRE_PROYECTO}-old-`date +"%Y.%m.%d"`"
+# 
+# if [ -d "$DIR_PROYECTO_OLD" ] ; then
+#   echo
+#   echo Movemos proyecto drupal a $DIR_PROYECTO_OLD
+#   echo
+# 
+#   mv "$NOMBRE_PROYECTO" "$DIR_PROYECTO_OLD"
+#   [[ $? != 0 ]] && exit;
+# 
+#   echo
+#   echo copiar .vimrc 
+#   echo
+# 
+#   cp ${DIR_PROYECTO_OLD}/sites/all/modules/ices/.vimrc ./
+#   [[ $? != 0 ]] && exit;
+# 
+#   echo
+#   echo copiar .magtrabajos
+#   echo
+# 
+#   cp -R ${DIR_PROYECTO_OLD}/sites/all/modules/ices/.magtrabajos ./
+#   [[ $? != 0 ]] && exit;
+# fi
+
+
+echo
+echo Cambiamos a directorio del servidor
+echo -----------------------------------
+echo
+cd "$DIR_SERVIDOR"
+[[ $? != 0 ]] && exit;
+
+echo
+echo Bajamos drupal
+echo --------------
+echo
+drush -v dl drupal --drupal-project-rename=$NOMBRE_PROYECTO
+[[ $? != 0 ]] && exit;
+
+echo
+echo Cambiamos a directorio de proyecto
+echo ----------------------------------
+echo
+cd $NOMBRE_PROYECTO
+[[ $? != 0 ]] && exit;
+
+echo
+echo Bajamos archivos de idioma ca, es
+echo ---------------------------------
+echo
+wget http://ftp.drupal.org/files/translations/7.x/drupal/drupal-7.0.ca.po 
+[[ $? != 0 ]] && exit;
+wget http://ftp.drupal.org/files/translations/7.x/drupal/drupal-7.0.es.po
+[[ $? != 0 ]] && exit;
+
+echo
+echo Movemos archivos ubicación final
+echo --------------------------------
+echo
+mv  *.po profiles/standard/translations/
+[[ $? != 0 ]] && exit;
+
+echo
+echo Instalamos drupal standar
+echo -------------------------
+echo
+drush -v --yes site-install standard --account-name=$USUARIO_PROYECTO --account-pass=$PASS_PROYECTO --account-mail=$EMAIL \
+  --db-url=mysql://$USUARIO_MYSQL:$PASS_MYSQL@localhost/$NOMBRE_PROYECTO --locale=ca
+[[ $? != 0 ]] && exit;
+
+echo
+echo Cambiamos permisos en sites/default/files
+echo -----------------------------------------
+echo
+sudo chown -R $USER:$USUARIO_APACHE sites/default/files
+sudo chmod -R 775 sites/default/files
+[[ $? != 0 ]] && exit;
+
+echo
+echo Activamos módulo simpletest
+echo ---------------------------
+echo
+drush -v --yes en simpletest
+[[ $? != 0 ]] && exit;
+
+echo
+echo Módulos desarrollo
+echo ------------------
+echo
+
+read -p "Deseas instalar los módulos para desarrollo (s/n): " OPCION
+
+if [ "$OPCION" = "s" ] ; then
+  drush --yes dl coder devel admin_menu advanced_help
+  drush --yes en coder coder_review devel devel_generate admin_devel admin_menu_toolbar admin_menu advanced_help
+  drush --yes dis toolbar
+fi
+
+echo
+echo ==================
+echo Proceso completado
+echo ==================
+echo
+echo
+echo Pagina web del proyecto: 
+echo
+echo http://localhost/$NOMBRE_PROYECTO/
+echo
+echo Ejecución de test:
+echo
+echo http://localhost/$NOMBRE_PROYECTO/admin/config/development/testing
+echo 
+
+## Otras opciones
+
+# Los test desde drush dan errores que desde web no salen
+
+# echo
+# echo Ejecutamos test para CES
+# echo ------------------------
+# echo
+# drush --uri=http://localhost/$NOMBRE_PROYECTO test-run --xml ICES
+# [[ $? != 0 ]] && exit;
+
+# echo
+# echo Borramos cache
+# echo --------------
+# echo
+# drush cc all
+# [[ $? != 0 ]] && exit;
+

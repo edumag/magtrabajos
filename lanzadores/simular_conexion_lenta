@@ -1,0 +1,34 @@
+#!/bin/bash
+
+estado=0
+
+# trap ctrl-c and call ctrl_c()
+trap 'cancelar_simulacion ; exit' SIGINT
+
+function simular_conexion_lenta {
+  echo Simulamos conexión lenta en localhost
+  sudo tc qdisc add dev lo root handle 1: htb default 12
+  sudo tc class add dev lo parent 1:1 classid 1:12 htb rate 128kbps ceil 328kbps
+  sudo tc qdisc add dev lo parent 1:12 netem delay 200ms
+}
+
+function cancelar_simulacion {
+  echo  Cancelamos simulación
+  sudo tc qdisc del dev lo root
+}
+
+
+while [ true ]  ; do
+  # Ver estado actual
+  sudo tc -s qdisc ls dev lo
+  if [ $estado == 0 ] ; then
+    read -p 'ENTER para comenzar a simular conexión lenta.'
+    estado=1
+    simular_conexion_lenta
+  else
+    read -p 'ENTER para cancelar simulación de conexión lenta.'
+    estado=0
+    cancelar_simulacion
+  fi
+
+done

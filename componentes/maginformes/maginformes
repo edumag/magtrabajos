@@ -391,6 +391,8 @@ function menuInformes(){
 
             done
 
+         [[ "$per_pie_totales" != "NO" ]]                && presentarTotalTareasGeneral 
+
          # Estamos en proyecto
 
          elif [ "$proyectoId" != "" ] ; then
