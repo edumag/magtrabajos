@@ -1186,7 +1186,7 @@ function seleccionarTareas(){
 
       esac
 
-  CMD="$mt_comando_mysql \"SELECT t.id from tareas t LEFT JOIN movimientos m ON m.idTarea=t.id WHERE 1 $CONDICION  GROUP BY t.id  ORDER BY t.prioridad desc\""
+  CMD="$mt_comando_mysql \"SELECT t.id from tareas t LEFT JOIN movimientos m ON m.idTarea=t.id WHERE 1 $CONDICION  GROUP BY t.id  ORDER BY t.id \""
   log "Seleccionar tarea::$CMD"
   tareasIds=(`eval $CMD`)
   mensajes " ${#tareasIds[*]} tareas seleccionadas"
@@ -2283,6 +2283,47 @@ function cerrar(){
 
    fi
 
+
+}
+
+## Cambiar euros/hora de tareas
+
+function cambiarEurosHoraTareas(){
+
+   log $FUNCNAME "$*"
+
+   clear
+   echo "Cambiar euros/hora de tareas"
+   echo "============================"
+   echo
+
+   if [ "$tareaId" != "" ] ; then
+      echo
+      echo "$tarea"
+      echo "$tarea" | sed 's/./-/g'
+      echo
+      local condicion_cambio="id=$tareaId"
+   else
+      echo
+      echo "Cambiando estado a ${#tareasIds[*]} tareas"
+      echo "$tarea" | sed 's/./-/g'
+      echo
+      local condicion_cambio="idProyecto = $proyectoId $CONDICION"
+   fi
+
+   if [ "$1" = "" ] ; then
+      read -p "Cambiar euros/hora a (ENTER SALIR): " EUROS_HORA
+      if [ "$EUROS_HORA" = "" ] ; then 
+         mensajes " Cancelado cambiar estado"
+         return
+      fi
+   else
+      EUROS_HORA="$1"
+   fi
+
+   SQL="UPDATE tareas t SET euroshora=$EUROS_HORA WHERE $condicion_cambio "
+   ejecutarSQL "$SQL"
+   mensajes " Euros/Hora cambiado en tareas"
 
 }
 
@@ -4072,15 +4113,15 @@ function menuTareas(){
    caja "Tareas"
    
    abre_caja
-   linea_caja "[N]ueva" "Cerrar [z]"
-   linea_caja "[D]eseleccionar" "[S]eleccionar"
-   linea_caja "[C]ambiar estado" "[V]er descripcion"
-   linea_caja "Anyadir c[o]mpensacion" "[E]ditar Descripcion"
-   linea_caja "[P]rioridad" "[M]odificar"
-   linea_caja "[I]nformes" "Modifica[r] fechas"
-   linea_caja "[B]orrar" "[L]istar"
+   linea_caja "[N]ueva"                   "Cerrar [z]"
+   linea_caja "[D]eseleccionar"           "[S]eleccionar"
+   linea_caja "[C]ambiar estado"          "[V]er descripcion"
+   linea_caja "Anyadir c[o]mpensacion"    "[E]ditar Descripcion"
+   linea_caja "[P]rioridad"               "[M]odificar"
+   linea_caja "[I]nformes"                "Modifica[r] fechas"
+   linea_caja "[B]orrar"                  "[L]istar"
    linea_caja "N[u]eva tarea desde email" "Cambiar [t]area de proyecto"
-   linea_caja "Añadir a [G]rupo" ""
+   linea_caja "Añadir a [G]rupo"          "Modificar euros/[h]ora de tareas"
    cierra_caja
 
    read -n 1 -s OPCION
@@ -4123,6 +4164,9 @@ function menuTareas(){
          ;;
       c|C) # Cambiar estado de tareas seleccionadas
              cambiarEstadoTareas 
+          ;;
+      h|H) # Cambiar euros/hora de tareas
+             cambiarEurosHoraTareas 
           ;;
       v|V) # Ver la descripcion de la tarea en la que estamos
           if [ -e "$TMP" ] ; then rm $TMP ; fi
@@ -4286,7 +4330,7 @@ function menuGrupo(){
        echo
        read -p "Añadir tareas a grupo (s/n): " OPCION
        if [ "$OPCION" == "s" ] ; then
-         tareasIds=$(ejecutarSQL "SELECT t.id FROM tareas t WHERE 1 $CONDICION" "-N")
+         tareasIds=$(ejecutarSQL "SELECT t.id FROM tareas t WHERE 1 $CONDICION ORDER BY t.id" "-N")
          echo
          echo Tareas: $tareasIds
          for x in $tareasIds ; do
