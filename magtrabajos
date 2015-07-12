@@ -2464,7 +2464,28 @@ function modificar(){
 
    ## modificar según tengamos movimiento, tarea o proyecto
 
-   if [ "$movimientoId" = '' ] && [ "$tareaId" = '' ] && [ "$proyectoId" != '' ] || [ "$1" = "-p" ] ; then     # Proyecto seleccionado
+   if [ "$movimientoId" != '' ] ; then                                                    # No tenemos nada seleccionado
+      log "$FUNCNAME" "Movimiento: $movimientoId"
+      read -p "Nuevo nombre para movimiento: " NOMBRE
+      if [ "$NOMBRE" != "" ] ; then
+         SQL="UPDATE movimientos set nombre='$NOMBRE' WHERE id=$movimientoId"
+         ejecutarSQL "$SQL"
+      fi
+      definirProyecto
+
+   elif [ "$movimientoId" = '' ] && [ "$tareaId" != '' ] ; then                             # Tarea seleccionado
+      log "$FUNCNAME" "Tarea: $tareaId"
+      editarTarea
+
+   elif [ "$movimientoId" = '' ] && [ "$tareaId" = '' ] && [ "$tareasIds" != '' ]; then                             # Tareas seleccionadas
+
+     for tareaId in ${tareasIds[*]} ; do
+      log "$FUNCNAME" "Tarea: $tareaId"
+      editarTarea
+     done
+     tareaId=
+
+   elif [ "$movimientoId" = '' ] && [ "$tareaId" = '' ] && [ "$proyectoId" != '' ] || [ "$1" = "-p" ] ; then     # Proyecto seleccionado
       log "$FUNCNAME" "Proyecto: $proyectoId"
       echo ''
       echo 'Modificar proyecto'
@@ -2498,18 +2519,6 @@ function modificar(){
       ejecutarSQL "$SQL"
       mensajes ' Proyecto modificado'
 
-   elif [ "$movimientoId" = '' ] && [ "$tareaId" != '' ] ; then                             # Tarea seleccionado
-      log "$FUNCNAME" "Tarea: $tareaId"
-      editarTarea
-
-   elif [ "$movimientoId" != '' ] ; then                                                    # No tenemos nada seleccionado
-      log "$FUNCNAME" "Movimiento: $movimientoId"
-      read -p "Nuevo nombre para movimiento: " NOMBRE
-      if [ "$NOMBRE" != "" ] ; then
-         SQL="UPDATE movimientos set nombre='$NOMBRE' WHERE id=$movimientoId"
-         ejecutarSQL "$SQL"
-      fi
-      definirProyecto
    else                                                                                     # No hay nada seleccinoado
       mensajes " No hay nada seleccionado, no hacemos nada"
    fi
