@@ -447,16 +447,32 @@ function generarFactura() {
 
    #echo "--no-xml-declaration" > $TMP
 
-   tituloFactura="lesOlivex"
-   subtituloFactura="Serveis informàtics"
+   # Sin logo.
+   # tituloFactura="lesOlivex"
+   # subtituloFactura="Serveis informàtics"
+   # echo
+   # echo $tituloFactura | sed s/./=/g
+   # echo $tituloFactura
+   # echo $tituloFactura | sed s/./=/g
+   # echo
+   # echo $subtituloFactura
+   # echo $subtituloFactura | sed s/./=/g
+   # echo " "
+
+   # con logo.
+   echo '.. |date| date:: %d %B del %Y'
    echo
-   echo $tituloFactura | sed s/./=/g
-   echo $tituloFactura
-   echo $tituloFactura | sed s/./=/g
+   echo '.. image:: /home/eduardo/logo.png '
+   echo '  :alt: logo'                      
+   echo '  :align: left'                    
    echo
-   echo $subtituloFactura
-   echo $subtituloFactura | sed s/./=/g
-   echo " "
+   echo
+   echo '.. class:: right'   
+   echo
+   echo 'Les Olives, |date|.' 
+
+|
+|
 
    # Recogemos datos de factura si estamos imprimiendo una factura
    if [ "$facturaId" != "" ] ; then
@@ -466,7 +482,7 @@ function generarFactura() {
       eval "$SALIDA"
       echo " "
       printf "\n**Factura:** %04d-%04d" $proyectoId $numfact
-      echo -e "\n**Fecha** $fechaFactura"
+      # echo -e "\n**Fecha** $fechaFactura"
    
    fi
 
