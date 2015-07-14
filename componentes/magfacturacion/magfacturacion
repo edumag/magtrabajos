@@ -470,9 +470,10 @@ function generarFactura() {
    echo '.. class:: right'   
    echo
    echo 'Les Olives, |date|.' 
-
-|
-|
+   echo 
+   echo '|'
+   echo '|'
+   echo
 
    # Recogemos datos de factura si estamos imprimiendo una factura
    if [ "$facturaId" != "" ] ; then
