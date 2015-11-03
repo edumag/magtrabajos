@@ -2464,7 +2464,28 @@ function modificar(){
 
    ## modificar según tengamos movimiento, tarea o proyecto
 
-   if [ "$movimientoId" = '' ] && [ "$tareaId" = '' ] && [ "$proyectoId" != '' ] || [ "$1" = "-p" ] ; then     # Proyecto seleccionado
+   if [ "$movimientoId" != '' ] ; then                                                    # No tenemos nada seleccionado
+      log "$FUNCNAME" "Movimiento: $movimientoId"
+      read -p "Nuevo nombre para movimiento: " NOMBRE
+      if [ "$NOMBRE" != "" ] ; then
+         SQL="UPDATE movimientos set nombre='$NOMBRE' WHERE id=$movimientoId"
+         ejecutarSQL "$SQL"
+      fi
+      definirProyecto
+
+   elif [ "$movimientoId" = '' ] && [ "$tareaId" != '' ] ; then                             # Tarea seleccionado
+      log "$FUNCNAME" "Tarea: $tareaId"
+      editarTarea
+
+   elif [ "$movimientoId" = '' ] && [ "$tareaId" = '' ] && [ "$tareasIds" != '' ]; then                             # Tareas seleccionadas
+
+     for tareaId in ${tareasIds[*]} ; do
+      log "$FUNCNAME" "Tarea: $tareaId"
+      editarTarea
+     done
+     tareaId=
+
+   elif [ "$movimientoId" = '' ] && [ "$tareaId" = '' ] && [ "$proyectoId" != '' ] || [ "$1" = "-p" ] ; then     # Proyecto seleccionado
       log "$FUNCNAME" "Proyecto: $proyectoId"
       echo ''
       echo 'Modificar proyecto'
@@ -2498,18 +2519,6 @@ function modificar(){
       ejecutarSQL "$SQL"
       mensajes ' Proyecto modificado'
 
-   elif [ "$movimientoId" = '' ] && [ "$tareaId" != '' ] ; then                             # Tarea seleccionado
-      log "$FUNCNAME" "Tarea: $tareaId"
-      editarTarea
-
-   elif [ "$movimientoId" != '' ] ; then                                                    # No tenemos nada seleccionado
-      log "$FUNCNAME" "Movimiento: $movimientoId"
-      read -p "Nuevo nombre para movimiento: " NOMBRE
-      if [ "$NOMBRE" != "" ] ; then
-         SQL="UPDATE movimientos set nombre='$NOMBRE' WHERE id=$movimientoId"
-         ejecutarSQL "$SQL"
-      fi
-      definirProyecto
    else                                                                                     # No hay nada seleccinoado
       mensajes " No hay nada seleccionado, no hacemos nada"
    fi
@@ -4259,15 +4268,16 @@ function menuGrupo(){
      OPCION=$1
    else
 
-     if [ "$grupoId" != "" ] ; then
-       abre_caja "$nombre_grupo (${#tareasIds[*]})"
-       linea_caja "[A]ñadir tareas a grupo" "[D]eseleccionar"
-       linea_caja "[Q]uitar de grupo" "[M]odificar"
-       cierra_caja
-     fi
      abre_caja
      linea_caja "[N]ueva" "[S]eleccionar"
+     linea_caja "Añadir tareas seleccionadas a grupo [e]xistente"
      cierra_caja
+     if [ "$grupoId" != "" ] ; then
+       abre_caja "$nombre_grupo (${#tareasIds[*]})"
+       linea_caja "[Q]uitar de grupo" "[M]odificar"
+       linea_caja "[D]eseleccionar"
+       cierra_caja
+     fi
 
      # Si tenim missatge el presentem
      mensajes -get
@@ -4278,6 +4288,37 @@ function menuGrupo(){
 
    case $OPCION in
 
+     e|E)
+        echo
+        echo Seleccionar grupo
+        echo
+        sql="SELECT id, nombre, descripcion FROM grupos_tareas WHERE idProyecto=$proyectoId"
+
+        ejecutarSQL "$sql" "-N -B --raw" > ${DIR_TMP}listado
+        resultado_listado=''
+        generar_listado_fichero -t 'Seleccionar grupo' -o --ocultar-ayuda
+
+        [[ "$resultado_listado" = "" ]] && return
+
+        grupoId=($resultado_listado)
+       ejecutarSQL "$SQL_TAR $CONDICION"
+       echo
+       read -p "Añadir tareas a grupo (s/n): " OPCION
+       if [ "$OPCION" == "s" ] ; then
+         tareasIds=$(ejecutarSQL "SELECT t.id FROM tareas t WHERE 1 $CONDICION ORDER BY t.id" "-N")
+         echo
+         echo Tareas: $tareasIds
+         for x in $tareasIds ; do
+           # Borramos relaciones de tareas con otros grupos
+           SQL="DELETE FROM r_grupos_tareas WHERE tarea_id=$x"
+           ejecutarSQL "$SQL"
+           SQL="INSERT INTO r_grupos_tareas (grupo_id, tarea_id) 
+            VALUES ($grupoId, $x);"
+           ejecutarSQL "$SQL"
+           mensajes " Tarea [$x] a grupo [$grupoId]"
+         done
+       fi
+       ;;
      m|M)
        read -p "Nombre: ($nombre_grupo): " nombre_grupo
        read -p "Descripción: " descripcion
@@ -4320,30 +4361,6 @@ function menuGrupo(){
         fi
         ;;
 
-      a|A) # Añadir a grupo
-
-        if [ "$grupoId" == "" ] ; then
-          menuGrupo 's' 'volver'
-        fi
-
-       ejecutarSQL "$SQL_TAR $CONDICION"
-       echo
-       read -p "Añadir tareas a grupo (s/n): " OPCION
-       if [ "$OPCION" == "s" ] ; then
-         tareasIds=$(ejecutarSQL "SELECT t.id FROM tareas t WHERE 1 $CONDICION ORDER BY t.id" "-N")
-         echo
-         echo Tareas: $tareasIds
-         for x in $tareasIds ; do
-           # Borramos relaciones de tareas con otros grupos
-           SQL="DELETE FROM r_grupos_tareas WHERE tarea_id=$x"
-           ejecutarSQL "$SQL"
-           SQL="INSERT INTO r_grupos_tareas (grupo_id, tarea_id) 
-            VALUES ($grupoId, $x);"
-           ejecutarSQL "$SQL"
-           mensajes " Tarea [$x] a grupo [$grupoId]"
-         done
-       fi
-       ;;
 
       s|S)
         echo
