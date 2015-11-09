@@ -487,12 +487,13 @@ function menuInformes(){
          read -p "Mostrar euros en informe. (s/n): " MOSTRAR_EUROS
          [[ "$MOSTRAR_EUROS" == "s" ]] && MOSTRAR_EUROS=1 || MOSTRAR_EUROS=0
 
-         SEMANA=`date -d '17 days ago' "+%Y-%m-%d"`
+         SEMANA=`date -d '7 days ago' "+%Y-%m-%d"`
          read -p "Fecha Inicio: ($SEMANA): " FECHA_INICIO
          FECHA_INICIO=${FECHA_INICIO:-$SEMANA}
 
-         read -p "Fecha Final: ($HOY): " FECHA_FINAL
-         FECHA_FINAL=${FECHA_FINAL:-$HOY}
+         AYER=`date -d '1 days ago' "+%Y-%m-%d"`
+         read -p "Fecha Final: ($AYER): " FECHA_FINAL
+         FECHA_FINAL=${FECHA_FINAL:-$AYER}
 
          echo "Fechas: $FECHA_INICIO - $FECHA_FINAL"
 
@@ -506,7 +507,7 @@ function menuInformes(){
          FECHA_FINAL="$FECHA_FINAL 23:59:59"
 
          SUBSELECT="
-            SELECT p.nombre as Proyecto, LEFT(t.nombre,40) as Tarea, LEFT(m.nombre,22) as Mov, 
+            SELECT p.nombre as Proyecto, LEFT(t.nombre,60) as Tarea, LEFT(m.nombre,60) as Mov, 
             month(ti.fechaInicio) as mes
             , week(ti.fechaInicio,1) as sem
             , DATE_FORMAT(DATE_SUB(ti.fechaInicio,INTERVAL weekday(ti.fechaInicio) DAY), '%d %b %Y') AS primer_dia_semana
@@ -535,12 +536,12 @@ function menuInformes(){
             "
          [[ $SOBRE_PROYECTO != 0 ]] && SUBSELECT="$SUBSELECT AND p.id = $proyectoId"
 
-         #  echo
-         #  echo Sin agrupar
-         #  echo
-         #  echo -e "$SUBSELECT"
-         #  echo
-         #  mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SUBSELECT" trabajos | tee -a $TMP
+         # echo
+         # echo Sin agrupar
+         # echo
+         # echo -e "$SUBSELECT"
+         # echo
+         # mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SUBSELECT" trabajos | tee -a $TMP
 
          if [ -e $TMP ] ; then rm $TMP ; fi
 
@@ -568,18 +569,18 @@ function menuInformes(){
          mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
-         echo "-------------------" | tee -a $TMP
-         echo "Agrupar por Semanas" | tee -a $TMP
-         echo "-------------------" | tee -a $TMP
+         echo "---------------------------------" | tee -a $TMP
+         echo "Agrupar por movimientos y semanas" | tee -a $TMP
+         echo "---------------------------------" | tee -a $TMP
          echo "" | tee -a $TMP
-         SQL="
-            SELECT 
-              Proyecto
-              , Tarea
-              , CONCAT(primer_dia_semana, ' / ', ultimo_dia_semana ) AS 'Semana'
-              , CONCAT(FORMAT((sum(min)/60),0),':' 
-                , IF ( (sum(min)%60)<10,0,'' ) , FORMAT((sum(min)%60),0)  
-                ) as 'Dedicación'
+         SQL="SELECT  "
+         [[ $SOBRE_PROYECTO = 0 ]] && SQL="$SQL Proyecto, ';;;',"
+         SQL="$SQL Tarea, ';;;'
+              , Mov, ';;;'
+              , CONCAT(primer_dia_semana, ' / ', ultimo_dia_semana ) AS 'Semana', ';;;'
+              , CONCAT(FORMAT((sum(min)/60),0),':', ';;;' 
+                , IF ( (sum(min)%60)<10,0,'' ) , FORMAT((sum(min)%60),0), ';;;'  
+                ) as 'Dedicación', '\nnn'
             "
           if [ $MOSTRAR_EUROS = 1 ] ; then
            SQL="$SQL 
@@ -589,8 +590,15 @@ function menuInformes(){
          SQL="$SQL 
             FROM ($SUBSELECT) as subselect 
             "
-         GROUP="GROUP BY Tarea, subselect.sem "
-         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL $GROUP" trabajos | tee -a $TMP
+         GROUP="GROUP BY Mov, subselect.sem "
+         ORDER=" ORDER BY Tarea, Mov "
+         #mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL $GROUP $ORDER" trabajos | tee -a $TMP
+
+         SALIDA="$(ejecutarSQL "$SQL $GROUP $ORDER" "-N")"
+         echo -e "$SALIDA" | \
+         awk -v RS='\nnn' -v FS=';;;' '{
+            printf "%-60s\n%s%s%-60s ",$1, $4, $5, $2
+         }' | tee -a $TMP
          # tecla
 
          ;;
