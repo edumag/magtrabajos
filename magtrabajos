@@ -3345,7 +3345,7 @@ function contabilidad_proyecto() {
    [[ "$proyecto_facturacion" == "0" ]] && return ;
 
    # listado de facturas pendientes
-   pendiente_facturas | tee -a $TMP
+   pendiente_facturas
 
    # Tareas acabadas 
 
@@ -3378,8 +3378,11 @@ function presentarTotalTareasGeneral() {
 
    log $FUNCNAME "$*"
 
+   local titulo_plus=""
+
    if [ "$1" != "" ] ; then
 
+      titulo_plus=" $proyecto"
       CONDICION_TAREA=$1
       CONDICION_MOVIMIENTO=$1
 
@@ -3446,7 +3449,7 @@ function presentarTotalTareasGeneral() {
       tiempoTotal=`pasarMinHoras ${totalTodoMinutos:-0}`
       euros_hora=$(echo "scale=2 ; (${total:-0}/${totalTodoMinutos:-0})*60" | bc -l)
 
-      titulo_por_nivel "Total general" | tee -a "$TMP"
+      titulo_por_nivel "Total general${titulo_plus}" | tee -a "$TMP"
 
       echo -e "\n\n===============================    ===============" | tee -a $TMP
       echo   "Totales" | tee -a $TMP
