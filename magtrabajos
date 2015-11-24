@@ -2906,6 +2906,8 @@ presentarTODOs() {
 
    [[ -z $sql ]] && ARCHIVOS='' || local ARCHIVOS=$(ejecutarSQL "$SQL" "-N")
 
+   if [ "$ARCHIVOS" == '' ] ; then log "$FUNCNAME" "Sin archivos" ; return ; fi
+
    if [ "`pwd`/" == "$DIR_PROYECTO" ] || [ `pwd` == "$DIR_PROYECTO" ] ; then
 
      cmd="buscar_codigo buscar '@todo|@bug' "
