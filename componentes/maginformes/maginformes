@@ -473,9 +473,15 @@ function menuInformes(){
          ## WEEK(NOW(),1) El 1 hace que el primer día de la semana sea el lunes.
 
          ## SELECT DATE_SUB(NOW(),INTERVAL weekday(now()) DAY) AS d1, DATE_SUB(DATE_SUB(NOW(),INTERVAL weekday(now()) DAY),INTERVAL 7 DAY) AS d2"
+         ##
+         ## Obtener un día de la semana seleccionada.
+         ## SELECT MAKEDATE(2016,[numero de semana]*7)
 
          SOBRE_PROYECTO=1  ##< Informe sobre proyecto o general.
          MOSTRAR_EUROS=0   ##< Mostrar euros en informe.
+
+         ANYO_ACTUAL=$(ejecutarSQL "SELECT YEAR(NOW())" "-N")
+         SEMANA_ACTUAL=$(ejecutarSQL "SELECT WEEK(NOW(),1)" "-N")
 
          if [ "$proyectoId" != "" ] ; then
            echo
@@ -487,24 +493,38 @@ function menuInformes(){
          read -p "Mostrar euros en informe. (s/n): " MOSTRAR_EUROS
          [[ "$MOSTRAR_EUROS" == "s" ]] && MOSTRAR_EUROS=1 || MOSTRAR_EUROS=0
 
-         SEMANA=`date -d '7 days ago' "+%Y-%m-%d"`
-         read -p "Fecha Inicio: ($SEMANA): " FECHA_INICIO
-         FECHA_INICIO=${FECHA_INICIO:-$SEMANA}
+         read -p "Año: ($ANYO_ACTUAL): " ANYO
+         [[ "$ANYO" = "" ]] && ANYO=$ANYO_ACTUAL
 
-         AYER=`date -d '1 days ago' "+%Y-%m-%d"`
-         read -p "Fecha Final: ($AYER): " FECHA_FINAL
-         FECHA_FINAL=${FECHA_FINAL:-$AYER}
+         read -p "Semana: ($SEMANA_ACTUAL): " SEMANA
+         [[ "$SEMANA" = "" ]] && SEMANA=$SEMANA_ACTUAL
 
-         echo "Fechas: $FECHA_INICIO - $FECHA_FINAL"
+         # SEMANA=`date -d '7 days ago' "+%Y-%m-%d"`
+         # read -p "Fecha Inicio: ($SEMANA): " FECHA_INICIO
+         # FECHA_INICIO=${FECHA_INICIO:-$SEMANA}
+
+         # AYER=`date -d '1 days ago' "+%Y-%m-%d"`
+         # read -p "Fecha Final: ($AYER): " FECHA_FINAL
+         # FECHA_FINAL=${FECHA_FINAL:-$AYER}
+
+         SQL="SELECT MAKEDATE($ANYO,$SEMANA*7)"
+         echo -e "\nSQL: $SQL \n"
+         DIA_DE_LA_SEMANA=$(ejecutarSQL "$SQL" '-N')
+
+         # echo
+         # echo Dia de la semana: $DIA_DE_LA_SEMANA
+
+         FECHA_INICIO=$(ejecutarSQL "SELECT TIMESTAMPADD(DAY,(0-WEEKDAY('$DIA_DE_LA_SEMANA')),'$DIA_DE_LA_SEMANA')" "-N")
+         FECHA_FINAL=$(ejecutarSQL "SELECT TIMESTAMPADD(DAY,(6-WEEKDAY('$DIA_DE_LA_SEMANA')),'$DIA_DE_LA_SEMANA')" "-N")
+
+         # echo
+         # echo "Fechas: $FECHA_INICIO - $FECHA_FINAL"
 
          if [ $SOBRE_PROYECTO != 0 ] ; then
-           titulo="$proyecto $FECHA_INICIO / $FECHA_FINAL"
+           titulo="$proyecto $ANYO / Semana: $SEMANA / $FECHA_FINAL - $FECHA_FINAL"
          else
-           titulo="Proyectos $FECHA_INICIO / $FECHA_FINAL"
+           titulo="Proyectos $ANYO / Semana: $SEMANA / $FECHA_FINAL - $FECHA_FINAL"
          fi
-
-         FECHA_INICIO="$FECHA_INICIO 00:00:00"
-         FECHA_FINAL="$FECHA_FINAL 23:59:59"
 
          SUBSELECT="
             SELECT p.nombre as Proyecto, LEFT(t.nombre,60) as Tarea, LEFT(m.nombre,60) as Mov, 
@@ -529,11 +549,22 @@ function menuInformes(){
                     ) 
                  ) as euros "
           fi
+
+           FECHA_INICIO="$FECHA_INICIO 00:00:00"
+           FECHA_FINAL="$FECHA_FINAL 23:59:59"
+
           SUBSELECT="$SUBSELECT 
             FROM tiempos ti, movimientos m, tareas t, proyectos p 
             WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND p.id=t.idProyecto 
-            AND ( ti.fechaInicio >= '$FECHA_INICIO' AND ti.fechaFinal <= '$FECHA_FINAL' AND ti.fechaFinal != '0000-00-00 00:00:00' )
+            AND ( ti.fechaInicio >= '$FECHA_INICIO' AND ti.fechaInicio <= '$FECHA_FINAL' AND ti.fechaFinal != '0000-00-00 00:00:00' )
             "
+
+          # SUBSELECT="$SUBSELECT 
+          #   FROM tiempos ti, movimientos m, tareas t, proyectos p 
+          #   WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND p.id=t.idProyecto 
+          #   AND ( WEEK(ti.fechaInicio,1) = '$SEMANA' AND YEAR(ti.fechaInicio) = '$ANYO' AND ti.fechaFinal != '0000-00-00 00:00:00' )
+          #   "
+
          [[ $SOBRE_PROYECTO != 0 ]] && SUBSELECT="$SUBSELECT AND p.id = $proyectoId"
 
          # echo
