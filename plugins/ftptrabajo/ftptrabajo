@@ -110,7 +110,9 @@ declare -i na=0       ##< Nuemro de archivos
 ultimoError=${DIR_TMP}ftptrabajo.ultimoError
 
 ## Comando ftp
-COMANDO_FTP="ftp -p -i -v "
+# COMANDO_FTP="ftp -p -i -v "
+# COMANDO_FTP="sftp -P 22046 "
+COMANDO_FTP="$ftptrabajo_comando "
 LOCALES="LANG=en_GB.utf8"
 
 SALIDA=""

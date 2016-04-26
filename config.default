@@ -22,7 +22,7 @@
    ## @var default_mt_rst2html
    ## Comando para convertir de rst a html, por defecto: 
 
-   default_mt_rst2html="rst2html --no-xml-declaration --language=es  --stylesheet-path=/home/eduardo/.magtrabajos/magtrabajos.css " 
+   default_mt_rst2html="rst2html --no-xml-declaration --language=es  --stylesheet-path=$HOME/.magtrabajos/magtrabajos.css " 
 
    ## @var default_mt_rst2pdf
    ## Comando para convertir de rst a text, por defecto: rst2newlatex --output-encoding-error-handler=replace

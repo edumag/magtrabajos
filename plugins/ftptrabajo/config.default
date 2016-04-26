@@ -8,6 +8,11 @@
 ## @{
 
 
+   ## @var default_ftptrabajo_comando
+   ## Comando ftp: (ftp -p -i -v | sftp -p 2046)
+
+   default_ftptrabajo_comando="ftp -p -i -v"
+
    ## @var default_ftptrabajo_server
    ## Servidor ftp
 
