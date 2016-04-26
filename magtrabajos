@@ -2943,17 +2943,17 @@ presentarCabeceraMovimiento() {
 
    log $FUNCNAME $*
 
+   sql="SELECT CONCAT('movimiento=\'',nombre,'\';fecha_inicio=\'',fechaInicio,'\';') FROM movimientos WHERE id=$movimientoId"
+   salida="$(ejecutarSQL "$sql" -N)"
+   if [ "$salida" = "" ] ; then
+      echo -e "ERROR::$salida \nSQL::$sql"
+      return
+   fi
+   eval "$salida"
+
    case $1 in
 
       completa)
-
-         sql="SELECT CONCAT('movimiento=\'',nombre,'\';fecha_inicio=\'',fechaInicio,'\';') FROM movimientos WHERE id=$movimientoId"
-         salida="$(ejecutarSQL "$sql" -N)"
-         if [ "$salida" = "" ] ; then
-            echo -e "ERROR::$salida \nSQL::$sql"
-            return
-         fi
-         eval "$salida"
 
          # Con formato presentamos titulo de movimiento como 
          # subsección, y su descripción
@@ -3000,22 +3000,21 @@ presentarCabeceraMovimiento() {
 
          log "$FUNCNAME" "formato simple"
 
-         if [ "$movimiento" = 'inicio' ] ; then
-           echo                    | tee -a $TMP      
-           echo "Inicio de $tarea" | tee -a $TMP
-         else
-           SQL="SELECT descripcion FROM movimientos WHERE id=$movimientoId"
-           descripcion="$(ejecutarSQL "$SQL" "-N")"
+         SQL="SELECT descripcion FROM movimientos WHERE id=$movimientoId"
+         descripcion="$(ejecutarSQL "$SQL" "-N")"
 
-           echo                           | tee -a $TMP      
-           echo "\*${movimiento}\*"       | tee -a $TMP 
-           echo                           | tee -a $TMP  
-           echo "fecha: $fecha_inicio"    | tee -a $TMP
-           echo                           | tee -a $TMP      
-           echo -e "$descripcion"         | tee -a $TMP
-           echo                           | tee -a $TMP      
-
+         if [ "$movimiento" != 'inicio' ] ; then
+           titulo_por_nivel "$movimiento" | tee -a $TMP 
+         #else
+           # titulo_por_nivel "Inicio de $tarea" | tee -a $TMP 
          fi
+
+         # echo                           | tee -a $TMP      
+         # echo \*\*${movimiento}\*\*     | tee -a $TMP 
+         echo                           | tee -a $TMP  
+         echo -e "$descripcion"         | tee -a $TMP
+         echo                           | tee -a $TMP      
+
          ;;
 
    esac

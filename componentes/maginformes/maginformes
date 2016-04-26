@@ -325,7 +325,7 @@ function menuInformes(){
 
                if [ "${movimientosIds[*]}" != "" ] ; then
 
-                  titulo_por_nivel "Bitácoras de $tarea"     | tee -a "$TMP"
+                  titulo_por_nivel "Contenido de $tarea"     | tee -a "$TMP"
 
                   let nivel_informe++
                   for movimientoId in ${movimientosIds[*]} ; do
