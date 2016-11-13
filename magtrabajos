@@ -1293,9 +1293,9 @@ function movimientosAbiertos(){
 
    # si tenemos un proyecto seleccionado solo miramos los del proyecto
    if [ -z $proyectoId ] ; then
-      SQL="SELECT m.id FROM movimientos m  WHERE (m.fechaFinal = null || m.fechaFinal = '0000-00-00 00:00:00') ORDER BY m.id"
+      SQL="SELECT m.id FROM movimientos m  WHERE (m.fechaFinal IS NULL || m.fechaFinal = null || m.fechaFinal = '0000-00-00 00:00:00') ORDER BY m.id"
    else
-      SQL="SELECT m.id FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal = null || m.fechaFinal = '0000-00-00 00:00:00') ORDER BY m.id"
+      SQL="SELECT m.id FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal IS NULL || m.fechaFinal = null || m.fechaFinal = '0000-00-00 00:00:00') ORDER BY m.id"
    fi
    movimientosIds=(`ejecutarSQL "$SQL" "-N"`)
 
@@ -1776,7 +1776,7 @@ function contador() {
             SQL="SELECT id FROM tiempos ORDER BY id DESC LIMIT 1"
             tiempoId="$(ejecutarSQL "$SQL" "-N")"
             # Quitamos fecha final del movimiento
-            SQL="UPDATE movimientos SET fechaFinal='' WHERE id=$movimientoId"
+            SQL="UPDATE movimientos SET fechaFinal=NULL WHERE id=$movimientoId"
             ejecutarSQL "$SQL"
             mensajes 'Ponemos contador en marcha'
          else
