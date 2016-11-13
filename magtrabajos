@@ -225,14 +225,12 @@ function comprobar_dependencias() {
    SQL_TOTAL_FROM='FROM tareas t LEFT JOIN movimientos m ON m.idTarea=t.id LEFT JOIN tiempos ti ON ti.idMovimiento=m.id '
 
    # Tareas seleccionar
-   SQL_TAR_SELECCIONAR="SELECT t.id, t.nombre, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, t.prioridad, t.idFactura, g.nombre
+   SQL_TAR_SELECCIONAR="SELECT t.id, t.nombre, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, t.prioridad, t.idFactura
       ,$SQL_TOTAL
       FROM tareas t 
       LEFT JOIN movimientos m ON m.idTarea=t.id 
       LEFT JOIN tiempos ti    ON ti.idMovimiento=m.id 
       LEFT JOIN estados e     ON t.idEstado=e.id
-      LEFT JOIN r_grupos_tareas rgt ON rgt.tarea_id=t.id
-      LEFT JOIN grupos_tareas g ON g.id=rgt.grupo_id
       WHERE 1"
 
    # Agrupar por tareas
@@ -722,7 +720,7 @@ function nuevoMovimiento(){
 
       movimiento=$(basename "$EMAIL" | sed s/_/\ /g)
     
-      SQL="INSERT INTO movimientos VALUES (null,'$tareaId','$movimiento','`AHORA`','',
+      SQL="INSERT INTO movimientos VALUES (null,'$tareaId','$movimiento','`AHORA`',NULL,
       '$(cat $TMP_DES  | sed s/\`/\\\\\`/g | sed s/\'/\\\\\'/g | sed s/\"/\\\\\"/g | sed s/\\\$/\\\\\$/g  )')"
       ejecutarSQL "$SQL"
 
@@ -730,7 +728,7 @@ function nuevoMovimiento(){
 
       read -p "titulo del moviento: " movimiento
       if [ "$movimiento" = "" ] ; then mensajes " Añadir movimiento cancelado" ; return ; fi
-      SQL="INSERT INTO movimientos VALUES (null,'$tareaId','$movimiento','`AHORA`','','')"
+      SQL="INSERT INTO movimientos VALUES (null,'$tareaId','$movimiento','`AHORA`',NULL,'')"
       ejecutarSQL "$SQL"
 
    fi
@@ -806,8 +804,11 @@ function anyadirTareaEmail () {
 
    done
 
+   [[ "$presupuesto" == '' ]] && presupuesto=0
+   [[ "$euroshora" == '' ]] && euroshora=0
+
    SQL="INSERT INTO tareas ( idProyecto, nombre, presupuesto, euroshora , idEstado , fechaInicio, descripcion, prioridad ) \
-   VALUES ($proyectoId,'`protegerTexto $tarea`','${presupuesto:-$tarPresupuesto}','${eurosHora:-$tarEurosHora}','${estadoId:-1}','`AHORA`', \
+   VALUES ($proyectoId,'`protegerTexto $tarea`',${presupuesto:-$tarPresupuesto},${eurosHora:-$tarEurosHora},'${estadoId:-1}','`AHORA`', \
    '$(cat $TMP_DES  | sed s/\`/\\\\\`/g | sed s/\'/\\\\\'/g | sed s/\"/\\\\\"/g | sed s/\\\$/\\\\\$/g  )', ${prioridad:-0}) "
 
    ejecutarSQL "$SQL"
@@ -912,8 +913,12 @@ function editarTarea(){
 
    if [ "$1" = "-n" ] ; then 
       # Tarea nueva
+
+     [[ "$presupuesto" == '' ]] && presupuesto=0
+     [[ "$euroshora" == '' ]] && eurosHora=0
+
       SQL="INSERT INTO tareas ( idProyecto, nombre, presupuesto, euroshora , idEstado , fechaInicio, descripcion, prioridad ) \
-      VALUES ($proyectoId,'`protegerTexto $tarea`','${presupuesto:-$tarPresupuesto}','${eurosHora:-$tarEurosHora}','${estadoId:-1}','`AHORA`', \
+      VALUES ($proyectoId,'`protegerTexto $tarea`',${presupuesto:-$tarPresupuesto},${eurosHora:-$tarEurosHora},'${estadoId:-1}','`AHORA`', \
       '$(cat $TMP_DES  | sed s/\`/\\\\\`/g | sed s/\'/\\\\\'/g | sed s/\"/\\\\\"/g | sed s/\\\$/\\\\\$/g  )', ${prioridad:-0}) "
 
       ejecutarSQL "$SQL"
@@ -1792,7 +1797,7 @@ function ejecutarSQL() {
 
    log $FUNCNAME "$*"
 
-   CMD="mysql --default-character-set=utf8 $2 -u$mt_usuario_mysql -p`contrasenya mysql` -e \"$1\" trabajos"
+   CMD="mysql --defaults-extra-file=$HOME/.my.cnf --default-character-set=utf8 $2 -u$mt_usuario_mysql -e \"$1\" trabajos"
    log "$FUNCNAME" "$SQL"
    eval "$CMD"
    if [ $? != 0 ] ; then
@@ -1807,7 +1812,7 @@ function ejecutarMysql2rst() {
 
    log $FUNCNAME "$*"
 
-   CMD="mysql2rst $2 -u$mt_usuario_mysql -p`contrasenya mysql` -e '$1' trabajos"
+   CMD="mysql2rst --defaults-extra-file=$HOME/.my.cnf $2 -u$mt_usuario_mysql -e '$1' trabajos"
    log "$FUNCNAME" "$1"
    eval "$CMD"
    if [ $? != 0 ] ; then
