@@ -283,7 +283,8 @@ grep "^213" $LOG | cut -d' ' -f2
 
 function ftp_existe_en_servidor() {
 echo "  Comprobar existencia de archivo o directorio [$1]..." > $LOG
-lftp  $ftptrabajo_server >> $LOG 2>&1<<FIN
+#lftp  $ftptrabajo_server >> $LOG 2>&1<<FIN
+$COMANDO_FTP  $ftptrabajo_server >> $LOG 2>&1<<FIN
 lcd $ftptrabajo_dir_local
 cd $ftptrabajo_dir_remoto
 cls "$1"
@@ -1658,7 +1659,15 @@ function estructuta_servidor() {
 
 function lanzar_comando() {
 
-   lftp -e "cd $ftptrabajo_dir_remoto ; $ftpcomando ; quit" $ftptrabajo_server
+  if [ "`echo $COMANDO_FTP | grep 'sftp'`" == '' ] ; then
+    lftp -e "cd $ftptrabajo_dir_remoto ; $ftpcomando ; quit" $ftptrabajo_server
+  else
+    CMD="$(echo $COMANDO_FTP | sed 's/\-P/\-p/')"
+    CMD="$(echo $CMD | sed 's/sftp/ssh/')"
+    echo "$CMD $ftptrabajo_server \"cd $ftptrabajo_dir_remoto ; $ftpcomando\"" 
+    #$CMD $ftptrabajo_server 'cd $ftptrabajo_dir_remoto ; $ftpcomando'
+    eval $CMD $ftptrabajo_server  $ftpcomando
+  fi
 
    }
 
@@ -1737,8 +1746,8 @@ while [ -n "$1" ]; do
       --borrar-dir) shift 1 ; accion=borrarDirectorioRecursivamente ;;
       --borrar) shift 1 ; accion=borrarArchivosServidor ;;
       --bajar|-b) shift 1 ; accion=trabajarArchivo ;;
-      --log-ftp) shift 1  ; comprobar_proyecto ; ($ftptrabajo_terminal -e "tail -f $LOG" &) ; exit ;;
-      --log) shift 1 ; comprobar_proyecto ; ($ftptrabajo_terminal -e "tail -f $REG" &) ; exit ;;
+      --log-ftp) shift 1  ; comprobar_proyecto ; (echo ; echo $LOG ; echo ; $ftptrabajo_terminal "tail -f $LOG" &) ; exit ;;
+      --log) shift 1 ; comprobar_proyecto ; (echo ; echo $LOG ; echo ; $ftptrabajo_terminal "tail -f $REG" &) ; exit ;;
       --sincronizar) shift 1 ; accion=sincronizar ;;
       --sincronizar-servidor) shift 1 ; accion=sincronizar_servidor ;;
       -edd) shift 1 ; comprobar_proyecto ; $ftptrabajo_editor "$LISTA_DIR_DESCARTADOS" ; exit ;;
