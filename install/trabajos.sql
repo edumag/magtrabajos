@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Temps de generació: 13-11-2016 a les 12:58:52
+-- Temps de generació: 17-11-2016 a les 08:21:44
 -- Versió del servidor: 5.7.16-0ubuntu0.16.04.1
 -- Versió de PHP: 7.0.8-0ubuntu0.16.04.3
 
@@ -26,14 +26,13 @@ SET time_zone = "+00:00";
 -- Estructura de la taula `archivos`
 --
 
-DROP TABLE IF EXISTS `archivos`;
 CREATE TABLE `archivos` (
   `id` mediumint(9) NOT NULL,
   `nombre` char(150) DEFAULT NULL,
   `descripcion` varchar(200) DEFAULT NULL,
   `url` char(200) DEFAULT NULL,
   `fecha_creacion_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `fecha_actualizacion_in` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+  `fecha_actualizacion_in` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -42,7 +41,6 @@ CREATE TABLE `archivos` (
 -- Estructura de la taula `documentos`
 --
 
-DROP TABLE IF EXISTS `documentos`;
 CREATE TABLE `documentos` (
   `idMovimiento` int(11) NOT NULL COMMENT 'id de tarea',
   `url` varchar(100) NOT NULL COMMENT 'url de documento'
@@ -54,7 +52,6 @@ CREATE TABLE `documentos` (
 -- Estructura de la taula `estados`
 --
 
-DROP TABLE IF EXISTS `estados`;
 CREATE TABLE `estados` (
   `id` int(10) UNSIGNED NOT NULL,
   `nombre` varchar(25) DEFAULT NULL
@@ -66,7 +63,6 @@ CREATE TABLE `estados` (
 -- Estructura de la taula `etiquetas`
 --
 
-DROP TABLE IF EXISTS `etiquetas`;
 CREATE TABLE `etiquetas` (
   `id` mediumint(9) NOT NULL,
   `nombre` char(20) DEFAULT NULL,
@@ -79,7 +75,6 @@ CREATE TABLE `etiquetas` (
 -- Estructura de la taula `facturas`
 --
 
-DROP TABLE IF EXISTS `facturas`;
 CREATE TABLE `facturas` (
   `id` int(11) NOT NULL,
   `numfact` int(11) NOT NULL COMMENT 'Número de factura del proyecto',
@@ -96,7 +91,6 @@ CREATE TABLE `facturas` (
 -- Estructura de la taula `grupos_tareas`
 --
 
-DROP TABLE IF EXISTS `grupos_tareas`;
 CREATE TABLE `grupos_tareas` (
   `id` int(11) NOT NULL,
   `nombre` varchar(150) NOT NULL,
@@ -110,7 +104,6 @@ CREATE TABLE `grupos_tareas` (
 -- Estructura de la taula `movimientos`
 --
 
-DROP TABLE IF EXISTS `movimientos`;
 CREATE TABLE `movimientos` (
   `id` int(10) UNSIGNED NOT NULL,
   `idTarea` int(11) DEFAULT NULL,
@@ -126,7 +119,6 @@ CREATE TABLE `movimientos` (
 -- Estructura de la taula `personal`
 --
 
-DROP TABLE IF EXISTS `personal`;
 CREATE TABLE `personal` (
   `id` int(10) UNSIGNED NOT NULL,
   `nombre` varchar(30) DEFAULT NULL,
@@ -141,7 +133,6 @@ CREATE TABLE `personal` (
 -- Estructura de la taula `proyectos`
 --
 
-DROP TABLE IF EXISTS `proyectos`;
 CREATE TABLE `proyectos` (
   `id` int(10) UNSIGNED NOT NULL,
   `nombre` varchar(30) DEFAULT NULL,
@@ -160,7 +151,6 @@ CREATE TABLE `proyectos` (
 -- Estructura de la taula `rFacturasPagos`
 --
 
-DROP TABLE IF EXISTS `rFacturasPagos`;
 CREATE TABLE `rFacturasPagos` (
   `id` tinyint(4) NOT NULL,
   `idFactura` tinyint(4) NOT NULL,
@@ -175,7 +165,6 @@ CREATE TABLE `rFacturasPagos` (
 -- Estructura de la taula `rMovimientoArchivos`
 --
 
-DROP TABLE IF EXISTS `rMovimientoArchivos`;
 CREATE TABLE `rMovimientoArchivos` (
   `id` int(11) NOT NULL,
   `idMovimiento` int(11) NOT NULL DEFAULT '0',
@@ -188,7 +177,6 @@ CREATE TABLE `rMovimientoArchivos` (
 -- Estructura de la taula `rMovimientoTablas`
 --
 
-DROP TABLE IF EXISTS `rMovimientoTablas`;
 CREATE TABLE `rMovimientoTablas` (
   `idMovimiento` int(11) NOT NULL DEFAULT '0',
   `tabla` varchar(50) NOT NULL DEFAULT ''
@@ -200,7 +188,6 @@ CREATE TABLE `rMovimientoTablas` (
 -- Estructura de la taula `r_etiqueta_archivo`
 --
 
-DROP TABLE IF EXISTS `r_etiqueta_archivo`;
 CREATE TABLE `r_etiqueta_archivo` (
   `etiquetas_id` mediumint(9) NOT NULL,
   `archivos_id` mediumint(9) NOT NULL
@@ -212,7 +199,6 @@ CREATE TABLE `r_etiqueta_archivo` (
 -- Estructura de la taula `r_grupos_tareas`
 --
 
-DROP TABLE IF EXISTS `r_grupos_tareas`;
 CREATE TABLE `r_grupos_tareas` (
   `grupo_id` int(11) NOT NULL,
   `tarea_id` int(11) NOT NULL
@@ -224,7 +210,6 @@ CREATE TABLE `r_grupos_tareas` (
 -- Estructura de la taula `r_personal_proyecto`
 --
 
-DROP TABLE IF EXISTS `r_personal_proyecto`;
 CREATE TABLE `r_personal_proyecto` (
   `personal_id` int(11) NOT NULL,
   `proyecto_id` int(11) NOT NULL
@@ -236,7 +221,6 @@ CREATE TABLE `r_personal_proyecto` (
 -- Estructura de la taula `r_usuarios_roles`
 --
 
-DROP TABLE IF EXISTS `r_usuarios_roles`;
 CREATE TABLE `r_usuarios_roles` (
   `usuarios_id` int(11) NOT NULL,
   `roles_id` int(11) NOT NULL
@@ -248,7 +232,6 @@ CREATE TABLE `r_usuarios_roles` (
 -- Estructura de la taula `tareas`
 --
 
-DROP TABLE IF EXISTS `tareas`;
 CREATE TABLE `tareas` (
   `id` int(10) UNSIGNED NOT NULL,
   `prioridad` tinyint(2) DEFAULT '0',
@@ -271,12 +254,11 @@ CREATE TABLE `tareas` (
 -- Estructura de la taula `tiempos`
 --
 
-DROP TABLE IF EXISTS `tiempos`;
 CREATE TABLE `tiempos` (
   `id` int(10) UNSIGNED NOT NULL,
   `idMovimiento` int(11) DEFAULT NULL,
   `fechaInicio` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `fechaFinal` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+  `fechaFinal` timestamp NULL DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -285,14 +267,13 @@ CREATE TABLE `tiempos` (
 -- Estructura de la taula `trab_archivos`
 --
 
-DROP TABLE IF EXISTS `trab_archivos`;
 CREATE TABLE `trab_archivos` (
   `id` mediumint(9) NOT NULL,
   `nombre` char(150) COLLATE utf8_spanish_ci DEFAULT NULL,
   `descripcion` varchar(200) COLLATE utf8_spanish_ci DEFAULT NULL,
   `url` char(200) COLLATE utf8_spanish_ci DEFAULT NULL,
   `fecha_creacion_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `fecha_actualizacion_in` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+  `fecha_actualizacion_in` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 -- --------------------------------------------------------
@@ -301,7 +282,6 @@ CREATE TABLE `trab_archivos` (
 -- Estructura de la taula `trab_etiquetas`
 --
 
-DROP TABLE IF EXISTS `trab_etiquetas`;
 CREATE TABLE `trab_etiquetas` (
   `id` mediumint(9) NOT NULL,
   `nombre` char(20) COLLATE utf8_spanish_ci DEFAULT NULL,
@@ -314,7 +294,6 @@ CREATE TABLE `trab_etiquetas` (
 -- Estructura de la taula `trab_registros`
 --
 
-DROP TABLE IF EXISTS `trab_registros`;
 CREATE TABLE `trab_registros` (
   `id` int(11) NOT NULL,
   `sesion` int(11) DEFAULT NULL,
@@ -332,7 +311,6 @@ CREATE TABLE `trab_registros` (
 -- Estructura de la taula `trab_r_etiqueta_archivo`
 --
 
-DROP TABLE IF EXISTS `trab_r_etiqueta_archivo`;
 CREATE TABLE `trab_r_etiqueta_archivo` (
   `etiquetas_id` mediumint(9) NOT NULL,
   `archivos_id` mediumint(9) NOT NULL
@@ -344,7 +322,6 @@ CREATE TABLE `trab_r_etiqueta_archivo` (
 -- Estructura de la taula `trab_usuarios`
 --
 
-DROP TABLE IF EXISTS `trab_usuarios`;
 CREATE TABLE `trab_usuarios` (
   `id` int(11) NOT NULL,
   `usuario` char(50) COLLATE utf8_spanish_ci DEFAULT NULL,
@@ -532,7 +509,7 @@ ALTER TABLE `grupos_tareas`
 -- AUTO_INCREMENT per la taula `movimientos`
 --
 ALTER TABLE `movimientos`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3990;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3995;
 --
 -- AUTO_INCREMENT per la taula `personal`
 --
@@ -552,17 +529,17 @@ ALTER TABLE `rFacturasPagos`
 -- AUTO_INCREMENT per la taula `rMovimientoArchivos`
 --
 ALTER TABLE `rMovimientoArchivos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32830;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32832;
 --
 -- AUTO_INCREMENT per la taula `tareas`
 --
 ALTER TABLE `tareas`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2394;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2395;
 --
 -- AUTO_INCREMENT per la taula `tiempos`
 --
 ALTER TABLE `tiempos`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8735;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8746;
 --
 -- AUTO_INCREMENT per la taula `trab_archivos`
 --

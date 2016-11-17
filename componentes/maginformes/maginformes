@@ -533,7 +533,7 @@ function menuInformes(){
             , DATE_FORMAT(DATE_SUB(ti.fechaInicio,INTERVAL weekday(ti.fechaInicio) DAY), '%d %b %Y') AS primer_dia_semana
             , DATE_FORMAT(DATE_SUB(DATE_SUB(ti.fechaInicio,INTERVAL weekday(ti.fechaInicio) DAY),INTERVAL -6 DAY), '%d %b %Y') AS ultimo_dia_semana
             , DATE_FORMAT(ti.fechaInicio, '%Y-%m-%d %W') as dia, 
-            FORMAT((IF (ti.fechaFinal!='0000-00-00 00:00:00',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now()))- 
+            FORMAT((IF (ti.fechaFinal is not null',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now()))- 
             UNIX_TIMESTAMP(ti.fechaInicio) ) / 60,0) as min
             , ti.fechaInicio AS fechaInicio
             , ti.fechaFinal AS fechaFinal
@@ -556,13 +556,13 @@ function menuInformes(){
           SUBSELECT="$SUBSELECT 
             FROM tiempos ti, movimientos m, tareas t, proyectos p 
             WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND p.id=t.idProyecto 
-            AND ( ti.fechaInicio >= '$FECHA_INICIO' AND ti.fechaInicio <= '$FECHA_FINAL' AND ti.fechaFinal != '0000-00-00 00:00:00' )
+            AND ( ti.fechaInicio >= '$FECHA_INICIO' AND ti.fechaInicio <= '$FECHA_FINAL' AND ti.fechaFinal is not null )
             "
 
           # SUBSELECT="$SUBSELECT 
           #   FROM tiempos ti, movimientos m, tareas t, proyectos p 
           #   WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND p.id=t.idProyecto 
-          #   AND ( WEEK(ti.fechaInicio,1) = '$SEMANA' AND YEAR(ti.fechaInicio) = '$ANYO' AND ti.fechaFinal != '0000-00-00 00:00:00' )
+          #   AND ( WEEK(ti.fechaInicio,1) = '$SEMANA' AND YEAR(ti.fechaInicio) = '$ANYO' AND ti.fechaFinal is not null )
           #   "
 
          [[ $SOBRE_PROYECTO != 0 ]] && SUBSELECT="$SUBSELECT AND p.id = $proyectoId"
@@ -596,7 +596,7 @@ function menuInformes(){
             FROM ($SUBSELECT) as sMinutos 
             "
          GROUP="GROUP BY Proyecto"
-         mysql2rst --defaults-extra-file=$HOME/.my.cnf  -u$mt_usuario_mysql -e "$SQL $GROUP" trabajos | tee -a $TMP
+         mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "---------------------------------" | tee -a $TMP
@@ -662,7 +662,7 @@ function menuInformes(){
             SELECT p.nombre as Proyecto, LEFT(t.nombre,40) as Tarea, LEFT(m.nombre,22) as Mov, 
             month(ti.fechaInicio) as mes, week(ti.fechaInicio,1) as sem,  
             DATE_FORMAT(ti.fechaInicio, '%Y-%m-%d %W') as dia, 
-            FORMAT((IF (ti.fechaFinal!='0000-00-00 00:00:00',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now()))- 
+            FORMAT((IF (ti.fechaFinal is not null,UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now()))- 
             UNIX_TIMESTAMP(ti.fechaInicio) ) / 60,0) as min,
             t.euroshora as \\\`e/h\\\`,
             IF (t.presupuesto>0, 
@@ -706,7 +706,7 @@ function menuInformes(){
             FROM ($SUBSELECT) as sMinutos 
             "
          GROUP="GROUP BY Proyecto"
-         mysql2rst --defaults-extra-file=$HOME/.my.cnf  -u$mt_usuario_mysql -e "$SQL $GROUP" trabajos | tee -a $TMP
+         mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
          # gráfica
          SQL="
             SELECT CONCAT(Proyecto,'\t', sum(min)/60) FROM ($SUBSELECT) as sMinutos 
@@ -725,7 +725,7 @@ function menuInformes(){
          echo "-----------------" | tee -a $TMP
          echo "" | tee -a $TMP
          # ejecutarSQL "$SUBSELECT ORDER BY ti.fechaInicio " "-t" | tee -a $TMP
-         mysql2rst --defaults-extra-file=$HOME/.my.cnf  -u$mt_usuario_mysql -e "$SUBSELECT ORDER BY ti.fechaInicio " trabajos | tee -a $TMP
+         mysql2rst -e "$SUBSELECT ORDER BY ti.fechaInicio " trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "------------------------------" | tee -a $TMP
@@ -734,7 +734,7 @@ function menuInformes(){
          echo "" | tee -a $TMP
          GROUP="GROUP BY sMinutos.Mov, sMinutos.dia "
          # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
-         mysql2rst --defaults-extra-file=$HOME/.my.cnf  -u$mt_usuario_mysql -e "$SQL_BASE $GROUP" trabajos | tee -a $TMP
+         mysql2rst -e "$SQL_BASE $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "------------------" | tee -a $TMP
@@ -749,7 +749,7 @@ function menuInformes(){
             "
          GROUP="GROUP BY sMinutos.Tarea "
          # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
-         mysql2rst --defaults-extra-file=$HOME/.my.cnf  -u$mt_usuario_mysql -e "$SQL $GROUP" trabajos | tee -a $TMP
+         mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "----------------" | tee -a $TMP
@@ -764,7 +764,7 @@ function menuInformes(){
             "
          GROUP="GROUP BY sMinutos.dia ORDER BY sMinutos.dia "
          #ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
-         mysql2rst --defaults-extra-file=$HOME/.my.cnf  -u$mt_usuario_mysql -e "$SQL $GROUP" trabajos | tee -a $TMP
+         mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "-------------------" | tee -a $TMP
@@ -773,7 +773,7 @@ function menuInformes(){
          echo "" | tee -a $TMP
          GROUP="GROUP BY sMinutos.sem "
          # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
-         mysql2rst --defaults-extra-file=$HOME/.my.cnf  -u$mt_usuario_mysql -e "$SQL $GROUP" trabajos | tee -a $TMP
+         mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
 
          # gráfica
          SQL="

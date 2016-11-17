@@ -1212,7 +1212,7 @@ function tiemposAbiertos() {
 
    log $FUNCNAME "$*"
 
-   SQL="SELECT t.id FROM tiempos t  WHERE (t.fechaFinal = null || t.fechaFinal = '0000-00-00 00:00:00') ORDER BY t.id"
+   SQL="SELECT t.id FROM tiempos t  WHERE (t.fechaFinal = null ) ORDER BY t.id"
    tiemposIds=($(ejecutarSQL "$SQL" "-N"))
 
    if [ "${tiemposIds[*]}" = "" ] ; then 
@@ -1293,9 +1293,9 @@ function movimientosAbiertos(){
 
    # si tenemos un proyecto seleccionado solo miramos los del proyecto
    if [ -z $proyectoId ] ; then
-      SQL="SELECT m.id FROM movimientos m  WHERE (m.fechaFinal IS NULL || m.fechaFinal = null || m.fechaFinal = '0000-00-00 00:00:00') ORDER BY m.id"
+      SQL="SELECT m.id FROM movimientos m  WHERE (m.fechaFinal IS NULL) ORDER BY m.id"
    else
-      SQL="SELECT m.id FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal IS NULL || m.fechaFinal = null || m.fechaFinal = '0000-00-00 00:00:00') ORDER BY m.id"
+      SQL="SELECT m.id FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal IS NULL ) ORDER BY m.id"
    fi
    movimientosIds=(`ejecutarSQL "$SQL" "-N"`)
 
@@ -1613,7 +1613,7 @@ function definirProyecto(){
 
       # Comprobar si tenemos contador en marcha
       if [ "$movimientoId" != "" ] ; then
-          SQL="SELECT id FROM tiempos WHERE idMovimiento=$movimientoId AND fechaFinal='0000-00-00 00:00:00' LIMIT 1"
+        SQL="SELECT id FROM tiempos WHERE idMovimiento=$movimientoId AND ( fechaFinal is null ) LIMIT 1"
           tiempoId="$(ejecutarSQL "$SQL" "-N")"
       fi
 
@@ -2232,7 +2232,7 @@ function cerrar(){
       FECHA="`AHORA`"
 
       # Comprobar movimientos abiertos
-      SQL="SELECT id FROM movimientos WHERE fechaFinal='0000-00-00 00:00:00' AND idTarea=$tareaId"
+      SQL="SELECT id FROM movimientos WHERE ( fechaFinal is null ) AND idTarea=$tareaId"
       ABIERTOS=$(ejecutarSQL "$SQL" "-N")
 
       if [ "$ABIERTOS" != "" ] ; then
@@ -2263,7 +2263,7 @@ function cerrar(){
       # Se coge la ultima fecha de los tiempos
       SQL="SELECT fechaFinal FROM tiempos WHERE idMovimiento=$movimientoId ORDER BY id DESC LIMIT 1"
       FECHA="$(ejecutarSQL "$SQL" "-N")"
-      if [ "$FECHA" = "0000-00-00 00:00:00" ] ; then                                        # Contador funcionando hay que pararlo
+      if [ "$FECHA" == "NULL" ] ; then                                        # Contador funcionando hay que pararlo
 
          mensajes "Contador funcionando, lo cerramos"
          contador -p
@@ -2785,7 +2785,7 @@ tarea=$(ejecutarSQL "SELECT nombre FROM tareas WHERE id=$tareaId" "-N")
 compensacion=$(ejecutarSQL "SELECT compensacion FROM tareas WHERE id=$tareaId" "-N")
 
 
-totalTareaMinutos=$(ejecutarSQL "SELECT sum((IF (ti.fechaFinal!='0000-00-00 00:00:00',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now())) - UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId" "-N")
+totalTareaMinutos=$(ejecutarSQL "SELECT sum((IF ( (ti.fechaFinal is not null )',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now())) - UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId" "-N")
 if [ "$totalTareaMinutos" != "NULL" ] ; then
    ttm=$(echo $totalTareaMinutos | cut -d. -f1)
 else
@@ -3048,7 +3048,7 @@ function presentarTotalMovimiento() {
    tarEurosHora=$(ejecutarSQL "SELECT euroshora from tareas where id=$tareaId" "-N")
 
 
-   totalMovimientoMinutos=$(ejecutarSQL "SELECT sum((IF (ti.fechaFinal!='0000-00-00 00:00:00',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now())) - UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId AND m.id=$movimientoId" "-N")
+   totalMovimientoMinutos=$(ejecutarSQL "SELECT sum((IF ( (ti.fechaFinal is not null ),UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now())) - UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId AND m.id=$movimientoId" "-N")
 
    if [ "$totalMovimientoMinutos" != "NULL" ] ; then
       ttm=$(echo $totalMovimientoMinutos | cut -d. -f1)
@@ -3417,7 +3417,7 @@ function presentarTotalTareasGeneral() {
    # Buscar el total en minutos de todas las tareas seleccionadas
 
    SQL="
-   SELECT sum((IF (ti.fechaFinal!='0000-00-00 00:00:00',UNIX_TIMESTAMP(ti.fechaFinal)
+   SELECT sum((IF (ti.fechaFinal is not null,UNIX_TIMESTAMP(ti.fechaFinal)
       ,UNIX_TIMESTAMP(now()))- UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos
       FROM tiempos ti, movimientos m, tareas t 
       WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.idProyecto=$proyectoId $CONDICION_MOVIMIENTO"
@@ -3640,7 +3640,7 @@ function verProyecto(){
          tareas_pendientes
 
          # Moviminetos abiertos
-         # SQL="SELECT CONCAT(t.nombre, ': ',  m.nombre, ';;;', m.descripcion, '\nnn') FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal = null || m.fechaFinal = '0000-00-00 00:00:00') ORDER BY m.id"
+         # SQL="SELECT CONCAT(t.nombre, ': ',  m.nombre, ';;;', m.descripcion, '\nnn') FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal = null ) ORDER BY m.id"
 
          # SALIDA="$(ejecutarSQL "$SQL" "-N")"
 
