@@ -21,7 +21,7 @@
 ## -N        Para tener cabeceras en la tabla
 ## -e        "sql a ejecutar"
 ## </pre>
-## Ejemplo: mysql2rst -uroot -p`contrasenya mysql` -e '$sql' trabajos
+## Ejemplo: mysql2rst --defaults-extra-file=$HOME/.my.cnf -uroot -e '$sql' trabajos
 ##
 ## @author   Eduardo Magrané
 ##
@@ -66,7 +66,7 @@ function mysql2rst() {
    local conta=0
    local CMD="mysql -t $encabezado -e \"$SQL\" $parametros"
 
-   #echo CMD: $CMD # DEBUG
+   # echo CMD: $CMD # DEBUG
    echo
 
    DIFS="$IFS" # separador fin de linea para que salga linea por linea

@@ -225,14 +225,12 @@ function comprobar_dependencias() {
    SQL_TOTAL_FROM='FROM tareas t LEFT JOIN movimientos m ON m.idTarea=t.id LEFT JOIN tiempos ti ON ti.idMovimiento=m.id '
 
    # Tareas seleccionar
-   SQL_TAR_SELECCIONAR="SELECT t.id, t.nombre, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, t.prioridad, t.idFactura, g.nombre
+   SQL_TAR_SELECCIONAR="SELECT t.id, t.nombre, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, t.prioridad, t.idFactura
       ,$SQL_TOTAL
       FROM tareas t 
       LEFT JOIN movimientos m ON m.idTarea=t.id 
       LEFT JOIN tiempos ti    ON ti.idMovimiento=m.id 
       LEFT JOIN estados e     ON t.idEstado=e.id
-      LEFT JOIN r_grupos_tareas rgt ON rgt.tarea_id=t.id
-      LEFT JOIN grupos_tareas g ON g.id=rgt.grupo_id
       WHERE 1"
 
    # Agrupar por tareas
@@ -722,7 +720,7 @@ function nuevoMovimiento(){
 
       movimiento=$(basename "$EMAIL" | sed s/_/\ /g)
     
-      SQL="INSERT INTO movimientos VALUES (null,'$tareaId','$movimiento','`AHORA`','',
+      SQL="INSERT INTO movimientos VALUES (null,'$tareaId','$movimiento','`AHORA`',NULL,
       '$(cat $TMP_DES  | sed s/\`/\\\\\`/g | sed s/\'/\\\\\'/g | sed s/\"/\\\\\"/g | sed s/\\\$/\\\\\$/g  )')"
       ejecutarSQL "$SQL"
 
@@ -730,7 +728,7 @@ function nuevoMovimiento(){
 
       read -p "titulo del moviento: " movimiento
       if [ "$movimiento" = "" ] ; then mensajes " Añadir movimiento cancelado" ; return ; fi
-      SQL="INSERT INTO movimientos VALUES (null,'$tareaId','$movimiento','`AHORA`','','')"
+      SQL="INSERT INTO movimientos VALUES (null,'$tareaId','$movimiento','`AHORA`',NULL,'')"
       ejecutarSQL "$SQL"
 
    fi
@@ -806,8 +804,11 @@ function anyadirTareaEmail () {
 
    done
 
+   [[ "$presupuesto" == '' ]] && presupuesto=0
+   [[ "$euroshora" == '' ]] && euroshora=0
+
    SQL="INSERT INTO tareas ( idProyecto, nombre, presupuesto, euroshora , idEstado , fechaInicio, descripcion, prioridad ) \
-   VALUES ($proyectoId,'`protegerTexto $tarea`','${presupuesto:-$tarPresupuesto}','${eurosHora:-$tarEurosHora}','${estadoId:-1}','`AHORA`', \
+   VALUES ($proyectoId,'`protegerTexto $tarea`',${presupuesto:-$tarPresupuesto},${eurosHora:-$tarEurosHora},'${estadoId:-1}','`AHORA`', \
    '$(cat $TMP_DES  | sed s/\`/\\\\\`/g | sed s/\'/\\\\\'/g | sed s/\"/\\\\\"/g | sed s/\\\$/\\\\\$/g  )', ${prioridad:-0}) "
 
    ejecutarSQL "$SQL"
@@ -912,8 +913,12 @@ function editarTarea(){
 
    if [ "$1" = "-n" ] ; then 
       # Tarea nueva
+
+     [[ "$presupuesto" == '' ]] && presupuesto=0
+     [[ "$euroshora" == '' ]] && eurosHora=0
+
       SQL="INSERT INTO tareas ( idProyecto, nombre, presupuesto, euroshora , idEstado , fechaInicio, descripcion, prioridad ) \
-      VALUES ($proyectoId,'`protegerTexto $tarea`','${presupuesto:-$tarPresupuesto}','${eurosHora:-$tarEurosHora}','${estadoId:-1}','`AHORA`', \
+      VALUES ($proyectoId,'`protegerTexto $tarea`',${presupuesto:-$tarPresupuesto},${eurosHora:-$tarEurosHora},'${estadoId:-1}','`AHORA`', \
       '$(cat $TMP_DES  | sed s/\`/\\\\\`/g | sed s/\'/\\\\\'/g | sed s/\"/\\\\\"/g | sed s/\\\$/\\\\\$/g  )', ${prioridad:-0}) "
 
       ejecutarSQL "$SQL"
@@ -1207,7 +1212,7 @@ function tiemposAbiertos() {
 
    log $FUNCNAME "$*"
 
-   SQL="SELECT t.id FROM tiempos t  WHERE (t.fechaFinal = null || t.fechaFinal = '0000-00-00 00:00:00') ORDER BY t.id"
+   SQL="SELECT t.id FROM tiempos t  WHERE (t.fechaFinal = null ) ORDER BY t.id"
    tiemposIds=($(ejecutarSQL "$SQL" "-N"))
 
    if [ "${tiemposIds[*]}" = "" ] ; then 
@@ -1288,9 +1293,9 @@ function movimientosAbiertos(){
 
    # si tenemos un proyecto seleccionado solo miramos los del proyecto
    if [ -z $proyectoId ] ; then
-      SQL="SELECT m.id FROM movimientos m  WHERE (m.fechaFinal = null || m.fechaFinal = '0000-00-00 00:00:00') ORDER BY m.id"
+      SQL="SELECT m.id FROM movimientos m  WHERE (m.fechaFinal IS NULL) ORDER BY m.id"
    else
-      SQL="SELECT m.id FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal = null || m.fechaFinal = '0000-00-00 00:00:00') ORDER BY m.id"
+      SQL="SELECT m.id FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal IS NULL ) ORDER BY m.id"
    fi
    movimientosIds=(`ejecutarSQL "$SQL" "-N"`)
 
@@ -1608,7 +1613,7 @@ function definirProyecto(){
 
       # Comprobar si tenemos contador en marcha
       if [ "$movimientoId" != "" ] ; then
-          SQL="SELECT id FROM tiempos WHERE idMovimiento=$movimientoId AND fechaFinal='0000-00-00 00:00:00' LIMIT 1"
+        SQL="SELECT id FROM tiempos WHERE idMovimiento=$movimientoId AND ( fechaFinal is null ) LIMIT 1"
           tiempoId="$(ejecutarSQL "$SQL" "-N")"
       fi
 
@@ -1771,7 +1776,7 @@ function contador() {
             SQL="SELECT id FROM tiempos ORDER BY id DESC LIMIT 1"
             tiempoId="$(ejecutarSQL "$SQL" "-N")"
             # Quitamos fecha final del movimiento
-            SQL="UPDATE movimientos SET fechaFinal='' WHERE id=$movimientoId"
+            SQL="UPDATE movimientos SET fechaFinal=NULL WHERE id=$movimientoId"
             ejecutarSQL "$SQL"
             mensajes 'Ponemos contador en marcha'
          else
@@ -1792,7 +1797,7 @@ function ejecutarSQL() {
 
    log $FUNCNAME "$*"
 
-   CMD="mysql --default-character-set=utf8 $2 -u$mt_usuario_mysql -p`contrasenya mysql` -e \"$1\" trabajos"
+   CMD="mysql --defaults-extra-file=$HOME/.my.cnf --default-character-set=utf8 $2 -u$mt_usuario_mysql -e \"$1\" trabajos"
    log "$FUNCNAME" "$SQL"
    eval "$CMD"
    if [ $? != 0 ] ; then
@@ -1807,7 +1812,7 @@ function ejecutarMysql2rst() {
 
    log $FUNCNAME "$*"
 
-   CMD="mysql2rst $2 -u$mt_usuario_mysql -p`contrasenya mysql` -e '$1' trabajos"
+   CMD="mysql2rst --defaults-extra-file=$HOME/.my.cnf $2 -u$mt_usuario_mysql -e '$1' trabajos"
    log "$FUNCNAME" "$1"
    eval "$CMD"
    if [ $? != 0 ] ; then
@@ -2227,7 +2232,7 @@ function cerrar(){
       FECHA="`AHORA`"
 
       # Comprobar movimientos abiertos
-      SQL="SELECT id FROM movimientos WHERE fechaFinal='0000-00-00 00:00:00' AND idTarea=$tareaId"
+      SQL="SELECT id FROM movimientos WHERE ( fechaFinal is null ) AND idTarea=$tareaId"
       ABIERTOS=$(ejecutarSQL "$SQL" "-N")
 
       if [ "$ABIERTOS" != "" ] ; then
@@ -2258,7 +2263,7 @@ function cerrar(){
       # Se coge la ultima fecha de los tiempos
       SQL="SELECT fechaFinal FROM tiempos WHERE idMovimiento=$movimientoId ORDER BY id DESC LIMIT 1"
       FECHA="$(ejecutarSQL "$SQL" "-N")"
-      if [ "$FECHA" = "0000-00-00 00:00:00" ] ; then                                        # Contador funcionando hay que pararlo
+      if [ "$FECHA" == "NULL" ] ; then                                        # Contador funcionando hay que pararlo
 
          mensajes "Contador funcionando, lo cerramos"
          contador -p
@@ -2464,7 +2469,28 @@ function modificar(){
 
    ## modificar según tengamos movimiento, tarea o proyecto
 
-   if [ "$movimientoId" = '' ] && [ "$tareaId" = '' ] && [ "$proyectoId" != '' ] || [ "$1" = "-p" ] ; then     # Proyecto seleccionado
+   if [ "$movimientoId" != '' ] ; then                                                    # No tenemos nada seleccionado
+      log "$FUNCNAME" "Movimiento: $movimientoId"
+      read -p "Nuevo nombre para movimiento: " NOMBRE
+      if [ "$NOMBRE" != "" ] ; then
+         SQL="UPDATE movimientos set nombre='$NOMBRE' WHERE id=$movimientoId"
+         ejecutarSQL "$SQL"
+      fi
+      definirProyecto
+
+   elif [ "$movimientoId" = '' ] && [ "$tareaId" != '' ] ; then                             # Tarea seleccionado
+      log "$FUNCNAME" "Tarea: $tareaId"
+      editarTarea
+
+   elif [ "$movimientoId" = '' ] && [ "$tareaId" = '' ] && [ "$tareasIds" != '' ]; then                             # Tareas seleccionadas
+
+     for tareaId in ${tareasIds[*]} ; do
+      log "$FUNCNAME" "Tarea: $tareaId"
+      editarTarea
+     done
+     tareaId=
+
+   elif [ "$movimientoId" = '' ] && [ "$tareaId" = '' ] && [ "$proyectoId" != '' ] || [ "$1" = "-p" ] ; then     # Proyecto seleccionado
       log "$FUNCNAME" "Proyecto: $proyectoId"
       echo ''
       echo 'Modificar proyecto'
@@ -2498,18 +2524,6 @@ function modificar(){
       ejecutarSQL "$SQL"
       mensajes ' Proyecto modificado'
 
-   elif [ "$movimientoId" = '' ] && [ "$tareaId" != '' ] ; then                             # Tarea seleccionado
-      log "$FUNCNAME" "Tarea: $tareaId"
-      editarTarea
-
-   elif [ "$movimientoId" != '' ] ; then                                                    # No tenemos nada seleccionado
-      log "$FUNCNAME" "Movimiento: $movimientoId"
-      read -p "Nuevo nombre para movimiento: " NOMBRE
-      if [ "$NOMBRE" != "" ] ; then
-         SQL="UPDATE movimientos set nombre='$NOMBRE' WHERE id=$movimientoId"
-         ejecutarSQL "$SQL"
-      fi
-      definirProyecto
    else                                                                                     # No hay nada seleccinoado
       mensajes " No hay nada seleccionado, no hacemos nada"
    fi
@@ -2771,7 +2785,7 @@ tarea=$(ejecutarSQL "SELECT nombre FROM tareas WHERE id=$tareaId" "-N")
 compensacion=$(ejecutarSQL "SELECT compensacion FROM tareas WHERE id=$tareaId" "-N")
 
 
-totalTareaMinutos=$(ejecutarSQL "SELECT sum((IF (ti.fechaFinal!='0000-00-00 00:00:00',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now())) - UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId" "-N")
+totalTareaMinutos=$(ejecutarSQL "SELECT sum((IF ( (ti.fechaFinal is not null )',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now())) - UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId" "-N")
 if [ "$totalTareaMinutos" != "NULL" ] ; then
    ttm=$(echo $totalTareaMinutos | cut -d. -f1)
 else
@@ -2896,6 +2910,8 @@ presentarTODOs() {
    esac
 
    [[ -z $sql ]] && ARCHIVOS='' || local ARCHIVOS=$(ejecutarSQL "$SQL" "-N")
+
+   if [ "$ARCHIVOS" == '' ] ; then log "$FUNCNAME" "Sin archivos" ; return ; fi
 
    if [ "`pwd`/" == "$DIR_PROYECTO" ] || [ `pwd` == "$DIR_PROYECTO" ] ; then
 
@@ -3031,7 +3047,7 @@ function presentarTotalMovimiento() {
    tarEurosHora=$(ejecutarSQL "SELECT euroshora from tareas where id=$tareaId" "-N")
 
 
-   totalMovimientoMinutos=$(ejecutarSQL "SELECT sum((IF (ti.fechaFinal!='0000-00-00 00:00:00',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now())) - UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId AND m.id=$movimientoId" "-N")
+   totalMovimientoMinutos=$(ejecutarSQL "SELECT sum((IF ( (ti.fechaFinal is not null ),UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now())) - UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId AND m.id=$movimientoId" "-N")
 
    if [ "$totalMovimientoMinutos" != "NULL" ] ; then
       ttm=$(echo $totalMovimientoMinutos | cut -d. -f1)
@@ -3335,7 +3351,7 @@ function contabilidad_proyecto() {
    [[ "$proyecto_facturacion" == "0" ]] && return ;
 
    # listado de facturas pendientes
-   pendiente_facturas | tee -a $TMP
+   pendiente_facturas
 
    # Tareas acabadas 
 
@@ -3368,8 +3384,11 @@ function presentarTotalTareasGeneral() {
 
    log $FUNCNAME "$*"
 
+   local titulo_plus=""
+
    if [ "$1" != "" ] ; then
 
+      titulo_plus=" $proyecto"
       CONDICION_TAREA=$1
       CONDICION_MOVIMIENTO=$1
 
@@ -3397,7 +3416,7 @@ function presentarTotalTareasGeneral() {
    # Buscar el total en minutos de todas las tareas seleccionadas
 
    SQL="
-   SELECT sum((IF (ti.fechaFinal!='0000-00-00 00:00:00',UNIX_TIMESTAMP(ti.fechaFinal)
+   SELECT sum((IF (ti.fechaFinal is not null,UNIX_TIMESTAMP(ti.fechaFinal)
       ,UNIX_TIMESTAMP(now()))- UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos
       FROM tiempos ti, movimientos m, tareas t 
       WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.idProyecto=$proyectoId $CONDICION_MOVIMIENTO"
@@ -3436,7 +3455,7 @@ function presentarTotalTareasGeneral() {
       tiempoTotal=`pasarMinHoras ${totalTodoMinutos:-0}`
       euros_hora=$(echo "scale=2 ; (${total:-0}/${totalTodoMinutos:-0})*60" | bc -l)
 
-      titulo_por_nivel "Total general" | tee -a "$TMP"
+      titulo_por_nivel "Total general${titulo_plus}" | tee -a "$TMP"
 
       echo -e "\n\n===============================    ===============" | tee -a $TMP
       echo   "Totales" | tee -a $TMP
@@ -3620,7 +3639,7 @@ function verProyecto(){
          tareas_pendientes
 
          # Moviminetos abiertos
-         # SQL="SELECT CONCAT(t.nombre, ': ',  m.nombre, ';;;', m.descripcion, '\nnn') FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal = null || m.fechaFinal = '0000-00-00 00:00:00') ORDER BY m.id"
+         # SQL="SELECT CONCAT(t.nombre, ': ',  m.nombre, ';;;', m.descripcion, '\nnn') FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal = null ) ORDER BY m.id"
 
          # SALIDA="$(ejecutarSQL "$SQL" "-N")"
 
@@ -4258,15 +4277,16 @@ function menuGrupo(){
      OPCION=$1
    else
 
-     if [ "$grupoId" != "" ] ; then
-       abre_caja "$nombre_grupo (${#tareasIds[*]})"
-       linea_caja "[A]ñadir tareas a grupo" "[D]eseleccionar"
-       linea_caja "[Q]uitar de grupo" "[M]odificar"
-       cierra_caja
-     fi
      abre_caja
      linea_caja "[N]ueva" "[S]eleccionar"
+     linea_caja "Añadir tareas seleccionadas a grupo [e]xistente"
      cierra_caja
+     if [ "$grupoId" != "" ] ; then
+       abre_caja "$nombre_grupo (${#tareasIds[*]})"
+       linea_caja "[Q]uitar de grupo" "[M]odificar"
+       linea_caja "[D]eseleccionar"
+       cierra_caja
+     fi
 
      # Si tenim missatge el presentem
      mensajes -get
@@ -4277,6 +4297,37 @@ function menuGrupo(){
 
    case $OPCION in
 
+     e|E)
+        echo
+        echo Seleccionar grupo
+        echo
+        sql="SELECT id, nombre, descripcion FROM grupos_tareas WHERE idProyecto=$proyectoId"
+
+        ejecutarSQL "$sql" "-N -B --raw" > ${DIR_TMP}listado
+        resultado_listado=''
+        generar_listado_fichero -t 'Seleccionar grupo' -o --ocultar-ayuda
+
+        [[ "$resultado_listado" = "" ]] && return
+
+        grupoId=($resultado_listado)
+       ejecutarSQL "$SQL_TAR $CONDICION"
+       echo
+       read -p "Añadir tareas a grupo (s/n): " OPCION
+       if [ "$OPCION" == "s" ] ; then
+         tareasIds=$(ejecutarSQL "SELECT t.id FROM tareas t WHERE 1 $CONDICION ORDER BY t.id" "-N")
+         echo
+         echo Tareas: $tareasIds
+         for x in $tareasIds ; do
+           # Borramos relaciones de tareas con otros grupos
+           SQL="DELETE FROM r_grupos_tareas WHERE tarea_id=$x"
+           ejecutarSQL "$SQL"
+           SQL="INSERT INTO r_grupos_tareas (grupo_id, tarea_id) 
+            VALUES ($grupoId, $x);"
+           ejecutarSQL "$SQL"
+           mensajes " Tarea [$x] a grupo [$grupoId]"
+         done
+       fi
+       ;;
      m|M)
        read -p "Nombre: ($nombre_grupo): " nombre_grupo
        read -p "Descripción: " descripcion
@@ -4319,30 +4370,6 @@ function menuGrupo(){
         fi
         ;;
 
-      a|A) # Añadir a grupo
-
-        if [ "$grupoId" == "" ] ; then
-          menuGrupo 's' 'volver'
-        fi
-
-       ejecutarSQL "$SQL_TAR $CONDICION"
-       echo
-       read -p "Añadir tareas a grupo (s/n): " OPCION
-       if [ "$OPCION" == "s" ] ; then
-         tareasIds=$(ejecutarSQL "SELECT t.id FROM tareas t WHERE 1 $CONDICION ORDER BY t.id" "-N")
-         echo
-         echo Tareas: $tareasIds
-         for x in $tareasIds ; do
-           # Borramos relaciones de tareas con otros grupos
-           SQL="DELETE FROM r_grupos_tareas WHERE tarea_id=$x"
-           ejecutarSQL "$SQL"
-           SQL="INSERT INTO r_grupos_tareas (grupo_id, tarea_id) 
-            VALUES ($grupoId, $x);"
-           ejecutarSQL "$SQL"
-           mensajes " Tarea [$x] a grupo [$grupoId]"
-         done
-       fi
-       ;;
 
       s|S)
         echo

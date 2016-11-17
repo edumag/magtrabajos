@@ -119,7 +119,7 @@ function menuInformes(){
          clear
          encabezado
          # Informes generales
-         caja '[C]ontrol del trabajo realizado entre fechas' 'Informes generales'
+         caja '[C]ontrol del trabajo realizado entre fechas | Informe [s]emanal' 'Informes generales'
          caja 'Generar [I]nforme | [A]brir | [G]uardar | G[u]ardar como | [E]ditar | [V]isualizar actual' 'Perfiles para informes'
          echo -e " Perfil actual: ${color_1}$perfil_actual${color_0}"
          echo
@@ -464,10 +464,188 @@ function menuInformes(){
          fi
          ;;
 
+       s|S) # Informe semanal.
+         ##
+         ## SELECT CONCAT(
+         ##     WEEK(NOW(),1), ' ' , SUBDATE(now(),WEEKDAY(now())), ' / ', ADDDATE(now(),6-WEEKDAY(now()))
+         ## 	) AS week;
+         ##
+         ## WEEK(NOW(),1) El 1 hace que el primer día de la semana sea el lunes.
+
+         ## SELECT DATE_SUB(NOW(),INTERVAL weekday(now()) DAY) AS d1, DATE_SUB(DATE_SUB(NOW(),INTERVAL weekday(now()) DAY),INTERVAL 7 DAY) AS d2"
+         ##
+         ## Obtener un día de la semana seleccionada.
+         ## SELECT MAKEDATE(2016,[numero de semana]*7)
+
+         SOBRE_PROYECTO=1  ##< Informe sobre proyecto o general.
+         MOSTRAR_EUROS=0   ##< Mostrar euros en informe.
+
+         ANYO_ACTUAL=$(ejecutarSQL "SELECT YEAR(NOW())" "-N")
+         SEMANA_ACTUAL=$(ejecutarSQL "SELECT WEEK(NOW(),1)" "-N")
+
+         if [ "$proyectoId" != "" ] ; then
+           echo
+           read -p "Sobre el proyecto actual o general? (s/n): " SOBRE_PROYECTO
+           [[ "$SOBRE_PROYECTO" == "n" ]] && SOBRE_PROYECTO=0 || SOBRE_PROYECTO=1
+         else
+           SOBRE_PROYECTO=0
+         fi
+         read -p "Mostrar euros en informe. (s/n): " MOSTRAR_EUROS
+         [[ "$MOSTRAR_EUROS" == "s" ]] && MOSTRAR_EUROS=1 || MOSTRAR_EUROS=0
+
+         read -p "Año: ($ANYO_ACTUAL): " ANYO
+         [[ "$ANYO" = "" ]] && ANYO=$ANYO_ACTUAL
+
+         read -p "Semana: ($SEMANA_ACTUAL): " SEMANA
+         [[ "$SEMANA" = "" ]] && SEMANA=$SEMANA_ACTUAL
+
+         # SEMANA=`date -d '7 days ago' "+%Y-%m-%d"`
+         # read -p "Fecha Inicio: ($SEMANA): " FECHA_INICIO
+         # FECHA_INICIO=${FECHA_INICIO:-$SEMANA}
+
+         # AYER=`date -d '1 days ago' "+%Y-%m-%d"`
+         # read -p "Fecha Final: ($AYER): " FECHA_FINAL
+         # FECHA_FINAL=${FECHA_FINAL:-$AYER}
+
+         SQL="SELECT MAKEDATE($ANYO,$SEMANA*7)"
+         echo -e "\nSQL: $SQL \n"
+         DIA_DE_LA_SEMANA=$(ejecutarSQL "$SQL" '-N')
+
+         # echo
+         # echo Dia de la semana: $DIA_DE_LA_SEMANA
+
+         FECHA_INICIO=$(ejecutarSQL "SELECT TIMESTAMPADD(DAY,(0-WEEKDAY('$DIA_DE_LA_SEMANA')),'$DIA_DE_LA_SEMANA')" "-N")
+         FECHA_FINAL=$(ejecutarSQL "SELECT TIMESTAMPADD(DAY,(6-WEEKDAY('$DIA_DE_LA_SEMANA')),'$DIA_DE_LA_SEMANA')" "-N")
+
+         # echo
+         # echo "Fechas: $FECHA_INICIO - $FECHA_FINAL"
+
+         if [ $SOBRE_PROYECTO != 0 ] ; then
+           titulo="$proyecto $ANYO / Semana: $SEMANA / $FECHA_FINAL - $FECHA_FINAL"
+         else
+           titulo="Proyectos $ANYO / Semana: $SEMANA / $FECHA_FINAL - $FECHA_FINAL"
+         fi
+
+         SUBSELECT="
+            SELECT p.nombre as Proyecto, LEFT(t.nombre,60) as Tarea, LEFT(m.nombre,60) as Mov, 
+            month(ti.fechaInicio) as mes
+            , week(ti.fechaInicio,1) as sem
+            , DATE_FORMAT(DATE_SUB(ti.fechaInicio,INTERVAL weekday(ti.fechaInicio) DAY), '%d %b %Y') AS primer_dia_semana
+            , DATE_FORMAT(DATE_SUB(DATE_SUB(ti.fechaInicio,INTERVAL weekday(ti.fechaInicio) DAY),INTERVAL -6 DAY), '%d %b %Y') AS ultimo_dia_semana
+            , DATE_FORMAT(ti.fechaInicio, '%Y-%m-%d %W') as dia, 
+            FORMAT((IF (ti.fechaFinal is not null',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now()))- 
+            UNIX_TIMESTAMP(ti.fechaInicio) ) / 60,0) as min
+            , ti.fechaInicio AS fechaInicio
+            , ti.fechaFinal AS fechaFinal
+            "
+          if [ $MOSTRAR_EUROS = 1 ] ; then
+            SUBSELECT="$SUBSELECT 
+              , t.euroshora as \\\`e/h\\\`,
+              IF (t.presupuesto>0, 
+                 'P.', \
+                 ROUND(
+                    t.euroshora * (((UNIX_TIMESTAMP(ti.fechaFinal)- UNIX_TIMESTAMP(ti.fechaInicio))/60)/60),
+                    2
+                    ) 
+                 ) as euros "
+          fi
+
+           FECHA_INICIO="$FECHA_INICIO 00:00:00"
+           FECHA_FINAL="$FECHA_FINAL 23:59:59"
+
+          SUBSELECT="$SUBSELECT 
+            FROM tiempos ti, movimientos m, tareas t, proyectos p 
+            WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND p.id=t.idProyecto 
+            AND ( ti.fechaInicio >= '$FECHA_INICIO' AND ti.fechaInicio <= '$FECHA_FINAL' AND ti.fechaFinal is not null )
+            "
+
+          # SUBSELECT="$SUBSELECT 
+          #   FROM tiempos ti, movimientos m, tareas t, proyectos p 
+          #   WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND p.id=t.idProyecto 
+          #   AND ( WEEK(ti.fechaInicio,1) = '$SEMANA' AND YEAR(ti.fechaInicio) = '$ANYO' AND ti.fechaFinal is not null )
+          #   "
+
+         [[ $SOBRE_PROYECTO != 0 ]] && SUBSELECT="$SUBSELECT AND p.id = $proyectoId"
+
+         # echo
+         # echo Sin agrupar
+         # echo
+         # echo -e "$SUBSELECT"
+         # echo
+
+         if [ -e $TMP ] ; then rm $TMP ; fi
+
+         echo "" | tee -a $TMP
+         echo "$titulo" | sed 's/./-/g' | tee -a $TMP
+         echo "$titulo" | tee -a $TMP
+         echo "$titulo" | sed 's/./-/g' | tee -a $TMP
+         echo "" | tee -a $TMP
+
+         SQL="
+            SELECT Proyecto
+              , CONCAT(FORMAT((sum(min)/60),0),':' 
+                , IF ( (sum(min)%60)<10,0,'' ) , FORMAT((sum(min)%60),0)  
+                ) as 'Dedicación'
+            "
+          if [ $MOSTRAR_EUROS = 1 ] ; then
+           SQL="$SQL 
+              , SUM(euros) AS euros 
+              "
+            fi
+         SQL="$SQL 
+            FROM ($SUBSELECT) as sMinutos 
+            "
+         GROUP="GROUP BY Proyecto"
+         mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
+
+         echo "" | tee -a $TMP
+         echo "---------------------------------" | tee -a $TMP
+         echo "Agrupar por movimientos y semanas" | tee -a $TMP
+         echo "---------------------------------" | tee -a $TMP
+         echo "" | tee -a $TMP
+         SQL="SELECT  "
+         [[ $SOBRE_PROYECTO = 0 ]] && SQL="$SQL Proyecto, ';;;',"
+         SQL="$SQL Tarea, ';;;'
+              , Mov, ';;;'
+              , CONCAT(primer_dia_semana, ' / ', ultimo_dia_semana ) AS 'Semana', ';;;'
+              , CONCAT(FORMAT((sum(min)/60),0),':', ';;;' 
+                , IF ( (sum(min)%60)<10,0,'' ) , FORMAT((sum(min)%60),0), ';;;'  
+                ) as 'Dedicación', '\nnn'
+            "
+          if [ $MOSTRAR_EUROS = 1 ] ; then
+           SQL="$SQL 
+              , SUM(euros) AS euros 
+              "
+            fi
+         SQL="$SQL 
+            FROM ($SUBSELECT) as subselect 
+            "
+         GROUP="GROUP BY Mov, subselect.sem "
+         ORDER=" ORDER BY Tarea, Mov "
+
+         SALIDA="$(ejecutarSQL "$SQL $GROUP $ORDER" "-N")"
+         echo -e "$SALIDA" | \
+         awk -v RS='\nnn' -v FS=';;;' '{
+            printf "%-60s\n%s%s%-60s ",$1, $4, $5, $2
+         }' | tee -a $TMP
+         # tecla
+
+         ;;
       c|C) # ver movimientos por fecha
          ## @todo colocar todo esto en una función a parte
          echo "Buscar movimientos entre fechas"
 
+         SOBRE_PROYECTO=0  ##< Informe sobre proyecto o general.
+         if [ "$proyectoId" != "" ] ; then
+           echo
+           read -p "Sobre el proyecto actual o general? (s/n): " SOBRE_PROYECTO
+           echo
+           if [ "$SOBRE_PROYECTO" != s ] ; then
+             SOBRE_PROYECTO=0
+           fi
+         else
+           SOBRE_PROYECTO=1
+         fi
          SEMANA=`date -d '17 days ago' "+%Y-%m-%d"`
          read -p "Fecha Inicio: ($SEMANA): " FECHA_INICIO
          FECHA_INICIO=${FECHA_INICIO:-$SEMANA}
@@ -481,10 +659,10 @@ function menuInformes(){
          FECHA_FINAL="$FECHA_FINAL 23:59:59"
 
          SUBSELECT="
-            SELECT p.nombre as Proyecto, LEFT(t.nombre,20) as Tarea, LEFT(m.nombre,15) as Mov, 
-            month(ti.fechaInicio) as mes, week(ti.fechaInicio) as sem,  
+            SELECT p.nombre as Proyecto, LEFT(t.nombre,40) as Tarea, LEFT(m.nombre,22) as Mov, 
+            month(ti.fechaInicio) as mes, week(ti.fechaInicio,1) as sem,  
             DATE_FORMAT(ti.fechaInicio, '%Y-%m-%d %W') as dia, 
-            FORMAT((IF (ti.fechaFinal!='0000-00-00 00:00:00',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now()))- 
+            FORMAT((IF (ti.fechaFinal is not null,UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now()))- 
             UNIX_TIMESTAMP(ti.fechaInicio) ) / 60,0) as min,
             t.euroshora as \\\`e/h\\\`,
             IF (t.presupuesto>0, 
@@ -498,6 +676,8 @@ function menuInformes(){
             WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND p.id=t.idProyecto 
             AND ( ti.fechaInicio >= '$FECHA_INICIO' AND ti.fechaFinal <= '$FECHA_FINAL' )
             "
+         [[ $SOBRE_PROYECTO != 0 ]] && SUBSELECT="$SUBSELECT AND p.id = $proyectoId"
+
          SQL_BASE="
             SELECT Proyecto, Tarea, Mov, mes, sem, dia, CONCAT(FORMAT((sum(min)/60),0),':' , 
             IF ( (sum(min)%60)<10,0,'' ) , FORMAT((sum(min)%60),0)  ) as tiempo,
@@ -507,11 +687,18 @@ function menuInformes(){
 
          if [ -e $TMP ] ; then rm $TMP ; fi
 
+         if [ $SOBRE_PROYECTO != 0 ] ; then
+           titulo="$proyecto $FECHA_INICIO / $FECHA_FINAL"
+         else
+           titulo="Proyectos $FECHA_INICIO / $FECHA_FINAL"
+         fi
+
          echo "" | tee -a $TMP
-         echo "---------" | tee -a $TMP
-         echo "Proyectos" | tee -a $TMP
-         echo "---------" | tee -a $TMP
+         echo "$titulo" | sed 's/./-/g' | tee -a $TMP
+         echo "$titulo" | tee -a $TMP
+         echo "$titulo" | sed 's/./-/g' | tee -a $TMP
          echo "" | tee -a $TMP
+
          SQL="
             SELECT Proyecto, CONCAT(FORMAT((sum(min)/60),0),':' , 
             IF ( (sum(min)%60)<10,0,'' ) , FORMAT((sum(min)%60),0)  ) as tiempo,
@@ -519,7 +706,7 @@ function menuInformes(){
             FROM ($SUBSELECT) as sMinutos 
             "
          GROUP="GROUP BY Proyecto"
-         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL $GROUP" trabajos | tee -a $TMP
+         mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
          # gráfica
          SQL="
             SELECT CONCAT(Proyecto,'\t', sum(min)/60) FROM ($SUBSELECT) as sMinutos 
@@ -538,7 +725,7 @@ function menuInformes(){
          echo "-----------------" | tee -a $TMP
          echo "" | tee -a $TMP
          # ejecutarSQL "$SUBSELECT ORDER BY ti.fechaInicio " "-t" | tee -a $TMP
-         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SUBSELECT ORDER BY ti.fechaInicio " trabajos | tee -a $TMP
+         mysql2rst -e "$SUBSELECT ORDER BY ti.fechaInicio " trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "------------------------------" | tee -a $TMP
@@ -547,7 +734,7 @@ function menuInformes(){
          echo "" | tee -a $TMP
          GROUP="GROUP BY sMinutos.Mov, sMinutos.dia "
          # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
-         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL_BASE $GROUP" trabajos | tee -a $TMP
+         mysql2rst -e "$SQL_BASE $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "------------------" | tee -a $TMP
@@ -562,7 +749,7 @@ function menuInformes(){
             "
          GROUP="GROUP BY sMinutos.Tarea "
          # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
-         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL $GROUP" trabajos | tee -a $TMP
+         mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "----------------" | tee -a $TMP
@@ -577,7 +764,7 @@ function menuInformes(){
             "
          GROUP="GROUP BY sMinutos.dia ORDER BY sMinutos.dia "
          #ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
-         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL $GROUP" trabajos | tee -a $TMP
+         mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "-------------------" | tee -a $TMP
@@ -586,7 +773,7 @@ function menuInformes(){
          echo "" | tee -a $TMP
          GROUP="GROUP BY sMinutos.sem "
          # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
-         mysql2rst  -u$mt_usuario_mysql -p`contrasenya mysql` -e "$SQL $GROUP" trabajos | tee -a $TMP
+         mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
 
          # gráfica
          SQL="
