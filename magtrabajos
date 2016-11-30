@@ -3639,7 +3639,7 @@ function verProyecto(){
          tareas_pendientes
 
          # Moviminetos abiertos
-         # SQL="SELECT CONCAT(t.nombre, ': ',  m.nombre, ';;;', m.descripcion, '\nnn') FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal = null ) ORDER BY m.id"
+         # SQL="SELECT CONCAT(t.nombre, ': ',  m.nombre, ';;;', m.descripcion, '\nnn') FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal is null ) ORDER BY m.id"
 
          # SALIDA="$(ejecutarSQL "$SQL" "-N")"
 
