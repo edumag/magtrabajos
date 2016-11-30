@@ -1212,7 +1212,7 @@ function tiemposAbiertos() {
 
    log $FUNCNAME "$*"
 
-   SQL="SELECT t.id FROM tiempos t  WHERE (t.fechaFinal = null ) ORDER BY t.id"
+   SQL="SELECT t.id FROM tiempos t  WHERE (t.fechaFinal is null ) ORDER BY t.id"
    tiemposIds=($(ejecutarSQL "$SQL" "-N"))
 
    if [ "${tiemposIds[*]}" = "" ] ; then 
