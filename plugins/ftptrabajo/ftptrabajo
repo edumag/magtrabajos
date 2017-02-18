@@ -637,7 +637,10 @@ function trabajarArchivo(){
       else
 
          comprobarBloqueoServidor "$x"
-         if [ $? != 0 ] ; then return 1 ; fi
+         # if [ $? != 0 ] ; then return 1 ; fi
+         # Seguimos con la lista.
+         if [ $? != 0 ] ; then continue ; fi
+
 
          # Cambiar nombre local a <archivo>.ft para poder estar 
          # a tiempo de recuperar la copia.
@@ -663,7 +666,8 @@ function trabajarArchivo(){
                nuevo "$x"
             else
                rm "$fich_ft"
-               return 1
+               # return 1
+               continue
             fi
          fi
 

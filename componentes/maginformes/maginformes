@@ -655,8 +655,8 @@ function menuInformes(){
 
          echo "Fechas: $FECHA_INICIO - $FECHA_FINAL"
 
-         FECHA_INICIO="$FECHA_INICIO 00:00:00"
-         FECHA_FINAL="$FECHA_FINAL 23:59:59"
+         FECHA_INICIO_SQL="$FECHA_INICIO 00:00:00"
+         FECHA_FINAL_SQL="$FECHA_FINAL 23:59:59"
 
          SUBSELECT="
             SELECT p.nombre as Proyecto, LEFT(t.nombre,40) as Tarea, LEFT(m.nombre,22) as Mov, 
@@ -674,7 +674,7 @@ function menuInformes(){
                ) as euros
             FROM tiempos ti, movimientos m, tareas t, proyectos p 
             WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND p.id=t.idProyecto 
-            AND ( ti.fechaInicio >= '$FECHA_INICIO' AND ti.fechaFinal <= '$FECHA_FINAL' )
+            AND ( ti.fechaInicio >= '$FECHA_INICIO_SQL' AND ti.fechaFinal <= '$FECHA_FINAL_SQL' )
             "
          [[ $SOBRE_PROYECTO != 0 ]] && SUBSELECT="$SUBSELECT AND p.id = $proyectoId"
 
@@ -707,34 +707,38 @@ function menuInformes(){
             "
          GROUP="GROUP BY Proyecto"
          mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
+
+
          # gráfica
-         SQL="
-            SELECT CONCAT(Proyecto,'\t', sum(min)/60) FROM ($SUBSELECT) as sMinutos 
-            "
-         datos=`ejecutarSQL  "$SQL $GROUP" "-N"`
-         img=`magraficas --titulo 'Tiempo en Proyectos' --plantilla semanas_horas "$datos"`
+         if [ $SOBRE_PROYECTO == 0 ] ; then
+           SQL="
+              SELECT CONCAT(Proyecto,'\t', sum(min)/60) FROM ($SUBSELECT) as sMinutos 
+              "
+           datos=`ejecutarSQL  "$SQL $GROUP" "-N"`
+           img=`magraficas --titulo 'Tiempo en Proyectos' --plantilla semanas_horas "$datos"`
 
-         echo                 | tee -a $TMP
-         echo .. image:: $img | tee -a $TMP
-         echo                 | tee -a $TMP
+           echo                 | tee -a $TMP
+           echo .. image:: $img | tee -a $TMP
+           echo                 | tee -a $TMP
+         fi
 
 
-         echo "" | tee -a $TMP
-         echo "-----------------" | tee -a $TMP
-         echo "Todos los tiempos" | tee -a $TMP
-         echo "-----------------" | tee -a $TMP
-         echo "" | tee -a $TMP
-         # ejecutarSQL "$SUBSELECT ORDER BY ti.fechaInicio " "-t" | tee -a $TMP
-         mysql2rst -e "$SUBSELECT ORDER BY ti.fechaInicio " trabajos | tee -a $TMP
+         #    echo "" | tee -a $TMP
+         #    echo "-----------------" | tee -a $TMP
+         #    echo "Todos los tiempos" | tee -a $TMP
+         #    echo "-----------------" | tee -a $TMP
+         #    echo "" | tee -a $TMP
+         #    # ejecutarSQL "$SUBSELECT ORDER BY ti.fechaInicio " "-t" | tee -a $TMP
+         #    mysql2rst -e "$SUBSELECT ORDER BY ti.fechaInicio " trabajos | tee -a $TMP
 
-         echo "" | tee -a $TMP
-         echo "------------------------------" | tee -a $TMP
-         echo "Agrupar por dias y movimientos" | tee -a $TMP
-         echo "------------------------------" | tee -a $TMP
-         echo "" | tee -a $TMP
-         GROUP="GROUP BY sMinutos.Mov, sMinutos.dia "
-         # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
-         mysql2rst -e "$SQL_BASE $GROUP" trabajos | tee -a $TMP
+         #    echo "" | tee -a $TMP
+         #    echo "------------------------------" | tee -a $TMP
+         #    echo "Agrupar por dias y movimientos" | tee -a $TMP
+         #    echo "------------------------------" | tee -a $TMP
+         #    echo "" | tee -a $TMP
+         #    GROUP="GROUP BY sMinutos.Mov, sMinutos.dia "
+         #    # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+         #    mysql2rst -e "$SQL_BASE $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "------------------" | tee -a $TMP
@@ -751,11 +755,11 @@ function menuInformes(){
          # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
          mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
 
-         echo "" | tee -a $TMP
-         echo "----------------" | tee -a $TMP
-         echo "Agrupar por Dias" | tee -a $TMP
-         echo "----------------" | tee -a $TMP
-         echo "" | tee -a $TMP
+         #   echo "" | tee -a $TMP
+         #   echo "----------------" | tee -a $TMP
+         #   echo "Agrupar por Dias" | tee -a $TMP
+         #   echo "----------------" | tee -a $TMP
+         #   echo "" | tee -a $TMP
          SQL="
             SELECT dia, CONCAT(FORMAT((sum(min)/60),0),':' , 
             IF ( (sum(min)%60)<10,0,'' ) , FORMAT((sum(min)%60),0)  ) as tiempo,
@@ -763,8 +767,8 @@ function menuInformes(){
             FROM ($SUBSELECT) as sMinutos 
             "
          GROUP="GROUP BY sMinutos.dia ORDER BY sMinutos.dia "
-         #ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
-         mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
+         #   #ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
+         #   mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
 
          echo "" | tee -a $TMP
          echo "-------------------" | tee -a $TMP
@@ -775,17 +779,19 @@ function menuInformes(){
          # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
          mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
 
-         # gráfica
-         SQL="
-            SELECT CONCAT(dia,'\t', sum(min)/60) FROM ($SUBSELECT) as sMinutos 
-            "
-         GROUP="GROUP BY sMinutos.dia ORDER BY sMinutos.dia "
-         datos=`ejecutarSQL  "$SQL $GROUP" "-N"`
-         img=`magraficas --titulo 'Total horas x semanas' --plantilla semanas_horas "$datos"`
+         cho $SQL $GROUP ; exit
 
-         echo                 | tee -a $TMP
-         echo .. image:: $img | tee -a $TMP
-         echo                 | tee -a $TMP
+         #   # gráfica
+         #   SQL="
+         #      SELECT CONCAT(dia,'\t', sum(min)/60) FROM ($SUBSELECT) as sMinutos 
+         #      "
+         #   GROUP="GROUP BY sMinutos.dia ORDER BY sMinutos.dia "
+         #   datos=`ejecutarSQL  "$SQL $GROUP" "-N"`
+         #   img=`magraficas --titulo 'Total horas x semanas' --plantilla semanas_horas "$datos"`
+
+         #   echo                 | tee -a $TMP
+         #   echo .. image:: $img | tee -a $TMP
+         #   echo                 | tee -a $TMP
 
 
 
