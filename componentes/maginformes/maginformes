@@ -779,8 +779,6 @@ function menuInformes(){
          # ejecutarSQL "$SQL $GROUP" "-t" | tee -a $TMP
          mysql2rst -e "$SQL $GROUP" trabajos | tee -a $TMP
 
-         cho $SQL $GROUP ; exit
-
          #   # gráfica
          #   SQL="
          #      SELECT CONCAT(dia,'\t', sum(min)/60) FROM ($SUBSELECT) as sMinutos 
