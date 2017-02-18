@@ -873,7 +873,9 @@ function comprobarBloqueoServidor(){
    if [ $? = 0  ] ; then
       # archivo bloqueado
       # Bajamos archivo para ver si el bloqueo es nuestro
-      if [ ! "`egrep -i \"$USUARIO\" \"${ftptrabajo_dir_local}/${*}.LCK\"`" ] ; then
+      # if [ ! "`egrep -i \"$USUARIO\" \"${ftptrabajo_dir_local}/${*}.LCK\"`" ] ; then
+      diff "${ftptrabajo_dir_local}/${*}.LCK" "$BLOQUEO" 
+      if [ $? != 0 ] ; then
          # El bloqueo no es nuestro lo mostramos y salimos
          ko
          color aviso
