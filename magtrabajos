@@ -1797,7 +1797,7 @@ function ejecutarSQL() {
 
    log $FUNCNAME "$*"
 
-   CMD="mysql --default-character-set=utf8 $2 -u$mt_usuario_mysql -e \"$1\" trabajos"
+   CMD="mysql --default-character-set=utf8 $2 -e \"$1\" trabajos"
    log "$FUNCNAME" "$SQL"
    eval "$CMD"
    if [ $? != 0 ] ; then

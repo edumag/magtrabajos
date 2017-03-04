@@ -124,7 +124,7 @@
    ## @var default_mt_comando_mysql
    ## Comando para ejecutar mysql
 
-   default_mt_comando_mysql='mysql --default-character-set=utf8 -u$default_mt_usuario_mysql trabajos -N -e '
+   default_mt_comando_mysql='mysql --default-character-set=utf8 trabajos -N -e '
 
    ## @var default_mt_tipo_proyecto
    ## Tipos soportados: php, bash, python

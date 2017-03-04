@@ -920,7 +920,7 @@ if [ "`basename $BASH_SOURCE`" = "`basename $0`" ] ; then
 
    function ejecutarSQL() {
 
-      CMD="mysql --default-character-set=utf8 $2 -u$mt_usuario_mysql -e \"$1\" trabajos"
+      CMD="mysql --default-character-set=utf8 $2 -e \"$1\" trabajos"
       log "$FUNCNAME" "$SQL"
       eval "$CMD"
       if [ $? != 0 ] ; then
@@ -934,7 +934,7 @@ if [ "`basename $BASH_SOURCE`" = "`basename $0`" ] ; then
 
    function ejecutarMysql2rst() {
 
-      CMD="mysql2rst $2 -u$mt_usuario_mysql -e '$1' trabajos"
+      CMD="mysql2rst $2 -e '$1' trabajos"
       log "$FUNCNAME" "$1"
       eval "$CMD"
       if [ $? != 0 ] ; then
