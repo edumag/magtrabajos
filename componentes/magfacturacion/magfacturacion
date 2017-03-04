@@ -425,7 +425,7 @@ function nueva_factura() {
     echo Numero: $proyectoId - $numfact
     echo
     read -p "Comentario: " COMENTARIO
-    SQL="INSERT INTO facturas (numfact, fechaFactura, comentario, idProyecto, fechaPagado) VALUES ($numfact, '`AHORA`', '`protegerTexto $COMENTARIO`', $proyectoId, '0000-00-00')"
+    SQL="INSERT INTO facturas (numfact, fechaFactura, comentario, idProyecto) VALUES ($numfact, '`AHORA`', '`protegerTexto $COMENTARIO`', $proyectoId)"
     ejecutarSQL "$SQL"
     # obtenemos ultimo id de factura
     facturaId=$(ejecutarSQL "SELECT id FROM facturas order by id desc limit 1" "-N")
@@ -752,7 +752,9 @@ function presentarDatosFactura() {
     # dTotal=$(ejecutarSQL "select Total from facturas where id=$facturaId" "-N")
    
     sql='SELECT '
-    sql="$sql CONCAT('dnumfact=',numfact,';dComentario=\'',f.comentario,'\'; dFechaFactura=',f.fechaFactura,'; dFechaPagado=',f.fechaPagado,'; dTotal=',f.Total,'; pagado=',if (sum(rfp.pagado),sum(rfp.pagado),0),';') FROM facturas f"
+    sql="$sql CONCAT('dnumfact=',numfact,';dComentario=\'',f.comentario,'\'; dFechaFactura=',f.fechaFactura,'; dFechaPagado='
+    ,if(f.fechaPagado IS NULL,'NULL',f.fechaPagado)
+    ,'; dTotal=',f.Total,'; pagado=',if (sum(rfp.pagado),sum(rfp.pagado),0),';') FROM facturas f"
     sql="$sql LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id"
     sql="$sql WHERE f.id=$facturaId"
     sql="$sql GROUP BY f.id"
@@ -918,7 +920,7 @@ if [ "`basename $BASH_SOURCE`" = "`basename $0`" ] ; then
 
    function ejecutarSQL() {
 
-      CMD="mysql --defaults-extra-file=$HOME/.my.cnf --default-character-set=utf8 $2 -u$mt_usuario_mysql -e \"$1\" trabajos"
+      CMD="mysql --default-character-set=utf8 $2 -u$mt_usuario_mysql -e \"$1\" trabajos"
       log "$FUNCNAME" "$SQL"
       eval "$CMD"
       if [ $? != 0 ] ; then
@@ -932,7 +934,7 @@ if [ "`basename $BASH_SOURCE`" = "`basename $0`" ] ; then
 
    function ejecutarMysql2rst() {
 
-      CMD="mysql2rst --defaults-extra-file=$HOME/.my.cnf $2 -u$mt_usuario_mysql -e '$1' trabajos"
+      CMD="mysql2rst $2 -u$mt_usuario_mysql -e '$1' trabajos"
       log "$FUNCNAME" "$1"
       eval "$CMD"
       if [ $? != 0 ] ; then

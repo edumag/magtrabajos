@@ -21,7 +21,7 @@
 ## -N        Para tener cabeceras en la tabla
 ## -e        "sql a ejecutar"
 ## </pre>
-## Ejemplo: mysql2rst --defaults-extra-file=$HOME/.my.cnf -uroot -e '$sql' trabajos
+## Ejemplo: mysql2rst -e '$sql' trabajos
 ##
 ## @author   Eduardo Magrané
 ##

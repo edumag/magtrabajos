@@ -1797,7 +1797,7 @@ function ejecutarSQL() {
 
    log $FUNCNAME "$*"
 
-   CMD="mysql --defaults-extra-file=$HOME/.my.cnf --default-character-set=utf8 $2 -u$mt_usuario_mysql -e \"$1\" trabajos"
+   CMD="mysql --default-character-set=utf8 $2 -u$mt_usuario_mysql -e \"$1\" trabajos"
    log "$FUNCNAME" "$SQL"
    eval "$CMD"
    if [ $? != 0 ] ; then
@@ -1812,7 +1812,7 @@ function ejecutarMysql2rst() {
 
    log $FUNCNAME "$*"
 
-   CMD="mysql2rst --defaults-extra-file=$HOME/.my.cnf $2 -u$mt_usuario_mysql -e '$1' trabajos"
+   CMD="mysql2rst -e '$1' trabajos"
    log "$FUNCNAME" "$1"
    eval "$CMD"
    if [ $? != 0 ] ; then
