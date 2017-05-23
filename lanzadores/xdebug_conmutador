@@ -22,7 +22,7 @@
 ## This source code is released for free distribution under the terms of the
 ## GNU General Public License as published by the Free Software Foundation.
 
-archivo_xdebug="/etc/php/7.0/apache2/conf.d/20-xdebug.ini"
+archivo_xdebug="/etc/php/7.1/apache2/conf.d/20-xdebug.ini"
 
 dir_prog="/home/eduardo/.xdebug_conmutador/"
 on="${dir_prog}xdebug.ini.on"
