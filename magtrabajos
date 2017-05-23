@@ -2785,7 +2785,7 @@ tarea=$(ejecutarSQL "SELECT nombre FROM tareas WHERE id=$tareaId" "-N")
 compensacion=$(ejecutarSQL "SELECT compensacion FROM tareas WHERE id=$tareaId" "-N")
 
 
-totalTareaMinutos=$(ejecutarSQL "SELECT sum((IF ( (ti.fechaFinal is not null )',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now())) - UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId" "-N")
+totalTareaMinutos=$(ejecutarSQL "SELECT sum((IF ( (ti.fechaFinal is not null ),UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now())) - UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId" "-N")
 if [ "$totalTareaMinutos" != "NULL" ] ; then
    ttm=$(echo $totalTareaMinutos | cut -d. -f1)
 else
