@@ -787,7 +787,7 @@ function pendiente_facturas(){
 
    ## Presentar lista de facturas pendiente de pagos
 
-   SQL_WHERE=" WHERE f.fechaPagado IS NULL OR f.fechaPagado = '' OR f.fechaPagado = '0000-00-00' AND f.idProyecto=$proyectoId"
+	 SQL_WHERE=" WHERE ( f.fechaPagado IS NULL OR f.fechaPagado = '' OR f.fechaPagado = '0000-00-00' ) AND f.idProyecto=$proyectoId"
 
    SQL="SELECT DISTINCT
      f.idProyecto, f.numfact, f.fechaFactura AS \\\`Fecha Factura\\\`
