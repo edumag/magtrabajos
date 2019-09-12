@@ -318,7 +318,7 @@ if [ "`basename $BASH_SOURCE`" = "`basename $0`" ] ; then
       ## 1 Función de la que viene
       ## 2 Texto
 
-      local archivo_log="${archivo_log:-$HOME/`basename '$0'`.log}"
+      local archivo_log=${archivo_log:-$HOME/`basename "$0"`.log}
 
       echo "` date +'%Y-%m-%d %H:%M'` $1 :: $2" >> $archivo_log
 

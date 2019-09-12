@@ -533,7 +533,7 @@ function menuInformes(){
             , DATE_FORMAT(DATE_SUB(ti.fechaInicio,INTERVAL weekday(ti.fechaInicio) DAY), '%d %b %Y') AS primer_dia_semana
             , DATE_FORMAT(DATE_SUB(DATE_SUB(ti.fechaInicio,INTERVAL weekday(ti.fechaInicio) DAY),INTERVAL -6 DAY), '%d %b %Y') AS ultimo_dia_semana
             , DATE_FORMAT(ti.fechaInicio, '%Y-%m-%d %W') as dia, 
-            FORMAT((IF (ti.fechaFinal is not null',UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now()))- 
+            FORMAT((IF (ti.fechaFinal is not null,UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now()))- 
             UNIX_TIMESTAMP(ti.fechaInicio) ) / 60,0) as min
             , ti.fechaInicio AS fechaInicio
             , ti.fechaFinal AS fechaFinal

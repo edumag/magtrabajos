@@ -46,7 +46,7 @@ conf="`dirname $BASH_SOURCE`/libash.conf"                                       
 
 function log() {
 
-   local archivo_log="${archivo_log:-$HOME/`basename '$0'`.log}"
+   local archivo_log=${archivo_log:-$HOME/`basename "$0"`.log}
 
    [[ -e "$archivo_log" ]] || touch "$archivo_log"
 
