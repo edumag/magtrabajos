@@ -22,7 +22,7 @@ file=${2:-/tmp/enlaces_rotos.txt}
 
 [[ -z $url ]] && error_enlaces "Debe definirse la url de destino"
 
-cmd="wget --spider  --no-parent -r -o $file $url"
+cmd="wget --spider --no-check-certificate --no-parent -r -o $file $url"
 
 echo
 echo url: $url
