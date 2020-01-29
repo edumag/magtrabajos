@@ -52,7 +52,7 @@ if [ "$config_magtrabajos_cargado" == "" ] ; then
 
    ## Para construir la url del servidor local donde se genera la documentación 
    ## cambiamos la parte del directorio correspondiente por localhost/
-   parte_dir='/home/eduardo/SERVIDOR'
+   parte_dir='/home/datos/www'
 
    ## Directorio de magtrabajos
    DIR_MAGTRABAJOS=$(dirname "$BASH_SOURCE")

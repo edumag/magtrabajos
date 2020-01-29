@@ -60,7 +60,7 @@ function menuExportar() {
    linea_caja
    linea_caja '[H]tml' '[P]df'
    linea_caja '[l]ess'  '[c]sv'
-   linea_caja '[m]ost'  '[c]sv'
+   linea_caja '[m]arkdown'  '[c]sv'
    cierra_caja
 
    # Si tenim missatge el presentem
@@ -179,8 +179,10 @@ function exportar() {
          less "$origen"
          ;;
 
-      most|m) # most
-         most "$origen"
+      markdown|m) # most
+         pandoc -s -o ${DIR_TMP}trabajos.md "$origen"
+         xdg-open "${DIR_TMP}trabajos.md"
+         
          ;;
 
       imprimir|I) # imprimir

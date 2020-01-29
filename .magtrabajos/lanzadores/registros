@@ -1,3 +1,0 @@
-#!/bin/bash
-
-$TERM -T 'Registros' -geometry 150x80 -e 'multitail /var/log/php_errors.log /var/log/apache2/error.log' &
