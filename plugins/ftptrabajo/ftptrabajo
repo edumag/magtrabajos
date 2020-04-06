@@ -1771,7 +1771,14 @@ while [ -n "$1" ]; do
       --depurar) shift 1 ; DEV=1 ; echo depurar activado ;;
       --listar-estructura) shift 1 ; accion=estructuta_servidor ;;
       --lftp) shift 1 ; comprobar_proyecto ; da="`pwd`" ; cd "$ftptrabajo_dir_local" ; lftp $ftptrabajo_server ; cd "$da" ; exit ;;
-      --mc) shift 1 ; comprobar_proyecto ; mc "$ftptrabajo_dir_local" /#ftp:$ftptrabajo_server ; exit ;;
+      --mc) 
+        shift 1
+        comprobar_proyecto
+        cmd_mc="mc $ftptrabajo_dir_local ftp://${ftptrabajo_server}"
+        echo "cmd: $cmd_mc"
+        eval "$cmd_mc"
+        exit 
+        ;;
       --lista-externa) shift 1 ; archivos=(`cat "$1"`) ; shift 1 ;;
       --consulta) shift 1 ; consulta=1 ;;
       *) archivos[$na]="$1" ; shift 1 ; let na++ ;;
