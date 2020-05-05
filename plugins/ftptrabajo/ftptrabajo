@@ -254,6 +254,16 @@ function verError(){
 
 }
 
+## Extraer carpeta local del fichero ftp.
+
+function path_file() {
+	if [ "$ftptrabajo_subdir_ftp" !== "" ] ; then
+		return $1
+	else
+		return $1 | sed "s/^$ftptrabajo_subdir_ftp\///g"
+	fi
+}
+
 ## Buscamos fecha de archivo
 ## @return 06/15/2010 11:49:06 GMT
 
