@@ -3794,8 +3794,6 @@ function encabezado() {
    local T=''
    local ST=''
 
-   figlet "$proyecto" 2> /dev/null
-
    # Presentamos nombre de proyecto, tarea, movimiento y estado
    if [ "$proyecto" != "" ] ; then 
       T="$proyecto ($proyectoId)"
