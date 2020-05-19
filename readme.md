@@ -1,7 +1,58 @@
+# MagTrabajos
+
 IDE de programación generado en bash
 
 ![Pantalla de inicio](https://raw.githubusercontent.com/edumag/magtrabajos/master/docs/img/pantalla_inicio_magtrabajos.png)
 
-Documentación:
+## manual Manual
 
-http://lesolivex.com/dox/magtrabajos/doxygen/html/index.htm
+### configuracion Configuración
+
+La configuración sigue una jerarquía desde la configuración global hasta la de 
+cada proyecto individual.
+
+- Primero cargamos $HOME/.magtrabajos/configuracion/*
+- Después .magtrabajos/configuracion/*
+
+En cada una de estas carpetas puede añadirse configuración para el mismo magtrabajos
+o para alguno de sus componentes o plugins que utiliza.
+
+Ejemplo en buscar_codigo:
+
+#### Si tenemos configuración de usuario la recogemos
+
+
+```
+[[ -e "$HOME/.magtrabajos/configuracion/$programa" ]] && source "$HOME/.magtrabajos/configuracion/$programa"
+```
+
+#### Si tenemos configuración de proyecto la recogemos
+
+```
+[[ -e ".magtrabajos/configuracion/$programa" ]] && source "$HOME/.magtrabajos/configuracion/$programa"
+```
+
+## lanzadores Lanzadores al inicio
+
+Si encontramos ".magtrabajos/lanzadores" el archivo lo añadimos
+al iniciar el programa. Para automatizar el lanzamiento de aplicaciones que abrimos
+al trabajar en el proyecto.
+
+Ejemplos:
+
+## Si hay sesión de vim anterior la abrimos y la borramos 
+
+```
+[[ -e Session.vim ]] && ( gvim -S Session.vim ; sleep 2s ; rm -f Session.vim )
+```
+
+## Lanzamos firefox con pagina del proyecto en local
+
+```
+$mt_navegador $mt_web_local &
+```
+
+- @subpage plugins "Plugins"
+- @subpage complementos "Complementos" 
+- @subpage lanzadores "Lanzador de scripts individuales" 
+- @subpage extensiones "Extensiones" 
