@@ -1,0 +1,7 @@
+#!/bin/bash
+
+## @file script2md
+##
+## @brief Construir salida markdown en base a la salida de doxygen2help.
+
+

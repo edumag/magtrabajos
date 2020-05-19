@@ -52,7 +52,7 @@ Ejemplos:
 $mt_navegador $mt_web_local &
 ```
 
-- @subpage plugins "Plugins"
-- @subpage complementos "Complementos" 
-- @subpage lanzadores "Lanzador de scripts individuales" 
-- @subpage extensiones "Extensiones" 
+- [Componentes](./componentes/readme.md)
+- [Extensiones](./extensiones/readme.md)
+- [Lanzadores](./lanzadores/readme.md)
+- [Plugins](./plugins/readme.md)
