@@ -3,6 +3,10 @@
 ## @file mc_con_ftp
 ## @brief Lanzar mc con dirección ftp del proyecto
 
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
+
 terminal='xterm -geometry 150x50 -bg black -fg white -e '
 comando_mc='mc ftp://${mt_ftp}/${mt_ftp_directorio}'
 
