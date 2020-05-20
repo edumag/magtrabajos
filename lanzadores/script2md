@@ -4,4 +4,60 @@
 ##
 ## @brief Construir salida markdown en base a la salida de doxygen2help.
 
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
+
+head() {
+
+    declare PWD=`pwd`
+    declare DIRNAME=`basename $PWD`
+    declare BRIEF=''
+    declare LISTADO=0
+
+    echo "# $DIRNAME"
+    echo
+    for s in `ls` ; do
+        [[ "$s" == "readme.md" ]] && continue
+        [[ ! -e "$s" ]] && continue
+        let "LISTADO++"
+        if [ $LISTADO -eq 1 ] ; then
+            echo
+            echo -e "## Listado"
+            echo
+        fi
+        BRIEF=`cat $s | grep -m 1 '@brief' | cut -d' ' -f 3-`
+        echo -e "- **${s}**\t$BRIEF"
+    done
+    echo
+}
+
+help2md() {
+    
+    declare HELPS=''
+    declare HELP=''
+
+    for s in `ls` ; do
+        [[ ! -x "$s" ]] && continue
+        HELP="`./$s --help`"
+        if [ "$HELP" != "" ] ; then
+            let "HELPS++"
+            if [ $HELPS -eq 1 ] ; then
+                echo
+                echo -e "## Scripts"
+                echo
+            fi
+            echo "### $s"
+            echo
+            echo '```'
+            echo -e "$HELP"
+            echo '```'
+            echo
+        fi
+    done
+
+}
+
+head .
+help2md .
 

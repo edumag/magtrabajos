@@ -1,7 +1,11 @@
 #!/bin/bash
 
-## @file
+## @file reemplazar_texto
 ## @brief Reemplazar texto.
+
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
 
 /usr/bin/regexxer &
 

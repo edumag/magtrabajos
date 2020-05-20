@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ## @file permisos_apache
 ## @brief Cambiar permisos para los proyectos web, para que no den problemas
@@ -8,6 +8,10 @@
 ##
 ## Si el primer argumento que se pasa es --quitar en vez de dar permisos
 ## lo que hacemos es quitarlos para el grupo pero mantenemos los de apache
+
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
 
 if [ "$1" = "--quitar" ] ; then
    shift 1

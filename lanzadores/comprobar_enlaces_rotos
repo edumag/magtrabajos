@@ -5,6 +5,10 @@
 ##
 ## dependencias: curl, lynx, wget
 
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
+
 if [ -z "$1" ] ; then
    # miramos si el directorio actual es un proyecto con su configuración
    source "`dirname "$BASH_SOURCE"`/../config"

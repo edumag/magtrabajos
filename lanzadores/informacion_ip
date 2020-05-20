@@ -3,6 +3,10 @@
 ## @file informacion_ip
 ## @brief Mostrar información sobre una ip o un dominio.
 
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
+
 informacion_ip_IP="$1"
 informacion_ip_CMD=/home/eduardo/opt/automater/Automater.py
 

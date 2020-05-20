@@ -11,5 +11,9 @@
 ##
 ## @todo Encriptar el archivo para más seguridad
 
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
+
 datos="$HOME/.gcm_ctsrc"
 grep ^"$1" "$datos" | cut -d\| -f2

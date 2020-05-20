@@ -7,6 +7,10 @@
 ## Se puede pasar extensión de archivos a buscar, sino 
 ## buscamos en todos.
 
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
+
 if [ "$1" != "" ] ; then
    find -name '*'.$1  -type f -print0  | xargs -0 egrep -R 'c99|r57' | cut -d: -f1
 else

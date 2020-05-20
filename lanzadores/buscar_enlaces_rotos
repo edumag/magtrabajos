@@ -1,7 +1,12 @@
 #!/bin/bash
 
-## @file
+## @file buscar_enlaces_rotos
 ## @brief Comprobar enlaces rotos
+
+
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
 
 ## Error
 function  error_enlaces() { 

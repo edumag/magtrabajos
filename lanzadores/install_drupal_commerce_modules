@@ -1,7 +1,0 @@
-sudo drush dl rules
-sudo drush dl views
-sudo drush dl entity
-sudo drush dl addressfield
-sudo drush en rules views entity addressfield
-sudo drush dl commerce
-sudo drush en commerce commerce_ui commerce_product commerce_product_ui commerce_product_reference commerce_cart commerce_customer_ui commerce_line_item_ui commerce_order_ui commerce_payment commerce_payment_ui commerce_product_pricing_ui commerce_product_pricing_ui commerce_tax commerce_tax_ui

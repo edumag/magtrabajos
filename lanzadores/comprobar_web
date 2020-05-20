@@ -6,6 +6,10 @@
 ## Referencia:
 ## http://www.linuxhispano.net/2013/02/19/monitorizar-servidor-web-para-ver-si-esta-caido-o-no-de-forma-automatica/
 
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
+
 if [ -z "$1" ] ; then
    # miramos si el directorio actual es un proyecto con su configuración
    source "`dirname "$BASH_SOURCE"`/../config"

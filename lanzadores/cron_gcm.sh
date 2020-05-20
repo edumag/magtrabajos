@@ -3,6 +3,10 @@
 ## @file cron_gcm.sh
 ## @brief Lanzar petición de cron sobre proyecto basado en GCM
 
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
+
 # configuración
 user="trabajosedu"
 pass="edutrabajos"

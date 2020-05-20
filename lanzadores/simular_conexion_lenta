@@ -1,6 +1,12 @@
 #!/bin/bash
+## @file simular_conexion_lenta
+## @brief Forzamos a realentizar la conexión a internet.
 
 estado=0
+
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
 
 # trap ctrl-c and call ctrl_c()
 trap 'cancelar_simulacion ; exit' SIGINT

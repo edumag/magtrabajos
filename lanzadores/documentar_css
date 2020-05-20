@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## @file
+## @file documentar_css
 ## @brief Documentar css
 ##
 ## Podemos documentarnos sobre como generar la documentación desde 
@@ -11,6 +11,10 @@
 ## sudo apt-get install nodejs nodejs-legacy
 ## sudo apt-get install npm
 ## npm install -fg styledocco
+
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
 
 
 ## Error

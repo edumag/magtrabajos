@@ -1,7 +1,0 @@
-#!/bin/bash
-
-## @file registros
-##
-## @brief Lanzar terminal con los registros
-
-xterm -bg black -fg yellow  -maximized -e "grc tail -f /var/log/apache2/error.log -f /var/log/mysql.err" &

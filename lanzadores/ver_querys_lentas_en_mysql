@@ -9,9 +9,12 @@
 ##  long_query_time = 2
 ##  log-queries-not-using-indexes
 
+help() { doxygen2help "$0" ; }
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
+
 ## @var mysql_log
 ## Archivo de registro
-
 mysql_log=/var/log/mysql/mysql-slow.log
 
 xterm -bg black -fg yellow  -maximized -e "grc tail -f $mysql_log" &
