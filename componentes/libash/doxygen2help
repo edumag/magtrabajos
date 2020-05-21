@@ -86,6 +86,8 @@ function doxygen2help() {
 
    }
 
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
+
 # si se llama al script directamente ejecutamos doxygen2help
 
 [[ "`basename "$BASH_SOURCE"`" != "`basename "$0"`" ]] || (doxygen2help $*)

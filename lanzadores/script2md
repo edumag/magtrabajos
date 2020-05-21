@@ -8,46 +8,49 @@ help() { doxygen2help "$0" ; }
 
 if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
 
+DIRNAME=`basename $PWD`
+
 head() {
 
     declare PWD=`pwd`
-    declare DIRNAME=`basename $PWD`
     declare BRIEF=''
-    declare LISTADO=0
+    declare DIR_ACTUAL=`pwd`
+    declare PRE_FILE="$1"
 
-    echo "# $DIRNAME"
-    echo
+    [[ "$1" != "" ]] && cd "$1"
+
     for s in `ls` ; do
         [[ "$s" == "readme.md" ]] && continue
-        [[ ! -e "$s" ]] && continue
-        let "LISTADO++"
-        if [ $LISTADO -eq 1 ] ; then
-            echo
-            echo -e "## Listado"
-            echo
+        if [ -d "$s" ] ; then
+            head $s
+            continue
         fi
+        [[ ! -e "$s" ]] && continue
         BRIEF=`cat $s | grep -m 1 '@brief' | cut -d' ' -f 3-`
-        echo -e "- **${s}**\t$BRIEF"
+        echo -e "- [**${PRE_FILE}/${s}**](#${s})\t$BRIEF"
     done
-    echo
+    cd "$DIR_ACTUAL"
 }
 
 help2md() {
     
-    declare HELPS=''
     declare HELP=''
+    declare DIR_ACTUAL=`pwd`
+    declare PRE_FILE="$1"
+
+    [[ "$1" != "" ]] && cd "$1"
 
     for s in `ls` ; do
         [[ ! -x "$s" ]] && continue
+        if [ -d "$s" ] ; then
+            help2md "$s"
+            continue
+        fi
         HELP="`./$s --help`"
         if [ "$HELP" != "" ] ; then
-            let "HELPS++"
-            if [ $HELPS -eq 1 ] ; then
-                echo
-                echo -e "## Scripts"
-                echo
-            fi
-            echo "### $s"
+            echo "<a name=\"$s\"/>"
+            echo
+            echo "### ${PRE_FILE}/${s}"
             echo
             echo '```'
             echo -e "$HELP"
@@ -55,9 +58,26 @@ help2md() {
             echo
         fi
     done
-
+    cd "$DIR_ACTUAL"
 }
 
+if [ -e ".head.md" ] ; then
+    cat .footer.md
+else
+    echo "# $DIRNAME"
+    echo
+fi
+
+echo
+echo -e "## Listado"
+echo
 head .
+
+echo
+echo -e "## Scripts"
+echo
 help2md .
 
+if [ -e ".footer.md" ] ; then
+    cat .footer.md
+fi
