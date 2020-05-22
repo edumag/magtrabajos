@@ -8,26 +8,42 @@ help() { doxygen2help "$0" ; }
 
 if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then help ; exit ; fi
 
+# Librería para extraer documentación de los ficheros.
+source "`dirname "$BASH_SOURCE"`/../componentes/libash/doxygen2help"
+
 DIRNAME=`basename $PWD`
+PRE_FILE="$1"
+
+## Comprobar si el fichero es ejecutable y tiene documentación.
+filedoc() {
+
+    [[ -x "$1" ]] || return 1
+    [ "`grep '@brief' "$1" 2>/dev/null `" == '' ] && return 2
+    [[ "`file "$1" | grep 'script'`" == '' ]] && return 3
+    return 0
+}
 
 head() {
 
     declare PWD=`pwd`
     declare BRIEF=''
     declare DIR_ACTUAL=`pwd`
-    declare PRE_FILE="$1"
+
+    [[ "$1" != "" ]] && PRE_FILE="${PRE_FILE}/$1"
 
     [[ "$1" != "" ]] && cd "$1"
 
     for s in `ls` ; do
-        [[ "$s" == "readme.md" ]] && continue
-        if [ -d "$s" ] ; then
-            head $s
-            continue
-        fi
-        [[ ! -e "$s" ]] && continue
+        filedoc "$s"
+        [[ $? -eq 0 ]] || continue
         BRIEF=`cat $s | grep -m 1 '@brief' | cut -d' ' -f 3-`
         echo -e "- [**${PRE_FILE}/${s}**](#${s})\t$BRIEF"
+    done
+    for s in `ls` ; do
+        if [ -d "$s" ] ; then
+            head $s
+            PRE_FILE=""
+        fi
     done
     cd "$DIR_ACTUAL"
 }
@@ -41,12 +57,9 @@ help2md() {
     [[ "$1" != "" ]] && cd "$1"
 
     for s in `ls` ; do
-        [[ ! -x "$s" ]] && continue
-        if [ -d "$s" ] ; then
-            help2md "$s"
-            continue
-        fi
-        HELP="`./$s --help`"
+        filedoc $s
+        [[ $? -eq 0 ]] || continue
+        HELP="`doxygen2help ./$s`"
         if [ "$HELP" != "" ] ; then
             echo "<a name=\"$s\"/>"
             echo
@@ -58,25 +71,30 @@ help2md() {
             echo
         fi
     done
+    for s in `ls` ; do
+        if [ -d "$s" ] ; then
+            help2md "$s"
+        fi
+    done
     cd "$DIR_ACTUAL"
 }
 
 if [ -e ".head.md" ] ; then
-    cat .footer.md
+    cat .head.md
 else
     echo "# $DIRNAME"
     echo
 fi
 
 echo
-echo -e "## Listado"
+echo -e "## Contenido"
 echo
-head .
+head
 
 echo
 echo -e "## Scripts"
 echo
-help2md .
+help2md
 
 if [ -e ".footer.md" ] ; then
     cat .footer.md
