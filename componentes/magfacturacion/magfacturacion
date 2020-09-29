@@ -462,7 +462,7 @@ function generarFactura() {
    # con logo.
    echo '.. |date| date:: %d %B del %Y'
    echo
-   echo '.. image:: /home/eduardo/logo.png '
+   echo ".. image:: $HOME/logo.png "
    echo '  :alt: logo'                      
    echo '  :align: left'                    
    echo
