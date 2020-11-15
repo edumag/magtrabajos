@@ -159,7 +159,7 @@ $mt_navegador $mt_web_local &
     - ftp con control de bloqueo.
     - etc...
 
- Dependencias: gvim, mysql, pdflatex, python-docutils iconv colrm
+ Dependencias: gvim, mysql, pdflatex, python-docutils iconv colrm ploticus
 
  Sugerencias: lftp, svn, cscope, doxygen mailtextbody
 

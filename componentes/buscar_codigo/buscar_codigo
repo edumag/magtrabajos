@@ -80,7 +80,7 @@ buscar_codigo_paginador="${buscar_codigo_paginador:-less}"
 ## @var buscar_codigo_exclude_dir
 ## Directorios a excluir en la búsqueda separados con espacios
 
-buscar_codigo_exclude_dir=".svn cache docs ext .git"
+buscar_codigo_exclude_dir=".svn cache docs ext .git vendor node_modules"
 
 ## @var buscar_codigo_exclude
 ## Excluir archivos en la búsqueda separados con espacios y entre comillas simple
