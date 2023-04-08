@@ -918,19 +918,24 @@ if [ "`basename $BASH_SOURCE`" = "`basename $0`" ] ; then
 
       }
 
-   function ejecutarSQL() {
+  function ejecutarSQL() {
 
-      CMD="mysql --default-character-set=utf8 $2 -e \"$1\" trabajos"
-      log "$FUNCNAME" "$SQL"
-      eval "$CMD"
-      if [ $? != 0 ] ; then
-         echo -e "$color_2 ERROR::$?::$CMD $color_0"
-         log "$FUNCNAME" "ERROR::$CMD"
-         log "SQL" "ERROR::$1"
-         exit 3
-      fi
+     log $FUNCNAME "$*"
 
-   }
+     if [ "$mt_ssh_mysql" != '' ] ; then
+       CMD="$mt_ssh_mysql \"$mt_comando_mysql $2 -e \\\"$1\\\"\""
+      else
+       CMD="$mt_comando_mysql $2 -e \"$1\""
+     fi
+     log "CMD: $CMD"
+     eval "$CMD"
+     if [ $? != 0 ] ; then
+        echo -e "`color colError` ERROR::$?::$CMD `color`"
+        log "$FUNCNAME" "ERROR::$CMD"
+        log "SQL" "ERROR::$1"
+        exit 3
+     fi
+  }
 
    function ejecutarMysql2rst() {
 

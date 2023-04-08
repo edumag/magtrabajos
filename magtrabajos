@@ -1183,9 +1183,9 @@ function seleccionarTareas(){
 
       esac
 
-  CMD="$mt_comando_mysql \"SELECT t.id from tareas t LEFT JOIN movimientos m ON m.idTarea=t.id WHERE 1 $CONDICION  GROUP BY t.id  ORDER BY t.id \""
-  log "Seleccionar tarea::$CMD"
-  tareasIds=(`eval $CMD`)
+  SQL="SELECT t.id from tareas t LEFT JOIN movimientos m ON m.idTarea=t.id WHERE 1 $CONDICION  GROUP BY t.id  ORDER BY t.id "
+  log "Seleccionar tarea::$SQL"
+  tareasIds=(`ejecutarSQL $SQL`)
   mensajes " ${#tareasIds[*]} tareas seleccionadas"
   if [ ${#tareasIds[*]} = 1 ] ; then
      tareaId=${tareasIds[*]}
@@ -1789,8 +1789,12 @@ function ejecutarSQL() {
 
    log $FUNCNAME "$*"
 
-   CMD="mysql --default-character-set=utf8 $2 -e \"$1\" trabajos"
-   log "$FUNCNAME" "$SQL"
+   if [ "$mt_ssh_mysql" != '' ] ; then
+     CMD="$mt_ssh_mysql \"$mt_comando_mysql $2 -e \\\"$1\\\"\""
+    else
+     CMD="$mt_comando_mysql $2 -e \"$1\""
+   fi
+   log "CMD: $CMD"
    eval "$CMD"
    if [ $? != 0 ] ; then
       echo -e "`color colError` ERROR::$?::$CMD `color`"

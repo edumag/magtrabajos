@@ -121,6 +121,11 @@
 
    default_mt_usuario_mysql="root"
 
+   ## @var default_mt_ssh_mysql
+   ## EN caso de ejcutar mysql en remoto.
+
+   deafult_mt_ssh_mysql='ssh HOST'
+
    ## @var default_mt_comando_mysql
    ## Comando para ejecutar mysql
 

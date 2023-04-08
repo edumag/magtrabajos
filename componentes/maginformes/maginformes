@@ -319,9 +319,9 @@ function menuInformes(){
             # Acciones sobre sus movimientos si hay recursividad
             if [ "$per_tarea_recursiva" != 'NO' ] ; then
                movimientoAnterior=$movimientoId
-               CMD="$mt_comando_mysql \"SELECT m.id from movimientos m WHERE m.idTarea=$tareaId  ORDER BY m.id \""
+               SQL="SELECT m.id from movimientos m WHERE m.idTarea=$tareaId  ORDER BY m.id "
                movimientosIds="()"
-               movimientosIds=(`eval $CMD`)
+               movimientosIds=(`ejecutarSQL $SQL`)
 
                if [ "${movimientosIds[*]}" != "" ] ; then
 
@@ -361,9 +361,9 @@ function menuInformes(){
                # Acciones sobre sus movimientos si hay recursividad
                if [ "$per_tarea_recursiva" != 'NO' ] ; then
                   movimientoAnterior=$movimientoId
-                  CMD="$mt_comando_mysql \"SELECT m.id from movimientos m WHERE m.idTarea=$tareaId ORDER BY m.id \""
+                  SQL="SELECT m.id from movimientos m WHERE m.idTarea=$tareaId ORDER BY m.id "
                   movimientosIds="()"
-                  movimientosIds=(`eval $CMD`)
+                  movimientosIds=(`ejecutarSQL $CMD`)
 
                   if [ "${movimientosIds[*]}" != "" ] ; then
 
