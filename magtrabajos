@@ -1185,7 +1185,7 @@ function seleccionarTareas(){
 
   SQL="SELECT t.id from tareas t LEFT JOIN movimientos m ON m.idTarea=t.id WHERE 1 $CONDICION  GROUP BY t.id  ORDER BY t.id "
   log "Seleccionar tarea::$SQL"
-  tareasIds=(`ejecutarSQL $SQL`)
+  tareasIds=(`ejecutarSQL "$SQL" -N`)
   mensajes " ${#tareasIds[*]} tareas seleccionadas"
   if [ ${#tareasIds[*]} = 1 ] ; then
      tareaId=${tareasIds[*]}
@@ -1438,12 +1438,13 @@ function informacionTarea(){
 
    log $FUNCNAME "$*"
 
-   if [ "$tareaId" = "" ] ; then
-      mensajes "TareaId debe estar definido"
+   if [ -z $tareaId ] ; then
+      error "TareaId debe estar definido"
+      exit 1
       return
    fi
 
-   log "$FUNCNAME" "tareaId: $tareaId"
+   log "tareaId: >$tareaId<"
 
    local separador=';;;'  # Para separar campos en mysql
 
@@ -1471,10 +1472,17 @@ function informacionTarea(){
 function informacionMovimiento(){
 
    log $FUNCNAME "$*"
+
+   mId=$1
+
+   if [ "$mId" = "" ] ; then
+    error "Sin identificador de movimiento"
+    return
+   fi
    
    local separador=';;;'  # Para separar campos en mysql
 
-   SQL="SELECT CONCAT(t.idProyecto,'$separador',t.id,'$separador',t.nombre,'$separador',m.nombre,'$separador', e.nombre) FROM tareas t, movimientos m, estados e WHERE t.idEstado=e.id AND  m.idTarea=t.id AND m.id=$movimientoId"
+   SQL="SELECT CONCAT(t.idProyecto,'$separador',t.id,'$separador',t.nombre,'$separador',m.nombre,'$separador', e.nombre) FROM tareas t, movimientos m, estados e WHERE t.idEstado=e.id AND  m.idTarea=t.id AND m.id=$mId"
    local SALIDA=$(ejecutarSQL "$SQL" "-N")
 
    if [ "$SALIDA" = ""  ] ; then
@@ -2574,7 +2582,7 @@ function borrar(){
       echo
       echo Borrando movimiento $movimientoId
       echo
-      presentarCabeceraMovimiento txt
+      presentarCabeceraMovimiento $movimientoId
       echo ""
       read -p "Eliminar movimiento (s/n): " OPCION
       if [ "$OPCION" = "s" ] ; then
@@ -2691,10 +2699,10 @@ presentarCabeceraTarea() {
          ;;
 
       *) # Por defecto formato simple
-         SQL="SELECT CONCAT('local titulo=\'',nombre,'\'; local prioridad=',prioridad) from tareas WHERE id=$tareaId "
-         cmd="$(ejecutarSQL '$SQL' '-N')"
-         log "$FUNCNAME $cmd"
-         eval "$cmd"
+         # SQL="SELECT CONCAT('local titulo=\'',nombre,'\'; local prioridad=',prioridad) from tareas WHERE id=$tareaId "
+         # cmd="$(ejecutarSQL "$SQL" '-N')"
+         # log "$FUNCNAME $cmd"
+         # eval "$cmd"
          titulo_por_nivel "$tarea"  | tee -a "$TMP" 
          SQL="SELECT descripcion from tareas WHERE id=$tareaId"
          echo -e "$(ejecutarSQL '$SQL' '-N')" | tee -a $TMP

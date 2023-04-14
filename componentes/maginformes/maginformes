@@ -363,7 +363,7 @@ function menuInformes(){
                   movimientoAnterior=$movimientoId
                   SQL="SELECT m.id from movimientos m WHERE m.idTarea=$tareaId ORDER BY m.id "
                   movimientosIds="()"
-                  movimientosIds=(`ejecutarSQL $CMD`)
+                  movimientosIds=(`ejecutarSQL "$SQL"`)
 
                   if [ "${movimientosIds[*]}" != "" ] ; then
 
@@ -371,7 +371,7 @@ function menuInformes(){
 
                      for movimientoId in ${movimientosIds[*]} ; do
 
-                        informacionMovimiento
+                        informacionMovimiento $movimientoId
                         presentarCabeceraMovimiento $per_movimiento_cabecera
                         let nivel_informe++
                         [[ "$per_movimiento_contabilidad" == "SI" ]] && presentarTotalMovimiento
