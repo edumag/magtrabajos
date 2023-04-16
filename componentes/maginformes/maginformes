@@ -321,7 +321,7 @@ function menuInformes(){
                movimientoAnterior=$movimientoId
                SQL="SELECT m.id from movimientos m WHERE m.idTarea=$tareaId  ORDER BY m.id "
                movimientosIds="()"
-               movimientosIds=(`ejecutarSQL $SQL`)
+               movimientosIds=(`ejecutarSQL "$SQL"`)
 
                if [ "${movimientosIds[*]}" != "" ] ; then
 
