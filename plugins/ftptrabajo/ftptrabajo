@@ -1784,7 +1784,7 @@ while [ -n "$1" ]; do
       --mc) 
         shift 1
         comprobar_proyecto
-        cmd_mc="mc $ftptrabajo_dir_local ftp://${ftptrabajo_server}"
+        cmd_mc="mc $ftptrabajo_dir_local ftp://${ftptrabajo_server}/$ftptrabajo_dir_remoto"
         echo "cmd: $cmd_mc"
         eval "$cmd_mc"
         exit 
