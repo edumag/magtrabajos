@@ -13,7 +13,7 @@ mt_codificacion_emails=''
 
 mt_comando_diff='meld'
 
-mt_ssh_mysql='ssh lesolivex'
+mt_ssh_mysql=''
 
 mt_comando_mysql="mysql --default-character-set=utf8 -ptrabajos --database=proyectos"
 

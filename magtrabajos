@@ -5490,10 +5490,15 @@ done
 
 [[ $DEV ]] && mostrar_variables_magtrabajos
 
-# sino tenemos un proyecto definido, probar si tenemos uno con el nombre del directorio actual
+# sino tenemos un proyecto definido, probar si tenemos uno en configuración de
+# proyecto o con el nombre del directorio actual
 if [ -z $proyectoId ] ; then
-   carpeta_actual="`basename "$(pwd)"`"
-   sql="SELECT id FROM proyectos WHERE nombre = '$carpeta_actual'";
+  if [ ! -z $mt_proyecto ] ; then
+    proyecto=$mt_proyecto
+  else
+   proyecto="`basename "$(pwd)"`"
+  fi
+   sql="SELECT id FROM proyectos WHERE nombre = '$proyecto'";
    id=`ejecutarSQL "$sql" "-N"`
    if [ "$id" == "" ] ; then
      # Miramos en archivo de configuración.

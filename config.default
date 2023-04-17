@@ -9,6 +9,11 @@
 ##
 ## @{
 
+   ## @var default_mt_proyecto
+   ## Nombre del proyecto
+
+   default_mt_proyecto=
+
    ## @var default_mt_dir_local
    ## Directorio local donde se encuentran el código fuente
 
@@ -97,18 +102,18 @@
    ## Codificación de los emails (Si es en utf8 dejar en blanco)
    ## Opciones más comunes: iso-8859-1
 
-   default_mt_codificacion_emails=''
+   default_mt_codificacion_emails='utf8'
 
    ## @var default_mt_codificacion_codigo
    ## Codificación de los archivos de código fuente (Si es en utf8 dejar en blanco)
    ## Opciones más comunes: iso-8859-1
 
-   default_mt_codificacion_codigo=''
+   default_mt_codificacion_codigo='utf8'
 
    ## @var default_mt_euroshora_defecto
    ## Euros por hora por defecto
 
-   default_mt_euroshora_defecto=
+   default_mt_euroshora_defecto=30
 
    ## @var default_mt_plugins_activados
    ## Lista de plugins activados para proyecto separados por espacios
@@ -122,14 +127,14 @@
    default_mt_usuario_mysql="root"
 
    ## @var default_mt_ssh_mysql
-   ## EN caso de ejcutar mysql en remoto.
+   ## En caso de ejcutar mysql en remoto. 'ssh HOST'.
 
-   deafult_mt_ssh_mysql='ssh HOST'
+   deafult_mt_ssh_mysql=''
 
    ## @var default_mt_comando_mysql
    ## Comando para ejecutar mysql
 
-   default_mt_comando_mysql='mysql --default-character-set=utf8 trabajos -N -e '
+   default_mt_comando_mysql='mysql --default-character-set=utf8 trabajos -e '
 
    ## @var default_mt_tipo_proyecto
    ## Tipos soportados: php, bash, python
