@@ -7,15 +7,13 @@ mt_archivo_pdf='/home/edumag/trabajos.pdf'
 
 mt_base_de_datos=''
 
-mt_codificacion_codigo=''
+mt_codificacion_codigo='utf8'
 
-mt_codificacion_emails=''
+mt_codificacion_emails='utf8'
 
 mt_comando_diff='meld'
 
-mt_ssh_mysql=''
-
-mt_comando_mysql="mysql --default-character-set=utf8 -ptrabajos --database=proyectos"
+mt_comando_mysql='default'
 
 mt_dir_local='/home/edumag/desarrollo/magtrabajos'
 
@@ -40,6 +38,8 @@ mt_paginador='less'
 mt_pdflatex='pdflatex '
 
 mt_plugins_activados='magcscope'
+
+mt_proyecto=''
 
 mt_rst2html='rst2html --no-xml-declaration --language=es  --stylesheet-path=/home/edumag/.magtrabajos/magtrabajos.css '
 
