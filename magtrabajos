@@ -5026,7 +5026,11 @@ function menuMovimientos() {
           ;;
       s|S) # Seleccionar movimiento
           # Si nomes tenim un moviment el selecionem directament
-          SQL="SELECT id FROM movimientos WHERE idTarea=$tareaId ORDER BY id"
+           if [ -z $tareaId ] ; then
+             SQL="SELECT m.id FROM movimientos m left join tareas t on t.id = m.idTarea left join proyectos p on p.id=t.idProyecto where p.id = $proyectoId ORDER BY m.id"
+           else
+             SQL="SELECT id FROM movimientos WHERE idTarea=$tareaId ORDER BY id"
+           fi
           aSALIDA=($(ejecutarSQL "$SQL" "-N"))
           if [ ${#aSALIDA[*]} = 1 ] ; then
              movimientoId=${aSALIDA[0]}
@@ -5037,7 +5041,11 @@ function menuMovimientos() {
              mensajes " No hay movimientos"
 
           else
-             SQL="SELECT CONCAT(m.id, '\t', m.nombre) FROM movimientos m WHERE m.idTarea=$tareaId ORDER BY m.id "
+             if [ -z $tareaId ] ; then
+               SQL="SELECT CONCAT(m.id, '\t', m.nombre , ' t:' , t.nombre) FROM movimientos m left join tareas t on t.id = m.idTarea left join proyectos p on p.id=t.idProyecto where p.id = $proyectoId ORDER BY m.id"
+             else
+               SQL="SELECT CONCAT(m.id, '\t', m.nombre) FROM movimientos m WHERE m.idTarea=$tareaId ORDER BY m.id "
+             fi
              SALIDA=$(ejecutarSQL "$SQL" "-N")
              if [ "$SALIDA" = "" ] ; then
                 mensajes " No hay movimientos"
@@ -5253,7 +5261,7 @@ function movimientosRecientes() {
    fi
    #SQL="$SQL GROUP BY m.nombre ORDER BY t.fechaFinal desc LIMIT $numMovimentos"
    SQL="$SQL GROUP BY m.id ORDER BY max(ti.fechaFinal) desc LIMIT $numMovimentos"
-   SALIDA1=$(ejecutarSQL "$SQL" '-N')
+   SALIDA1="$(ejecutarSQL "$SQL" '-N')"
    DIFS="$IFS" # separador fin de linea para que salga linea por linea
    IFS=$'\n'
    for SALIDA in $SALIDA1 ; do
