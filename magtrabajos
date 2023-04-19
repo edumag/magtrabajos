@@ -5058,7 +5058,7 @@ function menuMovimientos() {
 
           else
              if [ -z $tareaId ] ; then
-               SQL="SELECT CONCAT(m.id, '\t', m.nombre , ' t:' , t.nombre) FROM movimientos m left join tareas t on t.id = m.idTarea left join proyectos p on p.id=t.idProyecto where p.id = $proyectoId ORDER BY m.id"
+               SQL="SELECT CONCAT(m.id, '\t', m.nombre , ' :: ' , t.nombre) FROM movimientos m left join tareas t on t.id = m.idTarea left join proyectos p on p.id=t.idProyecto where p.id = $proyectoId ORDER BY m.id"
              else
                SQL="SELECT CONCAT(m.id, '\t', m.nombre) FROM movimientos m WHERE m.idTarea=$tareaId ORDER BY m.id "
              fi

@@ -319,9 +319,9 @@ function menuInformes(){
             # Acciones sobre sus movimientos si hay recursividad
             if [ "$per_tarea_recursiva" != 'NO' ] ; then
                movimientoAnterior=$movimientoId
-               SQL="SELECT m.id from movimientos m WHERE m.idTarea=$tareaId  ORDER BY m.id "
+               SQL="SELECT m.id from movimientos m WHERE m.idTarea=$tareaId  ORDER BY m.id"
                movimientosIds="()"
-               movimientosIds=(`ejecutarSQL "$SQL"`)
+               movimientosIds=(`ejecutarSQL "$SQL" -N`)
 
                if [ "${movimientosIds[*]}" != "" ] ; then
 
@@ -363,7 +363,7 @@ function menuInformes(){
                   movimientoAnterior=$movimientoId
                   SQL="SELECT m.id from movimientos m WHERE m.idTarea=$tareaId ORDER BY m.id "
                   movimientosIds="()"
-                  movimientosIds=(`ejecutarSQL "$SQL"`)
+                  movimientosIds=(`ejecutarSQL "$SQL" -N`)
 
                   if [ "${movimientosIds[*]}" != "" ] ; then
 
