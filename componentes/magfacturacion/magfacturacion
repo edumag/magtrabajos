@@ -210,7 +210,12 @@ function menuFacturacion() {
 
          FECHA_PAGADO=${FECHA_PAGADO:-$dFechaPagado}
 
-         SQL="UPDATE facturas SET comentario='${COMENTARIO:-$dComentario}', fechaFactura='${FECHA_FACTURA:-$dFechaFactura}', fechaPagado='${FECHA_PAGADO}', Total='${TOTAL:-$dTotal}' WHERE id=$facturaId"
+         if [ "$FECHA_PAGADO" != "" ] && [ "$FECHA_PAGADO" != 'NULL' ] && [ "$FECHA_PAGADO" != '0000-00-00' ] ; then
+           SQL="UPDATE facturas SET comentario='${COMENTARIO:-$dComentario}', fechaFactura='${FECHA_FACTURA:-$dFechaFactura}', fechaPagado='${FECHA_PAGADO}', Total='${TOTAL:-$dTotal}' WHERE id=$facturaId"
+         else
+           SQL="UPDATE facturas SET comentario='${COMENTARIO:-$dComentario}', fechaFactura='${FECHA_FACTURA:-$dFechaFactura}', fechaPagado=NULL, Total='${TOTAL:-$dTotal}' WHERE id=$facturaId"
+         fi
+
          log $FUNCNAME 'Modificando factura'
          ejecutarSQL "$SQL"
 
