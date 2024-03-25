@@ -89,7 +89,7 @@ if [[ ! -d "$DIR_CONFIG" ]] ; then
        mkdir -p "$DIR_CONFIG"
        mkdir -p "${DIR_CONFIG}/ficheros"
        mkdir -p "${DIR_CONFIG}/mysql"
-       touch "$fichero_configuracion_magbackup"
+       # touch "$fichero_configuracion_magbackup"
 fi
 . "$fichero_configuracion_magbackup"
 
