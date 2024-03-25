@@ -1,22 +1,22 @@
-#!/bin/bash 
+#!/bin/bash
 
-## @file magbackup  
+## @file magbackup
 ## @brief magbackup es un script para generar copias de seguridad.
 ##
 ## Con los ficheros creamos una copia por mes y a partir de esta vamos creando
 ## archivos por cada día de la semana con los cambios desde la copia por mes.
 ##
 ## Para generar las copias se debe crear un fichero de perfil en la carpeta
-## ~/.config/magscripts/magbackup/ficheros/perfil el nombre de la copia que se 
+## ~/.config/magscripts/magbackup/ficheros/perfil el nombre de la copia que se
 ## genera se basa en el nombre del archivo de perfil su formato es:
-## 
-## CS_DIR="/home/eduardo/" 
+##
+## CS_DIR="/home/eduardo/"
 ## CS_COPIAR="Scripts .bashrc"
 ##
 ## CS_DIR: Nos indica la carpeta donde situarnos
 ## CS_COPIAR: Las subcarpetas o archivos que deseamos copiar
 ##
-## En caso de una copia de mysql en CS_DIR debera añadirse mysql <user> <password> y en 
+## En caso de una copia de mysql en CS_DIR debera añadirse mysql <user> <password> y en
 ## CS_COPIAR los nombres de las bases de datos a copiar.
 ##
 ## En el caso de las copias de mysql no hay la posibilidad de copias incrementales con lo
@@ -37,7 +37,7 @@
 ##  Revision  SVN $Id: $
 ##
 ## Copyright  Copyright (c) 2011, Eduardo Magrané
-## 
+##
 ## This source code is released for free distribution under the terms of the
 ## GNU General Public License as published by the Free Software Foundation.
 
@@ -70,7 +70,7 @@ source "`dirname "$BASH_SOURCE"`/../../config"
 
 # Si no encontramos fichero de configuración hay que generarlo
 if [ ! -e "$fichero_configuracion_magbackup" ] ; then
-   echo 
+   echo
    echo "No se encontro fichero de configuración"
    echo
    read -p "Configurar ahora (s/n): " OPCION
@@ -193,7 +193,7 @@ function magbackup_crear_copia_mysql_perfil() {
 
       for BD in $BASES_DATOS ; do
          cmd="nice -10 mysqldump -u$USUARIO -p$PASS $BD | nice -10 bzip2 --best -c > ${magbackup_dir}mysql-${BD}-`hostname`-${DIA}.dump.bz2"
-         echo 
+         echo
          echo Comando: $cmd
          eval "$cmd"
       done
@@ -205,7 +205,7 @@ function magbackup_crear_copia_mysql_perfil() {
 while [ -n "$1" ] ; do
 
    case "$1" in
-      
+
       -h|-help|--help) help ; exit ;;
       -info) info ; help ; exit ;;
       --dependencias|-d) comprobar_dependencias ; exit ;;
