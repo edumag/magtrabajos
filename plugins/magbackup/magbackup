@@ -75,7 +75,7 @@ if [ ! -e "$fichero_configuracion_magbackup" ] ; then
    echo
    read -p "Configurar ahora (s/n): " OPCION
    if [ "$OPCION" = "s" ] ; then
-      configuracion_menu magbackup_ "$fichero_configuracion_magbackup" "$BASH_SOURCE"
+      configuracion_menu magbackup_ "$fichero_configuracion_magbackup" "`dirname "$BASH_SOURCE"`/config.default"
    else
       exit
    fi
