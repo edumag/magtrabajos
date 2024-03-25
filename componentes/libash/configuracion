@@ -18,13 +18,13 @@
 ## miprograma_titulo='HOLA'
 ## @endcode
 ##
-## Podemos definir un archivo con las variables por defecto, este archivo deberá contener el prefijo 
+## Podemos definir un archivo con las variables por defecto, este archivo deberá contener el prefijo
 ## de las variables más _default, ejemplo: mt_default_teminal="xterm", si al definir una configuración
 ## le damos como valor default, a la hora de leer la configuración se recogerá el valor establecido en
 ## el archivo de las variables por defecto.
 ##
-## Si tenemos un archivo con variables por defecto, este sera el que manda sobre los otros, la idea es 
-## que si el archivo por defecto a variado y ahora una variable deja de usarse, al editarse la 
+## Si tenemos un archivo con variables por defecto, este sera el que manda sobre los otros, la idea es
+## que si el archivo por defecto a variado y ahora una variable deja de usarse, al editarse la
 ## configuración ya no mostrara esta variable, manteniendo limpios los ficheros de configuración.
 ##
 ## @ingroup libash, configuracion
@@ -42,7 +42,7 @@
 ##  Revision  SVN $Id: $
 ##
 ## Copyright  Copyright (c) 2011, Eduardo Magrané
-## 
+##
 ## This source code is released for free distribution under the terms of the
 ## GNU General Public License as published by the Free Software Foundation.
 
@@ -123,7 +123,7 @@ function configuracion_editar() {
    echo -e "`color colComentario`$d`color`"
    echo
    local nom_var_default="default_$resultado_listado"
-   if [ ! -z "${!nom_var_default}" ] ; then 
+   if [ ! -z "${!nom_var_default}" ] ; then
       echo Si le das el valor default, recogeremos el valor por defecto
       echo
       echo -e "Por defecto: `color colAviso`${!nom_var_default}`color`"
@@ -175,7 +175,7 @@ function configuracion_leer_por_defecto() {
 ##
 ## - $1 Archivo de configuración
 ## - $2 Archivo de configuración por defecto
-## - $3 Prefijo de las variables 
+## - $3 Prefijo de las variables
 
 function configuracion_leer() {
 
@@ -220,13 +220,13 @@ function configuracion_leer() {
       fi
 
    done
-   
+
 
    }
 
 ## Guardamos las variables que coincidan con el prefijo en al archivo que se nos indica
 ##
-## Únicamente guardamos las variables que están en los archivos por defecto, de esta 
+## Únicamente guardamos las variables que están en los archivos por defecto, de esta
 ## manera evitamos que variables en desuso se acumulen sin necesidad.
 ##
 ## $1 Prefijo de las variables a guardar
@@ -290,7 +290,7 @@ function configuracion_guardar() {
 ## Listar variables y valores
 ##
 ## $1 Prefijo de las variables a guardar
-## $2 Archivo donde están las descripciones 
+## $2 Archivo donde están las descripciones
 
 function configuracion_lista() {
 
@@ -317,7 +317,7 @@ function configuracion_lista() {
 ## Presentar la configuración actual
 ##
 ## $1 Prefijo de las variables a guardar
-## $2 Archivo donde están las descripciones 
+## $2 Archivo donde están las descripciones
 
 function configuracion_ver() {
 
@@ -414,7 +414,7 @@ function configuracion_menu() {
    echo "Archivo default:...........$archivo_default"
    echo "Prefijo de variables:......$configuracion_prefijo"
    echo
-   echo '[V]er, [E]ditar' 
+   echo '[V]er, [E]ditar'
    echo
    read -n 1 -s -p "Opcion: " OPCION
 
@@ -423,13 +423,13 @@ function configuracion_menu() {
 
    case "$OPCION" in
 
-      v) configuracion_ver "$configuracion_prefijo" "$archivo_descripciones" "$archivo_default" ; tecla ;;
-      e) configuracion_editar "$configuracion_prefijo" "$archivo_descripciones" "$archivo_default" 
-         configuracion_guardar "$configuracion_prefijo" "$configuracion_archivo" "$archivo_default" 
+      v|V) configuracion_ver "$configuracion_prefijo" "$archivo_descripciones" "$archivo_default" ; tecla ;;
+      e|E) configuracion_editar "$configuracion_prefijo" "$archivo_descripciones" "$archivo_default"
+         configuracion_guardar "$configuracion_prefijo" "$configuracion_archivo" "$archivo_default"
          ;;
       *) return ;;
    esac
 
-   configuracion_menu "$configuracion_prefijo" "$configuracion_archivo" "$archivo_descripciones" "$archivo_default" 
+   configuracion_menu "$configuracion_prefijo" "$configuracion_archivo" "$archivo_descripciones" "$archivo_default"
 
    }

@@ -82,12 +82,23 @@ if [ ! -e "$fichero_configuracion_magbackup" ] ; then
 fi
 
 # Recogemos archivo de configuracion
+# @todo Crear carpetas si no las hay.
+DIR_CONFIG=`dirname $fichero_configuracion_magbackup`
+
+if [[ ! -d "$DIR_CONFIG" ]] ; then
+       mkdir -p "$DIR_CONFIG"
+       mkdir -p "${DIR_CONFIG}/ficheros"
+       mkdir -p "${DIR_CONFIG}/mysql"
+       touch "$fichero_configuracion_magbackup"
+fi
 . "$fichero_configuracion_magbackup"
 
 
 function magbackup_crear_copia_ficheros_perfil() {
 
    for file in "$directorio_perfiles__ficheros_magbackup"* ; do
+
+      [[ ${file:0-1} == '*' ]] && break
 
       CMD='nice -10 tar -Pcjpf '
 
@@ -184,6 +195,9 @@ function magbackup_crear_copia_mysql_perfil() {
 
    for file in "$directorio_perfiles__mysql_magbackup"* ; do
 
+    [[ ${file:0-1} == '*' ]] && break
+
+      echo
       echo -----
       echo Mysql
       echo -----
