@@ -6,7 +6,7 @@ IDE de programación generado en bash
 
 ## Configuración
 
-La configuración sigue una jerarquía desde la configuración global hasta la de 
+La configuración sigue una jerarquía desde la configuración global hasta la de
 cada proyecto individual.
 
 - Primero cargamos $HOME/.magtrabajos/configuracion/*
@@ -38,13 +38,13 @@ al trabajar en el proyecto.
 
 Ejemplos:
 
-## Si hay sesión de vim anterior la abrimos y la borramos 
+## Si hay sesión de vim anterior la abrimos y la borramos
 
 ```
 [[ -e Session.vim ]] && ( gvim -S Session.vim ; sleep 2s ; rm -f Session.vim )
 ```
 
-## Lanzamos firefox con pagina del proyecto en local
+## Lanzamos navegador con pagina del proyecto en local
 
 ```
 $mt_navegador $mt_web_local &
@@ -60,7 +60,7 @@ $mt_navegador $mt_web_local &
 - [**/libash/doxygen2help**](#doxygen2help)	Extraer de la documentación en la cabecera de los scripts la ayuda a presentar en consola
 - [**/libash/elegirArchivo**](#elegirArchivo)	librería para seleccionar archivos
 - [**/libash/general**](#general)	Funciones genericas para los scripts en bash
-- [**/libash/listado**](#listado)	listado es una librería que podemos insertar en nuestros scripts que nos permite generar menús 
+- [**/libash/listado**](#listado)	listado es una librería que podemos insertar en nuestros scripts que nos permite generar menús
 - [**/libash/mysql2rst**](#mysql2rst)	Librería para bash para transformar una consulta a mysql a una tabla valida para rst
 - [**/libash/pantalla**](#pantalla)	Librería para mejorar la salida por pantalla
 - [**/magtidy/magtidy**](#magtidy)	Interface para tidy
@@ -71,7 +71,7 @@ $mt_navegador $mt_web_local &
 - [**/lanzadores/buscar_webshell**](#buscar_webshell)	buscamos webshell en el código
 - [**/lanzadores/comprobar_enlaces_rotos**](#comprobar_enlaces_rotos)	Comprobación de los enlaces de un dominio web
 - [**/lanzadores/comprobar_web**](#comprobar_web)	Hacer una comprobación para ver si la pagina esta funcionando
-- [**/lanzadores/contrasenya**](#contrasenya)	Imprimir contraseña de comando 
+- [**/lanzadores/contrasenya**](#contrasenya)	Imprimir contraseña de comando
 - [**/lanzadores/cron_gcm.sh**](#cron_gcm.sh)	Lanzar petición de cron sobre proyecto basado en GCM
 - [**/lanzadores/documentar_css**](#documentar_css)	Documentar css
 - [**/lanzadores/git-cambios-realizados**](#git-cambios-realizados)	Muestra los cambios realizados desde git.
@@ -159,7 +159,7 @@ $mt_navegador $mt_web_local &
     - ftp con control de bloqueo.
     - etc...
 
- Dependencias: gvim, mysql, pdflatex, python-docutils iconv colrm ploticus
+ Dependencias: vim mysql pdflatex python-docutils iconv colrm ploticus uni2ascii
 
  Sugerencias: lftp, svn, cscope, doxygen mailtextbody
 
