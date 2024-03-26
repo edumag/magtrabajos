@@ -89,6 +89,10 @@ DIR_CONFIG=`dirname $fichero_configuracion_magbackup`
 
 if [[ ! -d "$DIR_CONFIG" ]] ; then
        mkdir -p "$DIR_CONFIG"
+       mkdir $directorio_perfiles__ficheros_magbackup
+       mkdir $directorio_perfiles__mysql_magbackup
+       mkdir $directorio_perfiles__docker_postgres_magbackup
+       mkdir $directorio_perfiles__dokku_magbackup
        configuracion_guardar "magbackup_" "$fichero_configuracion_magbackup" "`dirname "$BASH_SOURCE"`/config.default"
 fi
 . "$fichero_configuracion_magbackup"
