@@ -102,7 +102,7 @@ function magbackup_crear_copia_ficheros_perfil() {
 
       [[ ${file:0-1} == '*' ]] && break
 
-      CMD='nice -10 tar -Pcjpf '
+      CMD='nice -10 sudo tar -Pcjpf '
 
       source "$file"
 
