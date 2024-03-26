@@ -59,6 +59,8 @@
 fichero_configuracion_magbackup="$HOME/.magtrabajos/configuracion/magbackup/config"  ##< Fichero configuración
 directorio_perfiles__ficheros_magbackup="$HOME/.magtrabajos/configuracion/magbackup/ficheros/"  ##< Fichero configuración
 directorio_perfiles__mysql_magbackup="$HOME/.magtrabajos/configuracion/magbackup/mysql/"  ##< Fichero configuración
+directorio_perfiles__docker_postgres_magbackup="$HOME/.magtrabajos/configuracion/magbackup/docker_postgres/"  ##< Fichero configuración
+directorio_perfiles__dokku_magbackup="$HOME/.magtrabajos/configuracion/magbackup/dokku_postgres/"  ##< Fichero configuración
 
 MES=`date +%B`
 DIA=`date +%A`
@@ -71,7 +73,7 @@ source "`dirname "$BASH_SOURCE"`/../../config"
 # Si no encontramos fichero de configuración hay que generarlo
 if [ ! -e "$fichero_configuracion_magbackup" ] ; then
    echo
-   echo "No se encontro fichero de configuración"
+   echo "No se encontró fichero de configuración"
    echo
    read -p "Configurar ahora (s/n): " OPCION
    if [ "$OPCION" = "s" ] ; then
@@ -87,9 +89,7 @@ DIR_CONFIG=`dirname $fichero_configuracion_magbackup`
 
 if [[ ! -d "$DIR_CONFIG" ]] ; then
        mkdir -p "$DIR_CONFIG"
-       mkdir -p "${DIR_CONFIG}/ficheros"
-       mkdir -p "${DIR_CONFIG}/mysql"
-       # touch "$fichero_configuracion_magbackup"
+       configuracion_guardar "magbackup_" "$fichero_configuracion_magbackup" "`dirname "$BASH_SOURCE"`/config.default"
 fi
 . "$fichero_configuracion_magbackup"
 
@@ -216,6 +216,56 @@ function magbackup_crear_copia_mysql_perfil() {
 
 }
 
+function magbackup_crear_copia_docker_postgres_perfil() {
+
+   for file in "$directorio_perfiles__docker_postgres_magbackup"* ; do
+
+    [[ ${file:0-1} == '*' ]] && break
+
+      echo
+      echo ---------------
+      echo Docker Postgres
+      echo ---------------
+      echo
+
+      source "$file"
+
+      for BD in $BASES_DATOS ; do
+         cmd="nice -10 docker exec -i -e PGPASSWORD=${DOCKER_PASSWORD} ${DOCKER_IMAGE} /usr/bin/pg_dump -U ${DOCKER_USER} ${DOCKER_DATABASE} > ${magbackup_dir}docker_postgres-${DOCKER_DATABASE}-`hostname`-${DIA}.dump"
+         echo
+         echo Comando: $cmd
+         eval "$cmd"
+      done
+
+   done
+
+}
+
+function magbackup_crear_copia_dokku_postgres_perfil() {
+
+   for file in "$directorio_perfiles__dokku_magbackup"* ; do
+
+    [[ ${file:0-1} == '*' ]] && break
+
+      echo
+      echo --------------
+      echo Dokku Postgres
+      echo --------------
+      echo
+
+      source "$file"
+
+      for BD in $BASES_DATOS ; do
+         cmd="nice -10 dokku postgres:export DOKKU_APP > ${magbackup_dir}dokku_postgres-${DOCKER_APP}-`hostname`-${DIA}.dump"
+         echo
+         echo Comando: $cmd
+         eval "$cmd"
+      done
+
+   done
+
+}
+
 while [ -n "$1" ] ; do
 
    case "$1" in
@@ -230,4 +280,6 @@ done
 
 magbackup_crear_copia_ficheros_perfil
 magbackup_crear_copia_mysql_perfil
+magbackup_crear_copia_docker_postgres_perfil
+magbackup_crear_copia_dokku_postgres_perfil
 

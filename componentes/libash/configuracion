@@ -275,7 +275,6 @@ function configuracion_guardar() {
          echo -e "\n$variable='${!variable}'"
       done > "$configuracion_archivo"
 
-
    fi
 
 
