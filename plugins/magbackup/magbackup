@@ -22,9 +22,7 @@
 ## En el caso de las copias de mysql no hay la posibilidad de copias incrementales con lo
 ## cual se generara una copia completa cada vez.
 ##
-## @todo Si pasamos un archivo o directorio creamos archivo comprimido
-## @todo Copias para mysql
-## @todo Copias para git
+## @todo Asistente de configuración.
 ##
 ## @author   Eduardo Magrané
 ## @internal
