@@ -258,7 +258,7 @@ function magbackup_crear_copia_dokku_postgres_perfil() {
       source "$file"
 
       for BD in $BASES_DATOS ; do
-         cmd="nice -10 dokku postgres:export DOKKU_APP > ${magbackup_dir}dokku_postgres-${DOCKER_APP}-`hostname`-${DIA}.dump"
+         cmd="nice -10 dokku postgres:export $DOKKU_APP > ${magbackup_dir}dokku_postgres-${DOKKU_APP}-`hostname`-${DIA}.dump"
          echo
          echo Comando: $cmd
          eval "$cmd"
