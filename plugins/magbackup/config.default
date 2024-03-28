@@ -1,1 +1,3 @@
-magbackup_dir=$HOME/backups/
+default_magbackup_dir=$HOME/backups/
+default_magbackup_sync_servidor='user@dominio:/dir'
+default_magbackup_sync_local=$HOME/Nextcloud/backups/
