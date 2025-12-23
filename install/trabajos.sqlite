@@ -1,0 +1,158 @@
+PRAGMA synchronous = OFF;
+PRAGMA journal_mode = MEMORY;
+BEGIN TRANSACTION;
+CREATE TABLE `archivos` (
+  `id` integer NOT NULL
+,  `nombre` char(150) DEFAULT NULL
+,  `descripcion` varchar(200) DEFAULT NULL
+,  `url` char(200) DEFAULT NULL
+,  `fecha_creacion_at` timestamp NOT NULL DEFAULT current_timestamp
+,  `fecha_actualizacion_in` timestamp NULL DEFAULT NULL
+);
+CREATE TABLE `documentos` (
+  `idMovimiento` integer NOT NULL
+,  `url` varchar(100) NOT NULL
+);
+CREATE TABLE `estados` (
+  `id` integer  NOT NULL
+,  `nombre` varchar(25) DEFAULT NULL
+);
+CREATE TABLE `etiquetas` (
+  `id` integer NOT NULL
+,  `nombre` char(20) DEFAULT NULL
+,  `descripcion` varchar(80) DEFAULT NULL
+);
+CREATE TABLE `facturas` (
+  `id` integer NOT NULL
+,  `numfact` integer NOT NULL
+,  `comentario` varchar(50) DEFAULT NULL
+,  `fechaFactura` date NOT NULL
+,  `fechaPagado` date DEFAULT NULL
+,  `Total` float DEFAULT '0'
+,  `idProyecto` integer NOT NULL DEFAULT '0'
+);
+CREATE TABLE `grupos_tareas` (
+  `id` integer NOT NULL
+,  `nombre` varchar(150) NOT NULL
+,  `descripcion` text NOT NULL
+,  `idProyecto` integer NOT NULL
+);
+CREATE TABLE `movimientos` (
+  `id` integer  NOT NULL
+,  `idTarea` integer DEFAULT NULL
+,  `nombre` varchar(50) DEFAULT NULL
+,  `fechaInicio` timestamp NULL DEFAULT NULL
+,  `fechaFinal` timestamp NULL DEFAULT NULL
+,  `descripcion` text
+);
+CREATE TABLE `personal` (
+  `id` integer  NOT NULL
+,  `nombre` varchar(30) DEFAULT NULL
+,  `email` varchar(30) DEFAULT NULL
+,  `telefono` varchar(15) DEFAULT NULL
+,  `enviarTareas` integer DEFAULT NULL
+);
+CREATE TABLE `proyectos` (
+  `id` integer  NOT NULL
+,  `nombre` varchar(30) DEFAULT NULL
+,  `descripcion` text
+,  `svn` varchar(50) NOT NULL DEFAULT 'NO'
+,  `ftp` varchar(30) DEFAULT NULL
+,  `dirFtp` varchar(30) DEFAULT NULL
+,  `dirLocal` varchar(130) DEFAULT NULL
+,  `activado` integer NOT NULL DEFAULT '1'
+,  `facturacion` integer NOT NULL DEFAULT '1'
+);
+CREATE TABLE `rFacturasPagos` (
+  `id` integer NOT NULL
+,  `idFactura` integer NOT NULL
+,  `pagado` float(9,2) NOT NULL
+,  `fecha` date NOT NULL
+,  `descripcion` varchar(50) DEFAULT NULL
+);
+CREATE TABLE `rMovimientoArchivos` (
+  `id` integer NOT NULL
+,  `idMovimiento` integer NOT NULL DEFAULT '0'
+,  `nombre` varchar(100) NOT NULL
+);
+CREATE TABLE `rMovimientoTablas` (
+  `idMovimiento` integer NOT NULL DEFAULT '0'
+,  `tabla` varchar(50) NOT NULL DEFAULT ''
+);
+CREATE TABLE `r_etiqueta_archivo` (
+  `etiquetas_id` integer NOT NULL
+,  `archivos_id` integer NOT NULL
+);
+CREATE TABLE `r_grupos_tareas` (
+  `grupo_id` integer NOT NULL
+,  `tarea_id` integer NOT NULL
+);
+CREATE TABLE `r_personal_proyecto` (
+  `personal_id` integer NOT NULL
+,  `proyecto_id` integer NOT NULL
+);
+CREATE TABLE `r_usuarios_roles` (
+  `usuarios_id` integer NOT NULL
+,  `roles_id` integer NOT NULL
+);
+CREATE TABLE `tareas` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT
+,  `prioridad` integer DEFAULT '0'
+,  `idProyecto` integer DEFAULT NULL
+,  `nombre` varchar(50) DEFAULT NULL
+,  `presupuesto` decimal(9,2) DEFAULT NULL
+,  `compensacion` decimal(9,2) DEFAULT '0.00'
+,  `euroshora` decimal(9,2) DEFAULT NULL
+,  `idEstado` integer DEFAULT NULL
+,  `fechaInicio` date DEFAULT NULL
+,  `fechaFinal` date DEFAULT NULL
+,  `fechaPagado` date DEFAULT NULL
+,  `descripcion` text
+,  `idFactura` integer DEFAULT NULL
+);
+CREATE TABLE `tiempos` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT
+,  `idMovimiento` integer DEFAULT NULL
+,  `fechaInicio` timestamp NOT NULL DEFAULT current_timestamp
+,  `fechaFinal` timestamp NULL DEFAULT NULL
+);
+CREATE TABLE `trab_archivos` (
+  `id` integer NOT NULL
+,  `nombre` char(150) DEFAULT NULL
+,  `descripcion` varchar(200) DEFAULT NULL
+,  `url` char(200) DEFAULT NULL
+,  `fecha_creacion_at` timestamp NOT NULL DEFAULT current_timestamp
+,  `fecha_actualizacion_in` timestamp NULL DEFAULT NULL
+);
+CREATE TABLE `trab_etiquetas` (
+  `id` integer NOT NULL
+,  `nombre` char(20) DEFAULT NULL
+,  `descripcion` varchar(80) DEFAULT NULL
+);
+CREATE TABLE `trab_registros` (
+  `id` integer NOT NULL
+,  `sesion` integer DEFAULT NULL
+,  `fecha` integer DEFAULT NULL
+,  `tipo` varchar(10) DEFAULT NULL
+,  `fichero` varchar(100) DEFAULT NULL
+,  `linea` integer DEFAULT NULL
+,  `mensaje` varchar(500) DEFAULT NULL
+,  `descripcion` varchar(1300) DEFAULT NULL
+);
+CREATE TABLE `trab_r_etiqueta_archivo` (
+  `etiquetas_id` integer NOT NULL
+,  `archivos_id` integer NOT NULL
+);
+CREATE TABLE `trab_usuarios` (
+  `id` integer NOT NULL
+,  `usuario` char(50) DEFAULT NULL
+,  `pass_md5` char(32) DEFAULT NULL
+,  `nombre` char(50) DEFAULT NULL
+,  `apellidos` char(50) DEFAULT NULL
+,  `fecha_creacion` datetime NOT NULL
+,  `fecha_modificacion` timestamp NOT NULL DEFAULT current_timestamp
+,  `mail` char(60) DEFAULT NULL
+,  `telefono` char(15) DEFAULT NULL
+,  `admin` integer NOT NULL DEFAULT '0'
+);
+END TRANSACTION;

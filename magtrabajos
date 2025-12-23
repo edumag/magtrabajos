@@ -3,7 +3,7 @@
 ## @file magtrabajos
 ## @brief Gestión de tareas para programadores
 ## @mainpage magTrabajos
-## 
+##
 ## Conjunto de scripts realizados en bash para facilitar y agilizar la programación desde linux.
 ## .
 ##    - Administración de tareas
@@ -14,17 +14,17 @@
 ##    - Búsquedas en código
 ##    - ftp con control de bloqueo.
 ##    - etc...
-## 
-## Dependencias: gvim, mysql, pdflatex, python-docutils iconv colrm 
+##
+## Dependencias: gvim, mysql, pdflatex, python-docutils iconv colrm
 ##
 ## Sugerencias: lftp, svn, cscope, doxygen mailtextbody
 ##
 ## Uso: magtrabajos [opciones]
-## 
+##
 ## Sin opciones muestra menú de proyectos
-## 
-## Opciones:    
-## <pre> 
+##
+## Opciones:
+## <pre>
 ## --menu                                         Presentar menú
 ## --configurar                                   Configurar proyecto
 ## --adjuntar                                     Adjuntar documento externo
@@ -36,27 +36,27 @@
 ## --nuevo|-n                                     Nuevo proyecto, tarea o movimiento.
 ## --movimientos-abiertos|-ma                     Ver movimientos que estan abiertos.
 ## --tiempos-abiertos|-ta                         Buscar tiempos abiertos
-## --accion [Accion]                              Seleccionamos una acción a realizar 
+## --accion [Accion]                              Seleccionamos una acción a realizar
 ## --listar-acciones                              Presentar lista de posibles acciones
 ## --factura [Nun Factura]                        Seleccionaremos tareas por la factura
 ## --seleccionar-factura                          Listar facturas para seleccionar
-## --consulta                                     Indicamos que solo queremos hacer una comprobación, esto hará que nos 
+## --consulta                                     Indicamos que solo queremos hacer una comprobación, esto hará que nos
 ##                                                salga la información por pantalla.
-## --editar-archivos                              Editar archivos afectados de movimiento, necesita el movimiento 
+## --editar-archivos                              Editar archivos afectados de movimiento, necesita el movimiento
 ## --seleccionar-tareas '[criterio] [parametro]'  Seleccionar tareas por diferentes criterios
 ## --informe                                      Tipo de informe
 ## --listar-informes                              Listar los posibles informes
 ## --exportar [Formato] [Archivo rst]             Si no se indica formato muestra menú, formatos posibles:
 ##                                                [H]tml,[E]mail,Email h[t]ml,[P]df,[l]ess,[I]mprimir,[c]sv
-##                                                Si no se indica archivo rst se recoge el temporal con el último 
+##                                                Si no se indica archivo rst se recoge el temporal con el último
 ##                                                informe realizado
 ## --editar | -e                                  Editar archivos
 ## --estado-subversion                            Presentar estado de subversion de proyecto
-## --archivos                                     imprimir lista de archivos para poder ser procesada con otro comando, ejemplo: 
+## --archivos                                     imprimir lista de archivos para poder ser procesada con otro comando, ejemplo:
 ## --borrar_archivo_lista_afectados               Borrar archivos afectados de un movimiento, sino se especifican archivos nos permite seleccionar
 ##                                                magtrabajos -m 1343 --archivos | xargs ls -l
 ## --nueva-tarea-email                            Crear tarea nueva desde un archivo de email pasado como argumento.
-## --lanzar                                       Nos presenta listados para permitirnos seleccionar por diferentes 
+## --lanzar                                       Nos presenta listados para permitirnos seleccionar por diferentes
 ##                                                criterios, últimos movimientos, etc...
 ##
 ## --terminal                                     Lanza una terminal con magtrabajos y los parametros a continuación de --terminal
@@ -80,7 +80,7 @@
 ##  Revision  SVN $Id: $
 ##
 ## Copyright  Copyright (c) 2011, Eduardo Magrané
-## 
+##
 ## This source code is released for free distribution under the terms of the
 ## GNU General Public License as published by the Free Software Foundation.
 
@@ -188,40 +188,41 @@ function comprobar_dependencias() {
    # Orden para tareas
    ORDER_TAR=" ORDER BY t.id "
 
-   # Nombre de archivo 
+   # Nombre de archivo
    SQL_ARC="SELECT nombre FROM rMovimientoArchivos WHERE 1 "
 
    # Totales de tareas
-   SQL_TOTAL_TAREA='SELECT f.id , f.comentario, f.Total, f.fechaFactura, f.fechaPagado,  
-   IF (t.presupuesto>0,t.presupuesto + (t.compensacion),
-      ROUND(t.euroshora * (sum(UNIX_TIMESTAMP(ti.fechaFinal)- UNIX_TIMESTAMP(ti.fechaInicio))/60)/60 + (t.compensacion),2)
-   ) as totalxmovimientos 
-   FROM tareas t, tiempos ti, movimientos m, facturas f 
+   SQL_TOTAL_TAREA='SELECT f.id , f.comentario, f.Total, f.fechaFactura, f.fechaPagado,
+   CASE WHEN t.presupuesto>0
+     THEN t.presupuesto + (t.compensacion)
+     ELSE ROUND(t.euroshora * (sum(DATETIME(ti.fechaFinal, "unixepoch")-DATETIME(ti.fechaInicio, "unixepoch"))/60)/60 + (t.compensacion),2)
+   END as totalxmovimientos
+   FROM tareas t, tiempos ti, movimientos m, facturas f
    WHERE f.id=t.idFactura AND m.idTarea=t.id AND ti.idMovimiento=m.id '
 
    SQL_TOTAL_TAREA_GROUP=' GROUP BY t.id '
 
    # Listado de factura
-   SQL_FACTURAS='SELECT id, fechaFactura, fechaPagado, comentario, Total, sum(totalxmovimientos) 
+   SQL_FACTURAS='SELECT id, fechaFactura, fechaPagado, comentario, Total, sum(totalxmovimientos)
    FROM ($SQL_TOTAL_TAREA $SQL_TOTAL_TAREA_GROUP) AS tareasSQL '
 
    SQL_FACTURAS_GROUP=' GROUP BY id'
 
    # TOTALES CON SQL
-   SQL_TOTAL=' 
-      IF (t.presupuesto>0
-         ,t.presupuesto + (t.compensacion)
-         ,ROUND(t.euroshora * (sum(UNIX_TIMESTAMP(ti.fechaFinal)- UNIX_TIMESTAMP(ti.fechaInicio))/60)/60 + (t.compensacion),2)
-         ) AS TotalxTiempos'
+   SQL_TOTAL='
+      CASE WHEN t.presupuesto>0
+         THEN t.presupuesto + (t.compensacion)
+         ELSE ROUND(t.euroshora * (sum(DATETIME(ti.fechaFinal, \"unixepoch\")-DATETIME(ti.fechaInicio, \"unixepoch\"))/60)/60 + (t.compensacion),2)
+         END AS TotalxTiempos'
 
    SQL_TOTAL_FROM='FROM tareas t LEFT JOIN movimientos m ON m.idTarea=t.id LEFT JOIN tiempos ti ON ti.idMovimiento=m.id '
 
    # Tareas seleccionar
    SQL_TAR_SELECCIONAR="SELECT t.id, t.nombre, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, t.prioridad, t.idFactura
       ,$SQL_TOTAL
-      FROM tareas t 
-      LEFT JOIN movimientos m ON m.idTarea=t.id 
-      LEFT JOIN tiempos ti    ON ti.idMovimiento=m.id 
+      FROM tareas t
+      LEFT JOIN movimientos m ON m.idTarea=t.id
+      LEFT JOIN tiempos ti    ON ti.idMovimiento=m.id
       LEFT JOIN estados e     ON t.idEstado=e.id
       WHERE 1"
 
@@ -268,7 +269,7 @@ function comprobar_dependencias() {
 ## - $2 Nivel a utilizar por defecto $nivel_informe
 
 function titulo_por_nivel() {
-   
+
    local titulo="$1"
    local nivel=${2:-$nivel_informe}
 
@@ -279,7 +280,7 @@ function titulo_por_nivel() {
          echo $titulo | sed 's/./=/g'
          echo
          # Nivel 0 es el título del informe, colocamos título
-         # del indice. 
+         # del indice.
          if [ "$per_informe_indice" == "SI" ] ; then
             echo "Indice" | sed 's/./-/g' >> $fich_indice
             echo "Indice"                 >> $fich_indice
@@ -387,10 +388,10 @@ function configurar_magtrabajos() {
    echo '+---------------+'
    echo '| Configuración |'
    echo '+---------------+'
-   echo 
+   echo
    echo Proyecto: $proyecto
    echo
-   echo ' [C]onfigurar magtrabajos globalmente' 
+   echo ' [C]onfigurar magtrabajos globalmente'
    echo
    echo ' Configurar [p]royecto'
    echo
@@ -447,7 +448,7 @@ function lanzar_editor() {
    # zenity --info --text "$*" # DEV
 
    log $FUNCNAME "$*"
-   
+
    # comprobar que tenemos proyecto especificado, sino comprobamos movimientos abiertos.
 
    if [ "$proyectoId" == '' ] ; then
@@ -460,7 +461,7 @@ function lanzar_editor() {
       # Para que lance el editor aun sin haber proyecto
       proyecto="SinProyecto"
 
-      #error 'No hay contadores en marcha se sale' 100 
+      #error 'No hay contadores en marcha se sale' 100
       #exit 1
    fi
 
@@ -501,10 +502,10 @@ function lanzar_editor() {
       local archivos="$@"
    fi
 
-   if [ `echo "$archivos" | grep 'vim:'` ] ; then 
+   if [ `echo "$archivos" | grep 'vim:'` ] ; then
 
       # Tambien puede venir en formato web vim:/home/eduardo/archivo.php@linea
- 
+
       local archivo="`echo $archivos | cut -d: -f2`"
       local linea="`echo $archivos | cut -d@ -f2`"
       archivo="`echo $archivo | cut -d@ -f1`"
@@ -513,7 +514,7 @@ function lanzar_editor() {
 
       cmd="$editor +$linea $archivo"
 
-   elif [ `echo "$archivos" | grep '@'` ] ; then 
+   elif [ `echo "$archivos" | grep '@'` ] ; then
 
       # El archivo puede venir con el numero de linea especificado
       # en formato archivo@linea
@@ -523,7 +524,7 @@ function lanzar_editor() {
 
       cmd="$editor +$linea $archivo"
 
-   elif [ `echo "$archivos" | grep ':'` ] ; then 
+   elif [ `echo "$archivos" | grep ':'` ] ; then
 
       # El archivo puede venir con el numero de linea especificado
       # en formato archivo:linea
@@ -533,7 +534,7 @@ function lanzar_editor() {
 
       cmd="$editor +$linea $archivo"
 
-   elif [ "`echo ${archivos} | grep 'line'`" != '' ] ; then 
+   elif [ "`echo ${archivos} | grep 'line'`" != '' ] ; then
 
       # El archivo puede venir con el numero de linea especificado
       # en formato archivo on line linea
@@ -686,7 +687,7 @@ function nuevoMovimiento(){
    if [ "$tareaId" = "" ] ; then mensajes " Necesito una tarea definida" ; return ; fi
 
    # Comprobamos que no haya más de una tarea seleccionada
-   if [ ${#tareasIds[*]} -gt 1 ] ; then 
+   if [ ${#tareasIds[*]} -gt 1 ] ; then
       mensajes " Hay más de una tarea selecionada\nNo puedo crear movimiento"
    fi
 
@@ -694,9 +695,9 @@ function nuevoMovimiento(){
 
       shift 1
 
-      if [ -e "$TMP_DES" ] ; then rm "$TMP_DES" ; fi 
+      if [ -e "$TMP_DES" ] ; then rm "$TMP_DES" ; fi
 
-      if [ "$1" = "" ] ; then 
+      if [ "$1" = "" ] ; then
 
          read -p 'Archivo de email: ' EMAIL
          if [ "$EMAIL" = "" ] ; then mensajes " Email a tarea cancelado" ; return ; fi
@@ -711,12 +712,12 @@ function nuevoMovimiento(){
       if [ $? != 0 ] ; then mensajes " Error al ejecutar comando" ; exit ; fi
 
       movimiento=$(basename "$EMAIL" | sed s/_/\ /g)
-    
+
       SQL="INSERT INTO movimientos VALUES (null,'$tareaId','$movimiento','`AHORA`',NULL,
       '$(cat $TMP_DES  | sed s/\`/\\\\\`/g | sed s/\'/\\\\\'/g | sed s/\"/\\\\\"/g | sed s/\\\$/\\\\\$/g  )')"
       ejecutarSQL "$SQL"
 
-   elif [ "$1" = "" ] ; then                     # Si no tenemos el titulo del movimiento 
+   elif [ "$1" = "" ] ; then                     # Si no tenemos el titulo del movimiento
 
       read -p "titulo del moviento: " movimiento
       if [ "$movimiento" = "" ] ; then mensajes " Añadir movimiento cancelado" ; return ; fi
@@ -724,7 +725,7 @@ function nuevoMovimiento(){
       ejecutarSQL "$SQL"
 
    fi
-   
+
 
    # Ponerle empezado y añadir fechaFinal a tarea
    SQL="UPDATE tareas SET idEstado=2, fechaFinal='`AHORA`' WHERE id=$tareaId"
@@ -751,7 +752,7 @@ function anyadirTareaEmail () {
 
    if [ "$proyectoId" = "" ] ; then seleccionarProyecto ; fi
 
-   if [ -e "$TMP_DES" ] ; then rm "$TMP_DES" ; fi 
+   if [ -e "$TMP_DES" ] ; then rm "$TMP_DES" ; fi
 
    if [ "$1" = "" ] ; then
       read -p 'Archivo de email: ' EMAIL
@@ -788,7 +789,7 @@ function anyadirTareaEmail () {
       echo
       echo " [E]ditar descripción"
       echo " [I]nsertar tarea"
-      echo 
+      echo
       read -n 1 -s -p " Opcion: " OPCION
 
       if [ "$OPCION" == "" ] ; then mensajes " Cancelado insertar tarea" ; return ; fi
@@ -813,7 +814,7 @@ function anyadirTareaEmail () {
 
 ## Cambiar una tarea de proyecto al que pertenece
 ##
-## Si recibimos el identificador del proyecto como $1 hacemos 
+## Si recibimos el identificador del proyecto como $1 hacemos
 ## el cambio directamente, sino preguntamos.
 
 function cambiarTareaDeProyecto() {
@@ -851,7 +852,7 @@ function editarTarea(){
 
    if [ "$1" = "-n" ] ; then                    # Creamos nueva tarea
 
-      if [ -e "$TMP_DES" ] ; then rm "$TMP_DES" ; fi 
+      if [ -e "$TMP_DES" ] ; then rm "$TMP_DES" ; fi
 
       read -p "Nombre de tarea: " tareaN
 
@@ -903,7 +904,7 @@ function editarTarea(){
    read -p "Estado ($tarEstadoId): " estadoId
    read -p "Prioridad (0): " prioridad
 
-   if [ "$1" = "-n" ] ; then 
+   if [ "$1" = "-n" ] ; then
       # Tarea nueva
 
      [[ "$presupuesto" == '' ]] && presupuesto=0
@@ -998,7 +999,7 @@ function modificarFecha(){
 }
 
 ## Seleccionar tareas por diferentes criterios
-## 
+##
 ## Generamos la condición SQL que nos permite mantener seleccionado
 ## al proyecto, tarea o movimiento que serán utilizados en las acciones.
 ##
@@ -1027,7 +1028,7 @@ function seleccionarTareas(){
 
       --help|-help|-h) shift 1
 
-         echo 
+         echo
          echo Seleccionar tareas por diferentes criterios
          echo
          echo '  -help|--help|-h                                Pantalla de ayuda'
@@ -1084,17 +1085,16 @@ function seleccionarTareas(){
             fFECHA=$1
          fi
 
-         CONDICION=" AND (t.fechaInicio BETWEEN '$fFECHA' AND '$fFECHA' 
-                     OR t.fechaFinal BETWEEN '$fFECHA' AND '$fFECHA') 
-                     AND  t.idProyecto=$proyectoId "
+         CONDICION=" AND (t.fechaInicio BETWEEN '$fFECHA' AND '$fFECHA'
+                     OR t.fechaFinal BETWEEN '$fFECHA' AND '$fFECHA') "
 
          ;;
 
       -fechaPagado) shift 1
 
-         if [ "$1" = "" ] ; then 
+         if [ "$1" = "" ] ; then
             # Buscar fechas para presentarlas
-            SQL="SELECT fechaPagado FROM tareas WHERE idProyecto=$proyectoId AND fechaPagado != '' AND fechaPagado != '0000-00-00' GROUP BY fechaPagado"
+            SQL="SELECT fechaPagado FROM tareas WHERE fechaPagado != '' AND fechaPagado != '0000-00-00' GROUP BY fechaPagado"
             select rFECHA in 'Salir' 'Escribir_fecha' $(ejecutarSQL "$SQL" "-N") ; do
                echo "Fechas: "
                break
@@ -1107,16 +1107,16 @@ function seleccionarTareas(){
             fFECHA=$1
          fi
 
-         CONDICION=" AND (t.fechaPagado='$fFECHA') AND t.idProyecto=$proyectoId"
+         CONDICION=" AND (t.fechaPagado='$fFECHA')"
 
          ;;
 
       -lista-estados) shift 1
-         
+
          echo -e "\n\nEstados\n-------"
          SQL="SELECT id, nombre FROM estados"
          ejecutarSQL "$SQL"
-         ;; 
+         ;;
 
       -estado) shift 1
 
@@ -1138,7 +1138,7 @@ function seleccionarTareas(){
 
          local -a estados=($estado)
 
-         CONDICION=" AND t.idProyecto=$proyectoId AND ("
+         CONDICION=" AND ("
 
          local CON=''
          local ultimo=$((${#estados[*]}-1))
@@ -1150,10 +1150,10 @@ function seleccionarTareas(){
          CONDICION="$CONDICION $CON ) "
 
          ;;
-      -pendiente) 
+      -pendiente)
          # Seleccionar las tareas empezadas o pendientes
          mensajes 'Pendientes o empezadas'
-         CONDICION=" AND (t.idEstado=1 OR t.idEstado=2 OR t.idEstado=6 ) AND t.idProyecto=$proyectoId"
+         CONDICION=" AND (t.idEstado=1 OR t.idEstado=2 OR t.idEstado=6 )"
          ;;
 
       -buscar) shift 1
@@ -1165,15 +1165,15 @@ function seleccionarTareas(){
             PALABRA="$1"
          fi
          CONDICION=" AND (
-            t.nombre like '%$PALABRA%' 
-            OR t.descripcion like '%$PALABRA%' 
-            OR m.nombre like '%$PALABRA%' 
-            OR m.descripcion like '%$PALABRA%' 
-            ) AND t.idProyecto=$proyectoId "
+            t.nombre like '%$PALABRA%'
+            OR t.descripcion like '%$PALABRA%'
+            OR m.nombre like '%$PALABRA%'
+            OR m.descripcion like '%$PALABRA%'
+            ) "
          ;;
 
       -todo)
-         CONDICION=" AND t.idProyecto=$proyectoId"
+         CONDICION=""
          ;;
 
       *)
@@ -1189,7 +1189,7 @@ function seleccionarTareas(){
   mensajes " ${#tareasIds[*]} tareas seleccionadas"
   if [ ${#tareasIds[*]} = 1 ] ; then
      tareaId=${tareasIds[*]}
-     definirProyecto -t $tareadId
+     definirProyecto -t $tareaId
   fi
 
   movimientoId=""
@@ -1207,7 +1207,7 @@ function tiemposAbiertos() {
    SQL="SELECT t.id FROM tiempos t  WHERE (t.fechaFinal is null ) ORDER BY t.id"
    tiemposIds=($(ejecutarSQL "$SQL" "-N"))
 
-   if [ "${tiemposIds[*]}" = "" ] ; then 
+   if [ "${tiemposIds[*]}" = "" ] ; then
       return
 
    elif [ "${#tiemposIds[*]}" -gt 1 ] ; then
@@ -1253,7 +1253,7 @@ function tiemposAbiertos() {
       n_movimientoId=$(ejecutarSQL "$SQL" "-N")
       mensajes " Detectado tiempo sin cerrar movimiento: $n_movimientoId"
    fi
-   
+
    if [ "$n_movimientoId" != "" ] ; then
 
       if [ "$1" != "-l" ] ; then
@@ -1287,11 +1287,11 @@ function movimientosAbiertos(){
    if [ -z $proyectoId ] ; then
       SQL="SELECT m.id FROM movimientos m  WHERE (m.fechaFinal IS NULL) ORDER BY m.id"
    else
-      SQL="SELECT m.id FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal IS NULL ) ORDER BY m.id"
+      SQL="SELECT m.id FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND (m.fechaFinal IS NULL ) ORDER BY m.id"
    fi
    movimientosIds=(`ejecutarSQL "$SQL" "-N"`)
 
-   if [ "${movimientosIds[*]}" = "" ] ; then 
+   if [ "${movimientosIds[*]}" = "" ] ; then
       mensajes " No hay ningún movimiento abierto"
       return
    fi
@@ -1324,7 +1324,7 @@ function movimientosAbiertos(){
                              WHEN 10 THEN 'Octubre'
                              WHEN 11 THEN 'Noviembre'
                              WHEN 12 THEN 'Diciembre'
-                        END) ) FROM movimientos m, tareas t, proyectos p 
+                        END) ) FROM movimientos m, tareas t, proyectos p
                         WHERE m.idTarea=t.id AND p.id=t.idProyecto
                         $CONDICION_MOVIMIENTO ORDER BY m.id"
       SALIDA1=$(ejecutarSQL "$SQL" '-N')
@@ -1378,21 +1378,21 @@ function informacionProyecto() {
 
    log $FUNCNAME "$*"
 
-   local separador=';;;'  # Para separar campos en mysql
+   ## local separador=';;;'  # Para separar campos en mysql
 
-   SQL="SELECT CONCAT(nombre, '$separador', dirLocal, '$separador',activado, '$separador',facturacion)  FROM proyectos WHERE id=$proyectoId"
-   SALIDA="$(ejecutarSQL '$SQL' '-N')"
+   ## SQL="SELECT CONCAT(nombre, '$separador', dirLocal, '$separador',activado, '$separador',facturacion)  FROM proyectos WHERE id=$proyectoId"
+   ## SALIDA="$(ejecutarSQL '$SQL' '-N')"
 
-   if [ "$SALIDA" = ""  ] ; then
-      echo "Proyecto $proyectoId no encontrado"
-      exit
-      return
-   fi
-   proyecto="$(echo $SALIDA | awk -v FS="$separador" '{print $1 }')"
-   DIR_PROYECTO="$(echo $SALIDA | awk -v FS="$separador" '{print $2 }')"
-   proyecto_activado="$(echo $SALIDA | awk -v FS="$separador" '{print $3 }')"
-   proyecto_facturacion="$(echo $SALIDA | awk -v FS="$separador" '{print $4 }')"
-   proyecto_correos=($(ejecutarSQL 'SELECT email from personal p left join r_personal_proyecto rpp ON rpp.personal_id=p.id WHERE enviarTareas=1 AND rpp.proyecto_id=$proyectoId' '-N'))
+   ## if [ "$SALIDA" = ""  ] ; then
+   ##    echo "Proyecto $proyectoId no encontrado"
+   ##    exit
+   ##    return
+   ## fi
+   ## proyecto="$(echo $SALIDA | awk -v FS="$separador" '{print $1 }')"
+   ## DIR_PROYECTO="$(echo $SALIDA | awk -v FS="$separador" '{print $2 }')"
+   ## proyecto_activado="$(echo $SALIDA | awk -v FS="$separador" '{print $3 }')"
+   ## proyecto_facturacion="$(echo $SALIDA | awk -v FS="$separador" '{print $4 }')"
+   ## proyecto_correos=($(ejecutarSQL 'SELECT email from personal p left join r_personal_proyecto rpp ON rpp.personal_id=p.id WHERE enviarTareas=1 AND rpp.proyecto_id=$proyectoId' '-N'))
    # El archivo de pendientes para cada proyecto
    FICH_PENDIENTE=".magtrabajos/pendiente.rst"
    #TMP="${DIR_TMP}magtrabajos-$proyectoId.rst"
@@ -1416,6 +1416,8 @@ function informacionProyecto() {
 
 
    archivo_log="${DIR_TMP}${proyecto}.log"
+   DIR_PROYECTO=$(pwd)
+   proyecto_correos=edu@lesolivex.com
 
    log "$FUNCNAME" "proyecto: $proyecto"
    log "$FUNCNAME" "Directorio de proyecto: $DIR_PROYECTO"
@@ -1448,8 +1450,8 @@ function informacionTarea(){
 
    local separador=';;;'  # Para separar campos en mysql
 
-   SQL="SELECT CONCAT(t.idProyecto,'$separador', t.nombre,'$separador',p.nombre,'$separador', e.nombre) FROM tareas t, estados e, proyectos p WHERE t.idProyecto=p.id AND t.idEstado=e.id AND t.id=$tareaId"
-   local SALIDA=$(ejecutarSQL "$SQL" "-N")
+   SQL="SELECT CONCAT(t.nombre,'$separador', e.nombre) FROM tareas t, estados e WHERE t.idEstado=e.id AND t.id=$tareaId"
+   local SALIDA=$(ejecutarSQL "$SQL")
 
    if [ "$SALIDA" = ""  ] ; then
       echo "Tarea $tareaId no encontrada"
@@ -1457,9 +1459,8 @@ function informacionTarea(){
       return
    fi
 
-   tarea=$(echo $SALIDA | awk -v FS="$separador" '{print $2 }')
-   estado_tarea=$(echo $SALIDA | awk -v FS="$separador" '{print $4 }')
-   proyectoId=$(echo $SALIDA | awk -v FS="$separador" '{print $1 }')
+   tarea=$(echo $SALIDA | awk -v FS="$separador" '{print $1 }')
+   estado_tarea=$(echo $SALIDA | awk -v FS="$separador" '{print $3 }')
    #tareasIds=($tareaId)
 
    log "$FUNCNAME" "tarea: $tarea"
@@ -1479,7 +1480,7 @@ function informacionMovimiento(){
     error "Sin identificador de movimiento"
     return
    fi
-   
+
    local separador=';;;'  # Para separar campos en mysql
 
    SQL="SELECT CONCAT(t.idProyecto,'$separador',t.id,'$separador',t.nombre,'$separador',m.nombre,'$separador', e.nombre) FROM tareas t, movimientos m, estados e WHERE t.idEstado=e.id AND  m.idTarea=t.id AND m.id=$mId"
@@ -1500,7 +1501,7 @@ function informacionMovimiento(){
 
 }
 
-## Poner todas las variables de tarea o movimientos a cero 
+## Poner todas las variables de tarea o movimientos a cero
 
 function limpiar_variables() {
 
@@ -1527,7 +1528,7 @@ function seleccionarProyecto () {
       SQL="SELECT id, nombre from proyectos"
       ejecutarSQL "$SQL"
       read -p "Id de proyecto: " proyectoId
-      if [ "$proyectoId" != "" ] ; then 
+      if [ "$proyectoId" != "" ] ; then
          definirProyecto -p $proyectoId
          return
       fi
@@ -1557,7 +1558,7 @@ function seleccionarProyecto () {
          proyectoId=$(($OPCION+1))
       fi
 
-      if [ "$proyectoId" != "" ] ; then 
+      if [ "$proyectoId" != "" ] ; then
          definirProyecto -p $proyectoId
          return
       fi
@@ -1573,7 +1574,7 @@ function seleccionarProyecto () {
 ## Podemos definir el proyecto por un movimiento -m 1 o una tarea -t 1 o por el identificador
 ## del proyecto -p 1 o simplemente 1
 ##
-## $1 -p | -t | -m | -f  proyecto, tarea, movimiento, por factura 
+## $1 -p | -t | -m | -f  proyecto, tarea, movimiento, por factura
 ## $2 [Identificador]
 
 function definirProyecto(){
@@ -1619,7 +1620,7 @@ function definirProyecto(){
 
       # Si tenemos contador
       if [ "$movimientoId" != "" ] && [ "$tiempoId" != "" ] ; then
-         SQL="SELECT (`date +'%s'`-UNIX_TIMESTAMP(fechaInicio))/60 as min FROM tiempos WHERE id=$tiempoId"
+         SQL="SELECT (`date +'%s'`-DATETIME(fechaInicio, 'unixepoch'))/60 as min FROM tiempos WHERE id=$tiempoId"
          CONTADOR=$(ejecutarSQL "$SQL" "-N")
          #ejecutarSQL "$SQL"
          if [ "$CONTADOR" != "" ] ; then
@@ -1664,7 +1665,7 @@ function help_configuracion() {
    echo
    echo "Configuración actual:"
 
-   for variable in ${!mt_*} ; do d="desc_$variable" ; echo -e " \n#${!d}\n$variable=${!variable}" ; done 
+   for variable in ${!mt_*} ; do d="desc_$variable" ; echo -e " \n#${!d}\n$variable=${!variable}" ; done
 
    exit 0
 
@@ -1707,13 +1708,13 @@ function listarArchivos(){
 
       NUM_SALIDA=${#aSALIDA[*]}
 
-      if [ $NUM_SALIDA -gt 0 ] ; then 
+      if [ $NUM_SALIDA -gt 0 ] ; then
          # Hay archivos
          if [ "$1" != "--listar" ] ; then
             clear
             echo
             echo "ftp svn archivos afectados                        "
-            echo "=== === =========================================="  
+            echo "=== === =========================================="
          fi
 
 
@@ -1722,9 +1723,9 @@ function listarArchivos(){
             x="${aSALIDA[$n]}"
 
             ## Comprobar si el proyecto funciona con ftptrabajo y si es así informamos del estado del archivo
-            if [ "`plugin_activado ftptrabajo`" != "" ] ; then 
+            if [ "`plugin_activado ftptrabajo`" != "" ] ; then
                if [ "`ftptrabajo --proyecto $proyecto -vb | grep $x `" != "" ] ; then
-                  [[ "$1" != "--listar" ]] && tput bold 
+                  [[ "$1" != "--listar" ]] && tput bold
                   echo -e "Blq\c "
                   [[ "$1" != "--listar" ]] && tput sgr0
                else
@@ -1736,7 +1737,7 @@ function listarArchivos(){
             if [ -e '.svn' ] ; then
                salida="$(svn status | grep $x | grep -v '.LCK' | colrm 2)"
                if [ "$salida" != "" ] ; then
-                  [[ "$1" != "--listar" ]] && tput bold 
+                  [[ "$1" != "--listar" ]] && tput bold
                   echo -e "  $salida \c "
                   [[ "$1" != "--listar" ]] && tput sgr0
                else
@@ -1744,14 +1745,14 @@ function listarArchivos(){
                fi
             fi
 
-            echo -en " $x " 
+            echo -en " $x "
 
             ## Comprobar que existe en local
-            [[ -e "$x" ]] && echo || echo ' No existe en local' 
+            [[ -e "$x" ]] && echo || echo ' No existe en local'
 
          done
          echo ""
-         [[ "$1" != "--listar" ]] && tecla 
+         [[ "$1" != "--listar" ]] && tecla
       else
          # no hay archivos
          mensajes " No hay archivos afectados"
@@ -1775,7 +1776,7 @@ function contador() {
      if [ "$1" = "-p" ] ; then                            # Parar contador
 
         if [ "$tiempoId" != "" ] ; then                   # Comprobar que tenemos contador en marcha
-           SQL="UPDATE tiempos SET fechaInicio=fechaInicio, fechaFinal='`AHORA`' WHERE id=$tiempoId" 
+           SQL="UPDATE tiempos SET fechaInicio=fechaInicio, fechaFinal='`AHORA`' WHERE id=$tiempoId"
            ejecutarSQL "$SQL"
            tiempoId=""
            mensajes "Paramos contador"
@@ -1786,7 +1787,7 @@ function contador() {
       elif [ "$1" = "-s" ] ; then                         # Poner contador en marcha
 
          if [ "$tiempoId" = "" ] ; then                   # Sino lo esta ya
-            SQL="INSERT INTO tiempos (idMovimiento, fechaInicio) VALUES ($movimientoId,'`AHORA`')" 
+            SQL="INSERT INTO tiempos (idMovimiento, fechaInicio) VALUES ($movimientoId,'`AHORA`')"
             ejecutarSQL "$SQL"
             # Descubrimos ultimo id
             SQL="SELECT id FROM tiempos ORDER BY id DESC LIMIT 1"
@@ -1813,11 +1814,7 @@ function ejecutarSQL() {
 
    log $FUNCNAME "$*"
 
-   if [ "$mt_ssh_mysql" != '' ] ; then
-     CMD="$mt_ssh_mysql \"$mt_comando_mysql $2 -e \\\"$1\\\"\""
-    else
-     CMD="$mt_comando_mysql $2 -e \"$1\""
-   fi
+   CMD="sqlite3 proyecto.sqlite \"$1\""
    log "CMD: $CMD"
    eval "$CMD"
    if [ $? != 0 ] ; then
@@ -1860,8 +1857,8 @@ function borrar_archivo_lista_afectados() {
           SALIDA=$(ejecutarSQL "$SQL" "-N")
 
           if [ "$SALIDA" != "" ] ; then
-             echo -e "\nArchivos afectados" 
-             echo -e   "------------------\n" 
+             echo -e "\nArchivos afectados"
+             echo -e   "------------------\n"
              select ARCHIVOSe in salir todos `echo "$SALIDA"` ; do
                echo "archivo: "
                break
@@ -1875,7 +1872,7 @@ function borrar_archivo_lista_afectados() {
 
    fi
 
-   
+
    }
 
 ## borrar archivos afectados de la base de datos
@@ -1888,7 +1885,7 @@ function bd_borrar_archivos_afectados() {
       error "No se especifica archivo a borrar"
    fi
 
-    if [ "$1" = "todos" ] ; then 
+    if [ "$1" = "todos" ] ; then
        SQL="DELETE FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId"
     else
        SQL="DELETE FROM rMovimientoArchivos WHERE idMovimiento=$movimientoId AND nombre='$1'"
@@ -1907,7 +1904,7 @@ function anyadirArchvios(){
    # Inicializar e_archivos_seleccionados
    e_archivos_seleccionados=()
 
-   if [ "$movimientoId" = "" ] ; then 
+   if [ "$movimientoId" = "" ] ; then
     mensajes " No hay movimiento seleccionado"
     # Buscamos si hay alguno abierto
     #movimientosAbiertos
@@ -2116,13 +2113,13 @@ function pedirTarea() {
 
 ## Recibimos el nombre del evento a lanzar y se cargaran los scripts encontrados
 ## dentro de las carpetas de componentes/[componente]/eventos/[nombre evento]/
-## y plugins/[plugin]/eventos/[nombre evento] ordenados según nombre de script, 
+## y plugins/[plugin]/eventos/[nombre evento] ordenados según nombre de script,
 ## 03-script antes que 10-script
 ##
 ## Si desde el evento se añade evento_fallido=true antes del siguiente evento
 ## se preguntara si se desea cancelar o continuar
 ##
-## Si un evento desea interrumpir la ejecución del evento puede añadir 
+## Si un evento desea interrumpir la ejecución del evento puede añadir
 ## interrunpir_evento=true en su código lo cual generara la parada de los eventos.
 ##
 ## $1 Nombre del evento
@@ -2138,19 +2135,19 @@ function evento() {
    local lista=''
 
    for fevento in ${DIR_MAGTRABAJOS}/componentes/*/eventos/$evento/* ; do
-      [[ -e "$fevento" ]] && lista="$lista \n`basename $fevento`\t$fevento" 
+      [[ -e "$fevento" ]] && lista="$lista \n`basename $fevento`\t$fevento"
    done
 
    for componente in $mt_plugins_activados ; do
       for fevento in ${DIR_MAGTRABAJOS}/plugins/$componente/eventos/$evento/* ; do
-         [[ -e "$fevento" ]] && lista="$lista \n`basename $fevento`\t$fevento" 
+         [[ -e "$fevento" ]] && lista="$lista \n`basename $fevento`\t$fevento"
       done
    done
 
    # Eventos de proyecto
 
    for evento_proyecto in ${DIR_PROYECTO}/eventos/$evento/* ; do
-      [[ -e "$evento_proyecto" ]] && lista="$lista \n`basename $evento_proyecto`\t$evento_proyecto" 
+      [[ -e "$evento_proyecto" ]] && lista="$lista \n`basename $evento_proyecto`\t$evento_proyecto"
    done
 
    [[ "$lista" == "" ]] && ( log "$FUNCNAME"  "Eventos: Sin ganchos para $eventos" ; return )
@@ -2179,7 +2176,7 @@ function evento() {
 
 # FUNCIONES SOBRE ACCIONES
 
-## Modificar fecha de pagado de una tarea, Fecha a añadir, sino la pasamos como 
+## Modificar fecha de pagado de una tarea, Fecha a añadir, sino la pasamos como
 ## parámetro se preguntara
 
 function modificarFechaPagado() {
@@ -2258,7 +2255,7 @@ function cerrar(){
       if [ "$ABIERTOS" != "" ] ; then
          for movimientoId in $ABIERTOS ; do
             log "$FUNCNAME" "Cerrando movimiento $x"
-            cerrar cerrando_tarea 
+            cerrar cerrando_tarea
          done
          movimientoId=''
       fi
@@ -2333,12 +2330,12 @@ function cambiarEurosHoraTareas(){
       echo "Cambiando estado a ${#tareasIds[*]} tareas"
       echo "$tarea" | sed 's/./-/g'
       echo
-      local condicion_cambio="idProyecto = $proyectoId $CONDICION"
+      local condicion_cambio="$CONDICION"
    fi
 
    if [ "$1" = "" ] ; then
       read -p "Cambiar euros/hora a (ENTER SALIR): " EUROS_HORA
-      if [ "$EUROS_HORA" = "" ] ; then 
+      if [ "$EUROS_HORA" = "" ] ; then
          mensajes " Cancelado cambiar estado"
          return
       fi
@@ -2373,14 +2370,14 @@ function cambiarEstadoTareas(){
       echo "Cambiando estado a ${#tareasIds[*]} tareas"
       echo "$tarea" | sed 's/./-/g'
       echo
-      local condicion_cambio="idProyecto = $proyectoId $CONDICION"
+      local condicion_cambio="$CONDICION"
    fi
 
    if [ "$1" = "" ] ; then
       SQL="SELECT id, nombre FROM estados"
-      ejecutarSQL "$SQL" 
+      ejecutarSQL "$SQL"
       read -p "Cambiar estado a (ENTER SALIR): " ESTADO_ACTUAL
-      if [ "$ESTADO_ACTUAL" = "" ] ; then 
+      if [ "$ESTADO_ACTUAL" = "" ] ; then
          mensajes " Cancelado cambiar estado"
          return
       fi
@@ -2423,7 +2420,7 @@ function descripcion(){
          else
             $mt_editor "$tmp_file"
          fi
-         $mt_rst2html $tmp_file "${DIR_TMP}trabajos.html" 2> ${DIR_TMP}rst2html.err 
+         $mt_rst2html $tmp_file "${DIR_TMP}trabajos.html" 2> ${DIR_TMP}rst2html.err
          errores=`cat ${DIR_TMP}rst2html.err`
          if [ "$errores" != "" ] ; then
             echo
@@ -2458,7 +2455,7 @@ function descripcion(){
          else
             $mt_editor "$tmp_file"
          fi
-         $mt_rst2html $tmp_file "${DIR_TMP}trabajos.html" 2> ${DIR_TMP}rst2html.err 
+         $mt_rst2html $tmp_file "${DIR_TMP}trabajos.html" 2> ${DIR_TMP}rst2html.err
          errores=`cat ${DIR_TMP}rst2html.err`
          if [ "$errores" != "" ] ; then
             echo
@@ -2567,9 +2564,9 @@ function borrar(){
    elif [ "$movimientoId" = '' ] && [ "$tareaId" != '' ] ; then                             # Tarea seleccionado
       log "$FUNCNAME" "Tarea: $tareaId"
       echo 'Tareas a borrar'
-      ejecutarSQL "$SQL_TAR AND t.id=$tareaId $ORDER_TAR" 
+      ejecutarSQL "$SQL_TAR AND t.id=$tareaId $ORDER_TAR"
       echo 'Movimientos relacionados'
-      ejecutarSQL "SELECT m.id, m.nombre FROM movimientos m, tareas t WHERE t.id=m.idTarea AND t.id=$tareaId " 
+      ejecutarSQL "SELECT m.id, m.nombre FROM movimientos m, tareas t WHERE t.id=m.idTarea AND t.id=$tareaId "
 
       echo ""
       read -p "Eliminar tarea (s/n): " OPCION
@@ -2613,8 +2610,8 @@ function borrar(){
          echo -n "Borrar movimiento..."
          SQL="DELETE FROM movimientos WHERE id=$movimientoId"
          ejecutarSQL "$SQL"
-         if [ "$?" = 0 ] ; then 
-            echo '[ok]' 
+         if [ "$?" = 0 ] ; then
+            echo '[ok]'
             mensajes " Movimiento eliminado"
          fi
          movimiento=""
@@ -2637,7 +2634,7 @@ function borrar(){
 ## Parámetros
 ##
 ## -nombre Presenta nombre de proyecto
-## -completo Presenta nombre y toda la información disponible          
+## -completo Presenta nombre y toda la información disponible
 ##
 
 function presentarProyecto() {
@@ -2658,7 +2655,7 @@ function presentarProyecto() {
 
 # SOBRE TAREA
 
-## Presentar cabecera para tarea según tipo cabecera 
+## Presentar cabecera para tarea según tipo cabecera
 ## especificado en perfil
 
 presentarCabeceraTarea() {
@@ -2672,23 +2669,23 @@ presentarCabeceraTarea() {
             # Si el estado de la tarea es Pendiente o Posible no buscamos total ya que nos da error
             # al no tener movimientos ni tiempos.
 
-            SQL="select CONCAT( t.id, '\t', t.nombre, '\t', '0' , '\t',  
+            SQL="select CONCAT( t.id, '\t', t.nombre, '\t', '0' , '\t',
             e.nombre, '\t',
             t.fechaInicio, '\t',
             IF(t.fechaFinal,t.fechaFinal,'Sin fecha final'), '\t' )
-            from tareas t, estados e WHERE t.idEstado=e.id  AND t.idProyecto=$proyectoId  AND t.id=$tareaId"
+            from tareas t, estados e WHERE t.idEstado=e.id  AND t.id=$tareaId"
 
          else
 
-            SQL="select CONCAT( t.id, '\t', t.nombre, '\t',  
-            IF (t.presupuesto>0,
-             t.presupuesto + (t.compensacion),
-             ROUND(t.euroshora * (sum(UNIX_TIMESTAMP(ti.fechaFinal)- UNIX_TIMESTAMP(ti.fechaInicio))/60)/60 + 	(t.compensacion),2) 
-            ) , '\t',  
+            SQL="select CONCAT( t.id, '\t', t.nombre, '\t',
+            CASE WHEN t.presupuesto>0
+             THEN t.presupuesto + (t.compensacion)
+             ELSE ROUND(t.euroshora * (sum(DATETIME(ti.fechaFinal, 'unixepoch')- DATETIME(ti.fechaInicio, 'unixepoch'))/60)/60 + 	(t.compensacion),2) END
+            , '\t',
             e.nombre, '\t',
             t.fechaInicio, '\t',
             IF(t.fechaFinal,t.fechaFinal,'Sin fecha final'), '\t' )
-            from tareas t, estados e, tiempos ti, movimientos m WHERE m.idTarea=t.id AND ti.idMovimiento=m.id AND t.idEstado=e.id  AND t.idProyecto=$proyectoId  AND t.id=$tareaId"
+            from tareas t, estados e, tiempos ti, movimientos m WHERE m.idTarea=t.id AND ti.idMovimiento=m.id AND t.idEstado=e.id AND t.id=$tareaId"
 
          fi
 
@@ -2696,7 +2693,7 @@ presentarCabeceraTarea() {
 
          [[ "$SALIDA" = "" ]] && echo -e "ERROR::$SALIDA \nSQL::$SQL"
 
-         titulo_por_nivel "$tarea"  | tee -a "$TMP" 
+         titulo_por_nivel "$tarea"  | tee -a "$TMP"
 
          echo -e $SALIDA | awk -v RS='\nnn' -v FS='\t' '{ titulo=$2 ; gsub(".","=",$2) ; printf ":Fechas: %s /%s\n\n:Total: %s\n\n:Estado: %s\n\n",$5,$6,$3,$4}' | tee -a $TMP
          echo ":id: $tareaId"       | tee -a "$TMP"
@@ -2719,7 +2716,7 @@ presentarCabeceraTarea() {
          # cmd="$(ejecutarSQL "$SQL" '-N')"
          # log "$FUNCNAME $cmd"
          # eval "$cmd"
-         titulo_por_nivel "$tarea"  | tee -a "$TMP" 
+         titulo_por_nivel "$tarea"  | tee -a "$TMP"
          SQL="SELECT descripcion from tareas WHERE id=$tareaId"
          echo -e "$(ejecutarSQL '$SQL' '-N')" | tee -a $TMP
          ;;
@@ -2731,7 +2728,7 @@ presentarCabeceraTarea() {
 
 
 ## Presentar contenido de los archivos readme.dox afectados
-## 
+##
 ## Parámetros:
 ##
 ## - $1 -t sobre tarea, -m sobre movimiento
@@ -2797,7 +2794,7 @@ function presentarTotalTarea() {
 ##
 ## Dependiendo del tipo de informe que se pide o ACCION que se esta realizando
 
-# Totales   
+# Totales
 tarPresupuesto=$(ejecutarSQL "SELECT presupuesto from tareas where id=$tareaId" "-N")
 tarEurosHora=$(ejecutarSQL "SELECT euroshora from tareas where id=$tareaId" "-N")
 ESTADO=$(ejecutarSQL "SELECT e.nombre FROM tareas t, estados e WHERE t.idEstado=e.id AND t.id=$tareaId" "-N")
@@ -2805,7 +2802,7 @@ tarea=$(ejecutarSQL "SELECT nombre FROM tareas WHERE id=$tareaId" "-N")
 compensacion=$(ejecutarSQL "SELECT compensacion FROM tareas WHERE id=$tareaId" "-N")
 
 
-totalTareaMinutos=$(ejecutarSQL "SELECT sum((IF ( (ti.fechaFinal is not null ),UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now())) - UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId" "-N")
+totalTareaMinutos=$(ejecutarSQL "SELECT sum((CASE WHEN (ti.fechaFinal is not null ) THEN DATETIME(ti.fechaFinal, 'unixepoch') ELSE DATETIME(now(, 'unixepoch'))) - DATETIME(ti.fechaInicio, 'unixepoch')) / 60) END as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId" "-N")
 if [ "$totalTareaMinutos" != "NULL" ] ; then
    ttm=$(echo $totalTareaMinutos | cut -d. -f1)
 else
@@ -2830,15 +2827,15 @@ else
 fi
 
 if [ "$totalTareaMinutos" != "NULL" ] && [ $ttm -gt 1 ] ; then
-   
+
 
    DEDICACIO="`pasarMinHoras ${totalTareaMinutos:-0}`"
-   
+
    SQL="SELECT DATE_FORMAT(min(m.fechaInicio), '%Y-%m-%d')  as inicio FROM movimientos m WHERE idTarea=$tareaId"
    DATAINICI=$(ejecutarSQL "$SQL" "-N")
    SQL="SELECT DATE_FORMAT(max(m.fechaFinal), '%Y-%m-%d')  as inicio FROM movimientos m WHERE idTarea=$tareaId"
    DATAFI=$(ejecutarSQL "$SQL" "-N")
-  
+
 else
 
    TOTALTAREA="0"
@@ -2861,11 +2858,11 @@ case $ACCION in
       printf "|%3s|%-50s|%9s|%20s|%9s|%9s|\n" $tareaId "$tarea" ${DEDICACIO:-0} "$ESTADO" ${TOTALTAREA:0} ${PRESUPOST:-0} | tee -a $TMP
       ;;
    ver)
-      echo "PENDIENTE TOTAL PARA VER" 
+      echo "PENDIENTE TOTAL PARA VER"
       ;;
    *) # Por defecto
       titulo_por_nivel "Total de tarea $tarea" | tee -a "$TMP"
-      fila="\n+------------+------------+----------------+-------------+-----------+-----------+---------+----------+----------+" 
+      fila="\n+------------+------------+----------------+-------------+-----------+-----------+---------+----------+----------+"
       echo -e $fila  | tee -a $TMP
       echo -e -n "| Inici      | Fi         | Estat          | Estimacio   | Presupost | Dedicacio | Compen. | SubTotal |  Total   |"  | tee -a $TMP
       echo -e $fila  | tee -a $TMP
@@ -2884,7 +2881,7 @@ esac
 ## Presentamos lineas de los archivos afectados que contengan 'todo'
 ##
 ## Problemas con la códificación de caracteres al estar los archivos en latin1
-## Hacemos que se guarde la salida en un archivo para pasar su codificación a 
+## Hacemos que se guarde la salida en un archivo para pasar su codificación a
 ## UTF-8 y evitarlo.
 ##
 ## $1 -t|-m Para tarea o movimineto sin especificar sobre todo el proyecto (lento)
@@ -2949,7 +2946,7 @@ presentarTODOs() {
 
    else
 
-     echo 
+     echo
      echo buscar_codigo
      echo -------------
      echo -e "`color colError`"
@@ -2991,13 +2988,13 @@ presentarCabeceraMovimiento() {
 
       completa)
 
-         # Con formato presentamos titulo de movimiento como 
+         # Con formato presentamos titulo de movimiento como
          # subsección, y su descripción
 
          if [ "$movimiento" = 'inicio' ] ; then
            titulo_por_nivel "inicio de $tarea" | tee -a $TMP
          else
-           titulo_por_nivel "$movimiento" | tee -a $TMP 
+           titulo_por_nivel "$movimiento" | tee -a $TMP
          fi
 
          SQL="SELECT descripcion FROM movimientos WHERE id=$movimientoId"
@@ -3005,16 +3002,16 @@ presentarCabeceraMovimiento() {
 
          echo ":fecha: $fecha_inicio"   | tee -a $TMP
          echo ":id: $movimientoId"      | tee -a $TMP
-         echo                           | tee -a $TMP      
+         echo                           | tee -a $TMP
          echo -e "$descripcion"         | tee -a $TMP
-         echo                           | tee -a $TMP      
+         echo                           | tee -a $TMP
 
          ;;
 
       txt)
 
          log "$FUNCNAME" "formato txt"
-         SQL="$SQL_MOV AND m.id=$movimientoId " 
+         SQL="$SQL_MOV AND m.id=$movimientoId "
          SALIDA=$(ejecutarSQL "$SQL" "-N")
 
          if [ "$SALIDA" = "" ] ; then
@@ -3024,8 +3021,8 @@ presentarCabeceraMovimiento() {
 
          ## Si no tenemos detalles de movimiento presentamos solo el titulo
          echo -e $SALIDA | \
-         awk -v RS='\nnn' -v FS='\t' -v tarea="$tarea" ' 
-         { if ( $2 != "inicio" ) 
+         awk -v RS='\nnn' -v FS='\t' -v tarea="$tarea" '
+         { if ( $2 != "inicio" )
             printf "*%s*\n\n",$2
          else
             printf "%s \n\n",$5
@@ -3040,16 +3037,16 @@ presentarCabeceraMovimiento() {
          descripcion="$(ejecutarSQL "$SQL" "-N")"
 
          if [ "$movimiento" != 'inicio' ] ; then
-           titulo_por_nivel "$movimiento" | tee -a $TMP 
+           titulo_por_nivel "$movimiento" | tee -a $TMP
          #else
-           # titulo_por_nivel "Inicio de $tarea" | tee -a $TMP 
+           # titulo_por_nivel "Inicio de $tarea" | tee -a $TMP
          fi
 
-         # echo                           | tee -a $TMP      
-         # echo \*\*${movimiento}\*\*     | tee -a $TMP 
-         echo                           | tee -a $TMP  
+         # echo                           | tee -a $TMP
+         # echo \*\*${movimiento}\*\*     | tee -a $TMP
+         echo                           | tee -a $TMP
          echo -e "$descripcion"         | tee -a $TMP
-         echo                           | tee -a $TMP      
+         echo                           | tee -a $TMP
 
          ;;
 
@@ -3063,11 +3060,11 @@ function presentarTotalMovimiento() {
 
    ## Presentar total de Movimiento
 
-   # Totales   
+   # Totales
    tarEurosHora=$(ejecutarSQL "SELECT euroshora from tareas where id=$tareaId" "-N")
 
 
-   totalMovimientoMinutos=$(ejecutarSQL "SELECT sum((IF ( (ti.fechaFinal is not null ),UNIX_TIMESTAMP(ti.fechaFinal),UNIX_TIMESTAMP(now())) - UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId AND m.id=$movimientoId" "-N")
+   totalMovimientoMinutos=$(ejecutarSQL "SELECT sum((IF ( (ti.fechaFinal is not null ),DATETIME(ti.fechaFinal, 'unixepoch'),DATETIME(now(, 'unixepoch'))) - DATETIME(ti.fechaInicio, 'unixepoch')) / 60)  as minutos FROM tiempos ti, movimientos m, tareas t  WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.id=$tareaId AND m.id=$movimientoId" "-N")
 
    if [ "$totalMovimientoMinutos" != "NULL" ] ; then
       ttm=$(echo $totalMovimientoMinutos | cut -d. -f1)
@@ -3081,7 +3078,7 @@ function presentarTotalMovimiento() {
    if [ "$totalMovimientoMinutos" != "NULL" ] && [ $ttm -gt 1 ] ; then
 
       DEDICACIO="`pasarMinHoras ${totalMovimientoMinutos:-0}`"
-     
+
    else
 
       total_movimiento="0"
@@ -3091,7 +3088,7 @@ function presentarTotalMovimiento() {
 
    titulo_por_nivel "Total de movimiento $tarea / $movimiento" | tee -a "$TMP"
 
-   fila="\n+-----------+----------+" 
+   fila="\n+-----------+----------+"
    echo -e $fila  | tee -a $TMP
    echo -e -n "| Dedicacio |  Total   |"  | tee -a $TMP
    echo -e $fila  | tee -a $TMP
@@ -3115,7 +3112,7 @@ function presentarArchivosAfectados() {
 [[ "$2" != "" ]] && local id="$2" || local id=
 
 
-case $1 in 
+case $1 in
 
    -t) # Presentar de tarea
       if [ "$id" != "" ] ; then
@@ -3204,15 +3201,15 @@ function presentarNotas() {
 
    ## Presentamos archivos con las notas del proyecto
 
-   [[ ! -e "$FICH_PENDIENTE" ]] && return 
+   [[ ! -e "$FICH_PENDIENTE" ]] && return
 
    local salida=$(cat "$FICH_PENDIENTE")
 
    [[ "$salida" == "" ]] && return
 
    # Archivo de notas
-   titulo_por_nivel "Archivo de Notas de $proyecto" | tee -a $TMP 
-   cat $FICH_PENDIENTE | tee -a $TMP 
+   titulo_por_nivel "Archivo de Notas de $proyecto" | tee -a $TMP
+   cat $FICH_PENDIENTE | tee -a $TMP
 
    }
 
@@ -3226,13 +3223,13 @@ function pendienteCodigo() {
      SALIDA="$(buscar_codigo formato enlaces proyecto $proyecto)"
      if [ "$SALIDA" != "" ] ; then
         titulo_por_nivel "Código pendiente de $proyecto" | tee -a $TMP
-        echo -e "$SALIDA" | tee -a $TMP 
+        echo -e "$SALIDA" | tee -a $TMP
         echo | tee -a $TMP
      fi
 
    else
 
-     echo 
+     echo
      echo buscar_codigo
      echo -------------
      echo -e "`color colError`"
@@ -3258,11 +3255,11 @@ function erroresCodigo() {
         echo "Errores en código de $proyecto" | tee -a $TMP
         echo "Errores en código de $proyecto" | sed 's/./=/g' | tee -a $TMP
         echo | tee -a $TMP
-        echo -e "$SALIDA" | tee -a $TMP 
+        echo -e "$SALIDA" | tee -a $TMP
      fi
    else
 
-     echo 
+     echo
      echo buscar_codigo
      echo -------------
      echo -e "`color colError`"
@@ -3282,7 +3279,7 @@ function estado_control_versiones() {
 
       # subversion
       SALIDA="$(magcontrolversion status)"
-      if [ $? == 0 ] && [ "$SALIDA" != "" ] ; then 
+      if [ $? == 0 ] && [ "$SALIDA" != "" ] ; then
 
          titulo_por_nivel "subversion en $proyecto" | tee -a $TMP
          echo -e "$SALIDA" | awk -v FS='\t' '{printf "\n- %s", $1}' | tee -a $TMP
@@ -3294,7 +3291,7 @@ function estado_control_versiones() {
 
       # git
       SALIDA="$(git status)"
-      if [ $? == 0 ] && [ "$SALIDA" != "" ] ; then 
+      if [ $? == 0 ] && [ "$SALIDA" != "" ] ; then
 
          titulo_por_nivel "git en $proyecto" | tee -a $TMP
          echo -e "$SALIDA" | awk -v FS='@@@' '{printf "\n| %s", $1}' | tee -a $TMP
@@ -3306,19 +3303,19 @@ function estado_control_versiones() {
    }
 
 function tareas_pendientes() {
-   
+
    ## Listar tareas empezadas,pendientes o posibles
 
    local separador=';;;'  ##< Para separar campos en mysql
 
    # Si tenemos marcado que se muestren los enlaces
    if [ "$per_informe_enlaces" != "SI" ] ; then
-      SQL="SELECT CONCAT(t.id, '$separador', t.nombre,'$separador', e.nombre,'$separador', t.prioridad, '\nnn') FROM tareas t, estados e 
-        WHERE t.idEstado=e.id AND (t.idEstado=1 OR t.idEstado=2 OR t.idEstado=6) AND t.idProyecto=$proyectoId
+      SQL="SELECT CONCAT(t.id, '$separador', t.nombre,'$separador', e.nombre,'$separador', t.prioridad, '\nnn') FROM tareas t, estados e
+        WHERE t.idEstado=e.id AND (t.idEstado=1 OR t.idEstado=2 OR t.idEstado=6)
         ORDER BY t.prioridad desc, e.nombre desc "
    else
-      SQL="SELECT CONCAT(t.id,'$separador','\\\`',t.nombre,' <magtrabajos://--terminal%20--menu%20-t%20',t.id, '>\\\`_','$separador', e.nombre,'$separador', t.prioridad, '\nnn') FROM tareas t, estados e 
-        WHERE t.idEstado=e.id AND (t.idEstado=1 OR t.idEstado=2 OR t.idEstado=6) AND t.idProyecto=$proyectoId
+      SQL="SELECT CONCAT(t.id,'$separador','\\\`',t.nombre,' <magtrabajos://--terminal%20--menu%20-t%20',t.id, '>\\\`_','$separador', e.nombre,'$separador', t.prioridad, '\nnn') FROM tareas t, estados e
+        WHERE t.idEstado=e.id AND (t.idEstado=1 OR t.idEstado=2 OR t.idEstado=6)
         ORDER BY t.prioridad desc, e.nombre desc "
    fi
 
@@ -3373,10 +3370,10 @@ function contabilidad_proyecto() {
    # listado de facturas pendientes
    pendiente_facturas
 
-   # Tareas acabadas 
+   # Tareas acabadas
 
    salida="`listado_tareas_totales "AND t.idEstado=3"`"
-   
+
    if [ "$salida" != "" ] ; then
 
       titulo_por_nivel "Tareas acabadas en $proyecto"     | tee -a $TMP
@@ -3436,28 +3433,28 @@ function presentarTotalTareasGeneral() {
    # Buscar el total en minutos de todas las tareas seleccionadas
 
    SQL="
-   SELECT sum((IF (ti.fechaFinal is not null,UNIX_TIMESTAMP(ti.fechaFinal)
-      ,UNIX_TIMESTAMP(now()))- UNIX_TIMESTAMP(ti.fechaInicio)) / 60)  as minutos
-      FROM tiempos ti, movimientos m, tareas t 
-      WHERE ti.idMovimiento=m.id AND m.idTarea=t.id AND t.idProyecto=$proyectoId $CONDICION_MOVIMIENTO"
+   SELECT sum((IF (ti.fechaFinal is not null,DATETIME(ti.fechaFinal, 'unixepoch')
+      ,DATETIME(now(, 'unixepoch')))- DATETIME(ti.fechaInicio, 'unixepoch')) / 60)  as minutos
+      FROM tiempos ti, movimientos m, tareas t
+      WHERE ti.idMovimiento=m.id AND m.idTarea=t.id $CONDICION_MOVIMIENTO"
 
 
    totalTodoMinutos=$(ejecutarSQL "$SQL" "-N")
    ttm=$(echo $totalTodoMinutos | cut -d. -f1)
 
    if [ "$totalTodoMinutos" != "NULL" ] && [ $ttm -gt 1 ]  ; then
-      
+
       # Total
 
       SQL="
-      SELECT min(fechaInicio), max(fechaFinal), sum(total) 
+      SELECT min(fechaInicio), max(fechaFinal), sum(total)
       FROM (
-         SELECT t.fechaInicio, t.fechaFinal,  
+         SELECT t.fechaInicio, t.fechaFinal,
          IF (t.presupuesto>0,t.presupuesto + (t.compensacion),
-            ROUND(t.euroshora * (sum(UNIX_TIMESTAMP(ti.fechaFinal)- UNIX_TIMESTAMP(ti.fechaInicio))/60)/60 + (t.compensacion),2)
-         ) as total 
-         FROM tareas t, tiempos ti, movimientos m 
-         WHERE m.idTarea=t.id AND ti.idMovimiento=m.id AND t.idProyecto=$proyectoId  $CONDICION_TAREA
+            ROUND(t.euroshora * (sum(DATETIME(ti.fechaFinal, 'unixepoch')-DATETIME(ti.fechaInicio, 'unixepoch'))/60)/60 + (t.compensacion),2)
+         ) as total
+         FROM tareas t, tiempos ti, movimientos m
+         WHERE m.idTarea=t.id AND ti.idMovimiento=m.id  $CONDICION_TAREA
          GROUP BY t.id
       ) as totalsql
       "
@@ -3470,7 +3467,7 @@ function presentarTotalTareasGeneral() {
       local total=$(echo -e $SALIDA | cut -d' ' -f 3)
 
 
-      
+
       # Calcular los euros hora que salen
       tiempoTotal=`pasarMinHoras ${totalTodoMinutos:-0}`
       euros_hora=$(echo "scale=2 ; (${total:-0}/${totalTodoMinutos:-0})*60" | bc -l)
@@ -3498,12 +3495,12 @@ function ver_contador(){
    log $FUNCNAME "$*"
 
    ## Presentar contador
-   
+
    CONTADOR=""
 
    # Si tenemos un movimiento miramos el contador
    if [ "$movimientoId" != "" ] && [ "$tiempoId" != "" ] ; then
-      SQL="SELECT (`date +'%s'`-UNIX_TIMESTAMP(fechaInicio))/60 as min FROM tiempos WHERE id=$tiempoId"
+      SQL="SELECT (`date +'%s'`-DATETIME(fechaInicio, 'unixepoch'))/60 as min FROM tiempos WHERE id=$tiempoId"
       CONTADOR=$(ejecutarSQL "$SQL" "-N")
       #ejecutarSQL "$SQL"
       if [ "$CONTADOR" != "" ] ; then
@@ -3521,7 +3518,7 @@ function lista_archivos() {
 
    ## Listar archivos de fora que pueda ser aprovechada la lista para otros programas
 
-   case $1 in 
+   case $1 in
 
       -t) # Presentar de tarea
          local SQL="SELECT DISTINCT r.nombre FROM tareas t, movimientos m, rMovimientoArchivos r WHERE m.idTarea=t.id AND m.id=r.idMovimiento AND t.id=$tareaId ORDER BY r.nombre"
@@ -3581,8 +3578,8 @@ function comenzar(){
 
 
       anyadir)
-         echo "Añadiendo archivos afectados" 
-         anyadirArchvios 
+         echo "Añadiendo archivos afectados"
+         anyadirArchvios
          ;;
 
       # *) # No tenemos definida una acción, probamos de ejecutarla como comando
@@ -3593,8 +3590,8 @@ function comenzar(){
    esac
 
 
-   ver 
-   
+   ver
+
    pieInforme
 }
 
@@ -3659,7 +3656,7 @@ function verProyecto(){
          tareas_pendientes
 
          # Moviminetos abiertos
-         # SQL="SELECT CONCAT(t.nombre, ': ',  m.nombre, ';;;', m.descripcion, '\nnn') FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND t.idProyecto=$proyectoId AND (m.fechaFinal is null ) ORDER BY m.id"
+         # SQL="SELECT CONCAT(t.nombre, ': ',  m.nombre, ';;;', m.descripcion, '\nnn') FROM movimientos m, tareas t  WHERE m.idTarea=t.id AND (m.fechaFinal is null ) ORDER BY m.id"
 
          # SALIDA="$(ejecutarSQL "$SQL" "-N")"
 
@@ -3815,13 +3812,13 @@ function encabezado() {
    local ST=''
 
    # Presentamos nombre de proyecto, tarea, movimiento y estado
-   if [ "$proyecto" != "" ] ; then 
+   if [ "$proyecto" != "" ] ; then
       T="$proyecto ($proyectoId)"
-      if [ "$tarea" != "" ] ; then 
+      if [ "$tarea" != "" ] ; then
          ST="$tarea ($tareaId)"
-         if [ "$movimiento" != "" ] ; then 
+         if [ "$movimiento" != "" ] ; then
             ST="$ST | $movimiento ($movimientoId)"
-         fi 
+         fi
       fi
       if [ "$estado_tarea" != "" ] ; then T="$T [$estado_tarea]" ; fi
    fi
@@ -3853,11 +3850,11 @@ function menu(){
 
    # Borramos fichero temporal de archivos
    if [ -e "$fichArchivosTmp" ] ; then rm $fichArchivosTmp ; fi
-   
+
    # Acción por defecto
    if [ "$ACCION" = "menu" ] || [ "$ACCION" = "" ] ; then ACCION="informacion" ; fi
 
-   if [ "$CONDICION" = "" ] ; then CONDICION=" AND t.idProyecto=$proyectoId " ; fi
+   if [ "$CONDICION" = "" ] ; then CONDICION=" " ; fi
 
    # Generamos condición en base a las tareas seleccionadas
    tareas2condicion
@@ -3871,10 +3868,10 @@ function menu(){
 
    abre_caja 'Menu Principal'
 
-   linea_caja 'Pro[y]ectos' '[I]nformes' 
+   linea_caja 'Pro[y]ectos' '[I]nformes'
    linea_caja '[T]areas' 'E[x]portar'
    linea_caja 'Gr[u]pos' ''
-   linea_caja '[M]ovimmientos' '[N]otas' 
+   linea_caja '[M]ovimmientos' '[N]otas'
    linea_caja '[F]acturacion' '[C]onfigurar'
    linea_caja '[H]erramientas' 'Archivo para pro[g]ramadores'
    linea_caja
@@ -3889,7 +3886,7 @@ function menu(){
 
    # Pendiente, buscamos la ultima linea del archivo de pendiente y la presentamos si hay contenido
    if [ -e "$FICH_PENDIENTE" ] ; then
-      PENDIENTE=`tail -n 1 $FICH_PENDIENTE` 
+      PENDIENTE=`tail -n 1 $FICH_PENDIENTE`
       if [ "$PENDIENTE" != "" ] ; then
          caja "$PENDIENTE" 'Pendiente' "$colComentario" '0'
       fi
@@ -3899,7 +3896,7 @@ function menu(){
    mensajes -get
 
    OPCION=''
-   read -t 70 -n 1 -s OPCION 
+   read -t 70 -n 1 -s OPCION
    echo
 
    case $OPCION in
@@ -3942,7 +3939,7 @@ function menu(){
             perfil_actual=mail
             ACCION='informe' ; comenzar
             perfil_actual=$ant_perfil_actual
-            exportar email "$TMP" 
+            exportar email "$TMP"
          fi
 
          # devolver estado anterior
@@ -3953,7 +3950,7 @@ function menu(){
       *) menu ;;
 
    esac
-   
+
    menu
 
 }
@@ -3974,12 +3971,12 @@ function menuComponentes() {
    for componente in ${DIR_MAGTRABAJOS}/componentes/*/menu.sh ; do
       [[ -e "$componente" ]] || break
       echo -e "$(basename `dirname "$componente"`)\t`doxygen2help "$componente" -tag brief`" >> ${DIR_TMP}listado
-      
+
    done
    for componente in ${DIR_MAGTRABAJOS}/plugins/*/menu.sh ; do
       [[ -e "$componente" ]] || break
       echo -e "$(basename `dirname "$componente"`)\t`doxygen2help "$componente" -tag brief`" >> ${DIR_TMP}listado
-      
+
    done
    echo "$listado"
    generar_listado_fichero -t 'Componentes' --ocultar-ayuda
@@ -4010,7 +4007,7 @@ function menuHerramientas(){
    linea_caja '[E]nviar un email' 'V[a]riables de magtrabajos'
    linea_caja '[N]ueva ventana de programa'
    cierra_caja
-   
+
 
    read -n 1 -s OPCION
    echo
@@ -4054,7 +4051,7 @@ function menuHerramientas(){
          local declare sesiones="*.vim"
 
          if [ ${#sesiones[*]} = 1 ] ; then # si solo hay una la abrimos directamente
-            SESSION=${sesiones[0]} 
+            SESSION=${sesiones[0]}
          elif [ ${#sesiones[*]} = 0 ] ; then # si no hay
             mensajes ' No hay sesiones de vim'
          else
@@ -4101,7 +4098,7 @@ function menuProyectos(){
    case $OPCION in
 
       a|A) # Seleccionar proyecto
-         seleccionarProyecto 
+         seleccionarProyecto
          ;;
 
       n|N) # Nuevo proyecto
@@ -4147,7 +4144,7 @@ function menuTareas(){
    clear
    encabezado
    caja "Tareas"
-   
+
    abre_caja
    linea_caja "[N]ueva"                   "Cerrar [z]"
    linea_caja "[D]eseleccionar"           "[S]eleccionar"
@@ -4186,7 +4183,7 @@ function menuTareas(){
       u|U) anyadirTareaEmail ;;
       s|S)
          seleccionarTareas -menu
-         echo -e "\nFormato:\n\nNombre\tEstado\tFecha de inicio\tFecha final\tPrioridad\tFactura\tGrupo\tTotal\n" 
+         echo -e "\nFormato:\n\nNombre\tEstado\tFecha de inicio\tFecha final\tPrioridad\tFactura\tGrupo\tTotal\n"
          sql="$SQL_TAR_SELECCIONAR $CONDICION $SQL_TAR_GROUP ORDER BY t.fechaInicio"
          ejecutarSQL "$sql" "-N -B --raw" > ${DIR_TMP}listado
          pedirTarea
@@ -4199,10 +4196,10 @@ function menuTareas(){
          movimientoId_anterior=''
          ;;
       c|C) # Cambiar estado de tareas seleccionadas
-             cambiarEstadoTareas 
+             cambiarEstadoTareas
           ;;
       h|H) # Cambiar euros/hora de tareas
-             cambiarEurosHoraTareas 
+             cambiarEurosHoraTareas
           ;;
       v|V) # Ver la descripcion de la tarea en la que estamos
           if [ -e "$TMP" ] ; then rm $TMP ; fi
@@ -4290,7 +4287,7 @@ function menuGrupo(){
 
    clear
    caja "Grupos de tareas"
-   
+
    if [ "$1" != '' ] ; then
      OPCION=$1
    else
@@ -4339,7 +4336,7 @@ function menuGrupo(){
            # Borramos relaciones de tareas con otros grupos
            SQL="DELETE FROM r_grupos_tareas WHERE tarea_id=$x"
            ejecutarSQL "$SQL"
-           SQL="INSERT INTO r_grupos_tareas (grupo_id, tarea_id) 
+           SQL="INSERT INTO r_grupos_tareas (grupo_id, tarea_id)
             VALUES ($grupoId, $x);"
            ejecutarSQL "$SQL"
            mensajes " Tarea [$x] a grupo [$grupoId]"
@@ -4349,7 +4346,7 @@ function menuGrupo(){
      m|M)
        read -p "Nombre: ($nombre_grupo): " nombre_grupo
        read -p "Descripción: " descripcion
-       sql="UPDATE grupos_tareas 
+       sql="UPDATE grupos_tareas
        SET nombre='$nombre_grupo',
        descripcion='$descripcion'
        WHERE id=$grupoId
@@ -4423,11 +4420,11 @@ function menuGrupo(){
 }
 
 ## Menú para el lanzamientos de comandos externos
-## 
-## Tenemos en cuenta el directorio de comandos externos de la 
+##
+## Tenemos en cuenta el directorio de comandos externos de la
 ## propia aplicación y el de cada proyecto, pudiendo personalizarse
 ## en cada uno los comandos que se deseen.
-## 
+##
 ## Si se encuentra en un directorio llamado extension se incluira en el código
 ## con source, sino se lanza el comando
 
@@ -4436,7 +4433,7 @@ function menuComandos(){
    log $FUNCNAME "$*"
 
    local -a dir_comandos
-   
+
    dir_comandos[0]="$DIR_MAGTRABAJOS/extensiones/"
    dir_comandos[1]="$DIR_MAGTRABAJOS/lanzadores/"
    [[ -e ".`basename "$0"`/lanzadores/" ]] && \
@@ -4455,7 +4452,7 @@ function menuComandos(){
       for c in ${dir}* ; do
          local bc=$(basename "$c")
          if [ "$bc" != "readme.dox" ] ; then
-            cs=(${cs[*]} $c) 
+            cs=(${cs[*]} $c)
             printf "\n%2d) %-20s %s" ${conta} "$bc" "`doxygen2help "$c" -tag brief`"
             conta=$conta+1
          fi
@@ -4480,7 +4477,7 @@ function menuComandos(){
    else
       . ${cs[$OPCION]}
    fi
-   
+
    }
 
 function menuArchivos(){
@@ -4527,7 +4524,7 @@ function menuArchivos(){
          fi
 
          read -p 'Nombre: ' nuevo
-         if [ "$nuevo" = "" ] ; then 
+         if [ "$nuevo" = "" ] ; then
             mensajes 'Cancelado nuevo directorio'
             return
          fi
@@ -4545,7 +4542,7 @@ function menuArchivos(){
             return
          fi
 
-         if [ "`plugin_activado ftptrabajo`" != "" ] ; then 
+         if [ "`plugin_activado ftptrabajo`" != "" ] ; then
             # Creamos nuevo directorio en servidor
             echo
             echo ftptrabajos
@@ -4595,14 +4592,14 @@ function menuArchivos(){
          fi
 
          read -p 'Nombre: ' nuevo
-         if [ "$nuevo" = "" ] ; then 
+         if [ "$nuevo" = "" ] ; then
             mensajes 'Cancelado nuevo archivo'
             return
          fi
 
          nuevo="${e_archivos_seleccionados[0]}/$nuevo"
 
-         if [ "`plugin_activado ftptrabajo`" != "" ] ; then 
+         if [ "`plugin_activado ftptrabajo`" != "" ] ; then
              ftptrabajo --proyecto $proyecto  --nuevo $nuevo
          fi
 
@@ -4639,7 +4636,7 @@ function menuArchivos(){
 
          fi
 
-         numeroOrigen=${#e_archivos_seleccionados[*]}                 # contamos los archivos origen 
+         numeroOrigen=${#e_archivos_seleccionados[*]}                 # contamos los archivos origen
 
          if [ "${e_archivos_seleccionados[*]}" = "CANCELADO" ] ; then
             mensajes 'Cambiar nombre cancelado'
@@ -4654,13 +4651,13 @@ function menuArchivos(){
 
          fi
 
-         if [ "$nuevo" = "" ] ; then 
+         if [ "$nuevo" = "" ] ; then
             mensajes 'Cancelado cambio de nombre'
             return
          fi
 
          if [ -d "$nuevo" ] ; then
-            nuevo=$(echo ${nuevo} | sed 's/\/$//g')   # eliminamos barra final para asegurarnos 
+            nuevo=$(echo ${nuevo} | sed 's/\/$//g')   # eliminamos barra final para asegurarnos
             nuevo=${nuevo}/                             # y la añadimos así la llevara seguro.
          fi
 
@@ -4677,16 +4674,16 @@ function menuArchivos(){
          local listaDestino=()
          local listaDirNuevos=()
 
-         # si hay más de un archivo origen deducimos que el 
+         # si hay más de un archivo origen deducimos que el
          # destino es un directorio nuevo a crear
          if [ ${#e_archivos_seleccionados[*]} -gt 1 ] ; then
-            nuevo=$(echo ${nuevo} | sed 's/\/$//g')   # eliminamos barra final para asegurarnos 
+            nuevo=$(echo ${nuevo} | sed 's/\/$//g')   # eliminamos barra final para asegurarnos
             nuevo=${nuevo}/                             # y la añadimos así la llevara seguro.
             echo "nuevo es un directorio que habra que crear"
             listaDirNuevos[${listaDirNuevos[*]}]=$nuevo
          fi
 
-         ## generar lista de directorios y archivos afectados para 
+         ## generar lista de directorios y archivos afectados para
          ## poder ser tratados por ftptrabajo
          for o in `seq 0 $((${#e_archivos_seleccionados[*]}-1))` ; do
 
@@ -4762,7 +4759,7 @@ function menuArchivos(){
 
          generarListaAfectados "${e_archivos_seleccionados[*]}"
 
-         clear 
+         clear
 
          echo
          echo Acción a realizar
@@ -4797,14 +4794,14 @@ function menuArchivos(){
          clear
 
          ## Comprobar que todos los archivos afectados por el cambio estén bloqueados si utilizamos ftptrabajo
-         if [ "`plugin_activado ftptrabajo`" != "" ] ; then 
+         if [ "`plugin_activado ftptrabajo`" != "" ] ; then
             # Comprobar si lo tenemos bloqueado
             echo
             echo magtrabajos
             echo ----------
             echo
             echo Comprobar que los archivos esten bloqueados por nosotros
-            echo 
+            echo
             local noBloqueados='inicio'
             while [ "$noBloqueados" != "" ] ; do
                noBloqueados=''
@@ -4829,7 +4826,7 @@ function menuArchivos(){
                fi
             done
          fi
-         
+
          ## cambiar nombre en lista de afectados de movimiento.
          echo
          echo 'Actualizar lista de archivos afectados al movimiento'
@@ -4844,7 +4841,7 @@ function menuArchivos(){
          ejecutarSQL "$SQL"
 
          ## Ejecutamos primero control de versiones
-         if [ "`plugin_activado magcontrolversion`" != "" ] ; then 
+         if [ "`plugin_activado magcontrolversion`" != "" ] ; then
             echo
             echo control de versiones
             echo --------------------
@@ -4880,12 +4877,12 @@ function menuArchivos(){
 
 
          ## Generar cambios en ftptrabajo
-         if [ "`plugin_activado ftptrabajo`" != "" ] ; then 
+         if [ "`plugin_activado ftptrabajo`" != "" ] ; then
             echo
             echo ftptrabajo
             echo ----------
             echo
-            
+
             if [ "${listaDirNuevos[*]}" != "" ] ; then
                for n in `seq 0 $((${#listaDirNuevos[*]}-1))` ; do
                   ftptrabajo --proyecto $proyecto --nuevo-dir "${listaDirNuevos[$n]}"
@@ -4915,7 +4912,7 @@ function menuArchivos(){
          echo
          echo "Directorio: $ARCHIVOSe"
 
-         if [ "`plugin_activado ftptrabajo`" != "" ] ; then 
+         if [ "`plugin_activado ftptrabajo`" != "" ] ; then
             # Hay que eliminarlo tambien del servidor
             echo
             read -n 1 -s -p 'Eliminar directorio del servidor remoto (s/n):' opcion
@@ -4925,7 +4922,7 @@ function menuArchivos(){
             fi
          fi
 
-         if [ "`plugin_activado magcontrolversion`" != "" ] ; then 
+         if [ "`plugin_activado magcontrolversion`" != "" ] ; then
             echo
             read -n 1 -s -p 'Eliminar directorio de control de versiones (s/n):' opcion
             if [ "$opcion" = "s" ] ; then
@@ -4962,7 +4959,7 @@ function menuArchivos(){
             return
          fi
 
-         if [ "`plugin_activado ftptrabajo`" != "" ] ; then 
+         if [ "`plugin_activado ftptrabajo`" != "" ] ; then
             # Hay que eliminarlo tambien del servidor
             echo
             read -n 1 -s -p 'Eliminar archivo del servidor remoto (s/n):' opcion
@@ -4972,7 +4969,7 @@ function menuArchivos(){
             fi
          fi
 
-         if [ "`plugin_activado magcontrolversion`" != "" ] ; then 
+         if [ "`plugin_activado magcontrolversion`" != "" ] ; then
             echo
             read -n 1 -s -p 'Eliminar archivo de control de versiones (s/n):' opcion
             echo
@@ -5093,7 +5090,7 @@ function menuMovimientos() {
           anyadirArchivosDB
           ;;
       u|U) # Nuevo movimiento desde un email
-         nuevoMovimiento --email 
+         nuevoMovimiento --email
          ;;
       *) return ;;
 
@@ -5129,18 +5126,18 @@ function listar_plugins() {
 function plugin_activado() {
 
    if [ "$1" != "" ] ; then
-      echo $mt_plugins_activados | grep "$1" 
+      echo $mt_plugins_activados | grep "$1"
    else
       echo $mt_plugins_activados
    fi
-   
+
    }
 
 function subirArchivos(){
 
    log $FUNCNAME "$*"
 
-   if [ "`plugin_activado ftptrabajo`" == "" ] ; then 
+   if [ "`plugin_activado ftptrabajo`" == "" ] ; then
       return
    fi
    # Subir archivos
@@ -5153,14 +5150,14 @@ function subirArchivos(){
     SALIDA=$(ejecutarSQL "$SQL" "-N")
 
     if [ "$SALIDA" != "" ] ; then
-       echo -e "\nArchivos afectados" 
-       echo -e   "------------------\n" 
+       echo -e "\nArchivos afectados"
+       echo -e   "------------------\n"
        select ARCHIVOSe in salir todos `echo "$SALIDA"` ; do
          echo "archivo: "
          break
        done
        if [ "$ARCHIVOSe" != "salir" ] ; then
-          if [ "$ARCHIVOSe" = "todos" ] ; then 
+          if [ "$ARCHIVOSe" = "todos" ] ; then
              ftptrabajo --proyecto $proyecto  -s `echo $SALIDA`
           else
              ftptrabajo --proyecto $proyecto  -s $ARCHIVOSe
@@ -5178,7 +5175,7 @@ function subirArchivos(){
 
 function tareas2condicion() {
 
-   CONDICION="AND ("
+   CONDICION=" AND ("
    conta=0
    for x in ${tareasIds[*]} ; do
     conta=$((conta+1))
@@ -5188,7 +5185,11 @@ function tareas2condicion() {
       CONDICION="$CONDICION t.id=$x OR "
     fi
    done
-   CONDICION="$CONDICION )"
+   if [ $conta = 0 ] ; then
+      CONDICION=""
+    else
+     CONDICION="$CONDICION )"
+   fi
 }
 
 ## Lanzador
@@ -5233,7 +5234,7 @@ function lanzador() {
    echo
    read -p "Opcion: (0 - salir) " OPCION
 
-   [[ "$OPCION" = "0" ]] && return 
+   [[ "$OPCION" = "0" ]] && return
 
    definirProyecto ${seleccion_id[$OPCION]}
 
@@ -5268,9 +5269,9 @@ function movimientosRecientes() {
       echo "-----------------------"
    fi
 
-   SQL="SELECT CONCAT('-m ',m.id,'::', p.nombre,' ', t.nombre ,' ', m.nombre, '   ', max(ti.fechaFinal), ' ',e.nombre ) 
+   SQL="SELECT CONCAT('-m ',m.id,'::', p.nombre,' ', t.nombre ,' ', m.nombre, '   ', max(ti.fechaFinal), ' ',e.nombre )
    FROM movimientos m, tiempos ti, proyectos p, tareas t , estados e
-   WHERE t.idProyecto=p.id AND t.id=m.idTarea AND m.id=ti.idMovimiento AND t.idEstado=e.id  
+   WHERE t.idProyecto=p.id AND t.id=m.idTarea AND m.id=ti.idMovimiento AND t.idEstado=e.id
    "
    if [ "$proyectoId" != "" ] ; then        # Si tenemos proyecto listamos los del proyecto solamente
       SQL="$SQL AND p.id=$proyectoId "
@@ -5300,7 +5301,7 @@ function movimientosRecientes() {
 
 ## Proteger texto
 ##
-## Añadimos barras de escape a las comillas 
+## Añadimos barras de escape a las comillas
 
 function protegerTexto(){
    echo -e "$*" | sed s/\"/\\\\\"/g | sed s/\'/\\\\\'/g | sed s/\`/\\\\\`/g | sed s/\&/\\\\\X/g
@@ -5370,8 +5371,8 @@ while [ -n "$1" ]; do
       --terminal) shift 1 ; $mt_terminal $0 $@ ; exit ;; # lanzar terminal
       --depurar) shift 1 ; DEV=SI ; echo 'Depuración activada' ;;
       --menu)  shift 1 ; ACCION="menu" ;;
-      --adjuntar) shift 1 
-        if [ "$movimientoId" = "" ] ; then 
+      --adjuntar) shift 1
+        if [ "$movimientoId" = "" ] ; then
            tiemposAbiertos
            if [ "$movimientoId" = "" ] ; then
               echo Se necesita tener un movimiento seleccionado o un contador en marcha para adjuntar documentos
@@ -5388,7 +5389,7 @@ while [ -n "$1" ]; do
       --nuevo|-n) shift 1 ; ACCION="nuevo" ;;
       --añadir-archivo|-a)
         shift 1
-        if [ "$movimientoId" = "" ] ; then 
+        if [ "$movimientoId" = "" ] ; then
            mensajes " No hay movimiento seleccionado"
            # Buscamos si hay alguno abierto
            #movimientosAbiertos
@@ -5429,7 +5430,7 @@ while [ -n "$1" ]; do
       --movimientos-abiertos|-ma) shift 1 ; movimientosAbiertos ;;
       --tiempos-abiertos|-ta) shift 1 ; tiemposAbiertos ;;
       --accion) ACCION="$2" ; shift 2 ;;
-      --listar-acciones) shift 1 ; echo -e "\n\nAcciones\n--------" ; for accion in ${acciones[*]} ; do echo - $accion ; done ;; 
+      --listar-acciones) shift 1 ; echo -e "\n\nAcciones\n--------" ; for accion in ${acciones[*]} ; do echo - $accion ; done ;;
       --factura) seleccionarFactura "$2" ; shift 2 ;;
       --seleccionar-factura) shift 1 ; seleccionarFactura ;;
       --consulta) shift 1 ; consulta=1 ;;
@@ -5444,7 +5445,7 @@ while [ -n "$1" ]; do
                  perfil_actual=$1 ; shift 1
                  perfil_actual_fich="$HOME/.magtrabajos/perfiles/$perfil_actual"
                  source $perfil_actual_fich
-              elif [ -f "`dirname "$BASH_SOURCE"`/componentes/maginformes/perfiles/$1" ] ; then 
+              elif [ -f "`dirname "$BASH_SOURCE"`/componentes/maginformes/perfiles/$1" ] ; then
                  perfil_actual=$1 ; shift 1
                  perfil_actual_fich="`dirname "$BASH_SOURCE"`/componentes/maginformes/perfiles/$perfil_actual"
                  source $perfil_actual_fich
@@ -5455,7 +5456,7 @@ while [ -n "$1" ]; do
 
       --listar-plugins) listar_plugins ; exit ;;
       --listar-informes) shift 1 ; ACCION_PERSONALIZADA="menuInformes l" ;;
-      --exportar) 
+      --exportar)
          # Si $3 es un archivo existente supondremos que es el
          # archivo a exportar sino cogemos el $TMP
          #
@@ -5465,7 +5466,7 @@ while [ -n "$1" ]; do
             shift 3
          else
            ACCION_PERSONALIZADA="exportar '$2' '$TMP'"
-           shift 2 
+           shift 2
          fi
          mensajes "Perfil $perfil_actual abierto"
          ;;
@@ -5513,6 +5514,9 @@ done
 # Depuración
 
 [[ $DEV ]] && mostrar_variables_magtrabajos
+
+proyecto="`basename "$(pwd)"`"
+proyectoId=1
 
 # sino tenemos un proyecto definido, probar si tenemos uno en configuración de
 # proyecto o con el nombre del directorio actual

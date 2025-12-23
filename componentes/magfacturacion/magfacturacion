@@ -2,7 +2,7 @@
 
 ## @file magfacturacion
 ## @brief Programa de facturación basado en mysql
-## 
+##
 ## @author   Eduardo Magrané
 ## @internal
 ##       web  http://www.lesolivex.com
@@ -14,7 +14,7 @@
 ##  Revision  SVN $Id: $
 ##
 ## Copyright  Copyright (c) 2011, Eduardo Magrané
-## 
+##
 ## This source code is released for free distribution under the terms of the
 ## GNU General Public License as published by the Free Software Foundation.
 
@@ -240,7 +240,7 @@ function menuFacturacion() {
           ;;
 
       v|V) # Factura con tareas seleccionadas
-          generarFactura | tee $TMP 
+          generarFactura | tee $TMP
           tecla
           ;;
 
@@ -255,7 +255,7 @@ function menuFacturacion() {
           tecla
           ;;
 
-      l|L) # Listar facturas y pagos 
+      l|L) # Listar facturas y pagos
          lista_facturas_pagos
          ;;
 
@@ -273,20 +273,20 @@ function menuFacturacion() {
 
 function listado_tareas_totales() {
 
-   if [ "$1" != "" ] ; then 
+   if [ "$1" != "" ] ; then
       local CONDICION_TOTAL_TAREAS="$1"
    else
       local CONDICION_TOTAL_TAREAS=$CONDICION
    fi
 
    SUBSQL="
-      SELECT t.nombre as tarea, 
+      SELECT t.nombre as tarea,
       t.fechaInicio,
       t.fechaFinal,
-      IF (t.presupuesto>0,t.presupuesto + (t.compensacion),       
-      ROUND(t.euroshora * (sum(UNIX_TIMESTAMP(ti.fechaFinal)- UNIX_TIMESTAMP(ti.fechaInicio))/60)/60,2) + 	(t.compensacion) ) total
-            FROM tareas t, tiempos ti, movimientos m       
-      WHERE m.idTarea=t.id AND ti.idMovimiento=m.id AND t.idProyecto=$proyectoId $CONDICION_TOTAL_TAREAS GROUP BY t.id 
+      CASE WHEN t.presupuesto>0 THEN t.presupuesto + (t.compensacion),
+      ROUND(t.euroshora * (sum(UNIX_TIMESTAMP(ti.fechaFinal)- UNIX_TIMESTAMP(ti.fechaInicio))/60)/60,2) + 	(t.compensacion)  END total
+            FROM tareas t, tiempos ti, movimientos m
+      WHERE m.idTarea=t.id AND ti.idMovimiento=m.id AND t.idProyecto=$proyectoId $CONDICION_TOTAL_TAREAS GROUP BY t.id
    "
    SQL="SELECT CONCAT( tarea, '\t', fechaInicio, '\t',  fechaFinal, '\t',  sum(total)), '\nnn' FROM ($SUBSQL) AS subsql GROUP BY tarea ORDER BY fechaInicio"
 
@@ -295,32 +295,32 @@ function listado_tareas_totales() {
    SALIDA=$(ejecutarSQL "$SQL" "-N")
    [[ "$SALIDA" == "" ]] && return ;
    echo ""
-   echo $LINEA 
+   echo $LINEA
    echo " Tareas                                                   Data Inici       Data Final       Total    "
-   echo $LINEA 
+   echo $LINEA
    echo -e "$(echo -e $SALIDA | awk  -v RS='\nnn' -v FS='\t' '{ printf "%-50s  %15s  %15s %+15s\n",$1,$2,$3,$4 }')"
-   [[ "$total" != "" ]] && echo -e "$(echo -e "**$total**" | awk '{ printf "%-76s %+36s\n","**Total:**",$1 }')" 
-   echo $LINEA 
+   [[ "$total" != "" ]] && echo -e "$(echo -e "**$total**" | awk '{ printf "%-76s %+36s\n","**Total:**",$1 }')"
+   echo $LINEA
    }
 
 function totalesFactura() {
 
    ## Devolver el total de la factura
-   ## 
+   ##
    ## $1 Identificador de factura
 
-   if [ "$1" != "" ] ; then 
+   if [ "$1" != "" ] ; then
       CONDICION=" AND t.idFactura=$1 "
    fi
 
    SQL="
-   SELECT min(fechaInicio), max(fechaFinal), sum(total) 
+   SELECT min(fechaInicio), max(fechaFinal), sum(total)
    FROM (
-      SELECT t.fechaInicio, t.fechaFinal,  
-      IF (t.presupuesto>0,t.presupuesto + (t.compensacion),
+      SELECT t.fechaInicio, t.fechaFinal,
+      CASE WHEN t.presupuesto>0 THEN t.presupuesto + (t.compensacion),
          ROUND(t.euroshora * (sum(UNIX_TIMESTAMP(ti.fechaFinal)- UNIX_TIMESTAMP(ti.fechaInicio))/60)/60 + (t.compensacion),2)
-      ) as total 
-      FROM tareas t, tiempos ti, movimientos m 
+      ) as total
+      FROM tareas t, tiempos ti, movimientos m
       WHERE m.idTarea=t.id AND ti.idMovimiento=m.id $CONDICION
       GROUP BY t.id
    ) as totalsql
@@ -472,14 +472,14 @@ function generarFactura() {
    echo '.. |date| date:: %d %B del %Y'
    echo
    echo ".. image:: $HOME/logo.png "
-   echo '  :alt: logo'                      
-   echo '  :align: left'                    
+   echo '  :alt: logo'
+   echo '  :align: left'
    echo
    echo
-   echo '.. class:: right'   
+   echo '.. class:: right'
    echo
-   echo 'Les Olives, |date|.' 
-   echo 
+   echo 'Les Olives, |date|.'
+   echo
    echo '|'
    echo '|'
    echo
@@ -493,7 +493,7 @@ function generarFactura() {
       echo " "
       printf "\n**Factura:** %04d-%04d" $proyectoId $numfact
       # echo -e "\n**Fecha** $fechaFactura"
-   
+
    fi
 
    # Cremos tabla con los datos propios y de los del cliente
@@ -524,7 +524,7 @@ function generarFactura() {
    printf "\n|%-40s|%-40s|" "TEL 972768281" "$linea5"
    echo -e $linea
    echo " "
-   
+
 
    # Primera tabla con los totales linkeados a los detalles de cada tarea
 
@@ -602,15 +602,15 @@ function facturaDetalle() {
      FROM facturas f LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id"
 
    SQL_GROUP=" GROUP BY f.id"
-     
+
    if [ $facturaId ] ; then
       SQL="$SQL WHERE f.id=$facturaId $SQL_GROUP"
    else
       SQL="$SQL $SQL_GROUP"
-   fi 
+   fi
 
    ejecutarMysql2rst "$SQL" | tee -a $TMP
-    
+
     echo | tee -a $TMP
     if [ "$facturaId" = "" ] ; then
        echo
@@ -659,7 +659,7 @@ function movimientos_factura() {
       echo Numero de movimiento para seleccionar
       echo
       echo [A]ñadir nuevo movimiento
-      echo 
+      echo
       read -p 'Opcion: ' OPCION
 
       if [ "$OPCION" = 'a' ] ; then
@@ -759,7 +759,7 @@ function presentarDatosFactura() {
     # dFechaFactura=$(ejecutarSQL "select fechaFactura from facturas where id=$facturaId" "-N")
     # dFechaPagado=$(ejecutarSQL "select fechaPagado from facturas where id=$facturaId" "-N")
     # dTotal=$(ejecutarSQL "select Total from facturas where id=$facturaId" "-N")
-   
+
     sql='SELECT '
     sql="$sql CONCAT('dnumfact=',numfact,';dComentario=\'',f.comentario,'\'; dFechaFactura=',f.fechaFactura,'; dFechaPagado='
     ,if(f.fechaPagado IS NULL,'NULL',f.fechaPagado)
@@ -805,7 +805,7 @@ function pendiente_facturas(){
 
    SQL_GROUP=" GROUP BY f.id"
 
-   SQL_TOTAL="SELECT TRUNCATE((sum(tot.\\\`Total factura\\\`)-sum(if(tot.Pagado,tot.Pagado,0)) ),2) AS Pemdiente  
+   SQL_TOTAL="SELECT TRUNCATE((sum(tot.\\\`Total factura\\\`)-sum(if(tot.Pagado,tot.Pagado,0)) ),2) AS Pemdiente
      FROM ($SQL $SQL_WHERE $SQL_GROUP) AS tot"
 
    log $FUNCNAME 'Facturas pendientes'
@@ -824,7 +824,7 @@ function pendiente_facturas(){
    echo ":fecha: $HOY"                                  | tee -a "$TMP"
    echo                                                 | tee -a "$TMP"
 
-   # ejecutarMysql2rst "$SQL $SQL_WHERE $SQL_GROUP" 
+   # ejecutarMysql2rst "$SQL $SQL_WHERE $SQL_GROUP"
 
    echo -e "$salida" | awk '{ printf "**Factura:%04d-%04d**\n\n| Fecha factura: %s\n| Total: %s\n| Pagado: %s\n| Pendiente: %s\n\n\n",$1,$2,$3,$5,$6,$7,$8 }' | tee -a "$TMP"
 
@@ -839,11 +839,11 @@ function pendiente_facturas(){
 function listar_tareas() {
 
    sql="
-      SELECT t.id, t.nombre, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, f.fechaPagado AS Pagado, f.id as Factura 
-      FROM tareas t LEFT JOIN estados e ON t.idEstado=e.id 
+      SELECT t.id, t.nombre, e.nombre AS Estado, t.fechaInicio, t.fechaFinal, f.fechaPagado AS Pagado, f.id as Factura
+      FROM tareas t LEFT JOIN estados e ON t.idEstado=e.id
       LEFT JOIN facturas f ON f.id=t.idFactura
       WHERE t.id in (`echo $* | tr ' ' ,`)
-      ORDER BY t.id desc 
+      ORDER BY t.id desc
    "
 
    ejecutarMysql2rst "$sql"
@@ -854,7 +854,7 @@ function listar_tareas() {
 
 function actualizarTotalFactura() {
 
-   if [ "$1" == "" ] ; then 
+   if [ "$1" == "" ] ; then
       echo "Error, necesito identificador de factura"
       exit 1
    fi
@@ -894,10 +894,10 @@ function lista_facturas_pagos() {
      echo Abonado: $total Fecha: $fecha | sed 's/./-/g'  | tee -a $TMP
      echo                                                | tee -a $TMP
      local sql_factura="
-     SELECT f.id AS 'ID', f.numfact AS 'NF', f.comentario, 
-        f.fechaFactura, f.fechaPagado, f.Total AS \\\"Total Factura\\\", rfp.pagado AS Pagado 
-        FROM facturas f 
-        LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id 
+     SELECT f.id AS 'ID', f.numfact AS 'NF', f.comentario,
+        f.fechaFactura, f.fechaPagado, f.Total AS \\\"Total Factura\\\", rfp.pagado AS Pagado
+        FROM facturas f
+        LEFT JOIN rFacturasPagos rfp ON rfp.idFactura=f.id
         WHERE rfp.fecha=\\\"$fecha\\\"
         "
 
@@ -915,7 +915,7 @@ function lista_facturas_pagos() {
 # si se llama al script directamente
 
 if [ "`basename $BASH_SOURCE`" = "`basename $0`" ] ; then
-   
+
    declare -a facturasIds
    CONDICION=''
 
@@ -1014,7 +1014,7 @@ if [ "`basename $BASH_SOURCE`" = "`basename $0`" ] ; then
                fi
             done
             caja "$SALIDA" 'Mensajes' $colAviso 0
-            #echo 
+            #echo
             MEN=()
             menConta=0
             ;;

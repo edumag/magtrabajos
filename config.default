@@ -25,9 +25,9 @@
    default_mt_paginador="less"
 
    ## @var default_mt_rst2html
-   ## Comando para convertir de rst a html, por defecto: 
+   ## Comando para convertir de rst a html, por defecto:
 
-   default_mt_rst2html="rst2html --no-xml-declaration --language=es  --stylesheet-path=$HOME/.magtrabajos/magtrabajos.css " 
+   default_mt_rst2html="rst2html --no-xml-declaration --language=es  --stylesheet-path=$HOME/.magtrabajos/magtrabajos.css "
 
    ## @var default_mt_rst2pdf
    ## Comando para convertir de rst a text, por defecto: rst2newlatex --output-encoding-error-handler=replace
@@ -73,7 +73,7 @@
    ## @var default_mt_terminal
    ## Programa terminal de trabajo, ejemplos:
    ## @code
-   ## gnome-terminal --geometry 200x100 -e 
+   ## gnome-terminal --geometry 200x100 -e
    ## terminator -m -x
    ## @endcode
 
@@ -82,7 +82,7 @@
    ## @var default_mt_miniterminal
    ## Pequeña terminal para cosas como lanzar comandos externos y cosas así
 
-   default_mt_miniterminal='xterm -bg black -fg white' 
+   default_mt_miniterminal='xterm -bg black -fg white'
 
    ## @var default_mt_comando_diff
    ## Comando para trabajar los conflictos entre versiones, ejemplos:
@@ -134,7 +134,8 @@
    ## @var default_mt_comando_mysql
    ## Comando para ejecutar mysql
 
-   default_mt_comando_mysql='mysql --default-character-set=utf8 --database=trabajos '
+   # default_mt_comando_mysql='mysql --default-character-set=utf8 --database=trabajos '
+   default_mt_comando_mysql='sqlite3 proyecto.sqlite '
 
    ## @var default_mt_tipo_proyecto
    ## Tipos soportados: php, bash, python
@@ -147,7 +148,7 @@
    default_mt_web_local='http://localhost/$proyecto'
 
    ## @var default_mt_url_servidor
-   ## URL del servidor del proyecto 
+   ## URL del servidor del proyecto
 
    default_mt_url_servidor=''
 
